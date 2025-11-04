@@ -17,14 +17,15 @@ import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
+import org.xiyu.yee.copper_friend_backport.registry.ModBlockTags;
 import org.xiyu.yee.copper_friend_backport.registry.ModBlocks;
 import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 
@@ -41,38 +42,36 @@ public class CopperChestBlock extends ChestBlock {
 			.apply(instance, CopperChestBlock::new)
 	);
 	private static final Map<Block, Supplier<Block>> COPPER_TO_COPPER_CHEST_MAPPING = Map.of(
-            ModBlocks.COPPER_BLOCK,
+            Blocks.COPPER_BLOCK,
 		(Supplier)() -> ModBlocks.COPPER_CHEST,
-            ModBlocks.EXPOSED_COPPER,
+            Blocks.EXPOSED_COPPER,
 		(Supplier)() -> ModBlocks.EXPOSED_COPPER_CHEST,
-            ModBlocks.WEATHERED_COPPER,
+            Blocks.WEATHERED_COPPER,
 		(Supplier)() -> ModBlocks.WEATHERED_COPPER_CHEST,
-            ModBlocks.OXIDIZED_COPPER,
+            Blocks.OXIDIZED_COPPER,
 		(Supplier)() -> ModBlocks.OXIDIZED_COPPER_CHEST,
-            ModBlocks.WAXED_COPPER_BLOCK,
+            Blocks.WAXED_COPPER_BLOCK,
 		(Supplier)() -> ModBlocks.COPPER_CHEST,
-            ModBlocks.WAXED_EXPOSED_COPPER,
+            Blocks.WAXED_EXPOSED_COPPER,
 		(Supplier)() -> ModBlocks.EXPOSED_COPPER_CHEST,
-            ModBlocks.WAXED_WEATHERED_COPPER,
+            Blocks.WAXED_WEATHERED_COPPER,
 		(Supplier)() -> ModBlocks.WEATHERED_COPPER_CHEST,
-            ModBlocks.WAXED_OXIDIZED_COPPER,
+            Blocks.WAXED_OXIDIZED_COPPER,
 		(Supplier)() -> ModBlocks.OXIDIZED_COPPER_CHEST
 	);
 	private final WeatheringCopper.WeatherState weatherState;
 
-	@Override
 	public MapCodec<? extends CopperChestBlock> codec() {
 		return CODEC;
 	}
 
 	public CopperChestBlock(WeatheringCopper.WeatherState weatherState, SoundEvent soundEvent, SoundEvent soundEvent2, BlockBehaviour.Properties properties) {
-		super(() -> BlockEntityType.CHEST, soundEvent, soundEvent2, properties);
+		super(properties, () -> BlockEntityType.CHEST);
 		this.weatherState = weatherState;
 	}
 
-	@Override
 	public boolean chestCanConnectTo(BlockState blockState) {
-		return blockState.is(BlockTags.COPPER_CHESTS) && blockState.hasProperty(ChestBlock.TYPE);
+		return blockState.is(ModBlockTags.COPPER_CHESTS) && blockState.hasProperty(ChestBlock.TYPE);
 	}
 
 	@Override
@@ -101,21 +100,19 @@ public class CopperChestBlock extends ChestBlock {
 	}
 
 	@Override
-	protected BlockState updateShape(
+	public BlockState updateShape(
 		BlockState blockState,
-		LevelReader levelReader,
-		ScheduledTickAccess scheduledTickAccess,
-		BlockPos blockPos,
 		Direction direction,
-		BlockPos blockPos2,
-		BlockState blockState2,
-		RandomSource randomSource
+		BlockState neighborState,
+		net.minecraft.world.level.LevelAccessor levelAccessor,
+		BlockPos blockPos,
+		BlockPos neighborPos
 	) {
-		BlockState blockState3 = super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
-		if (this.chestCanConnectTo(blockState2)) {
+		BlockState blockState3 = super.updateShape(blockState, direction, neighborState, levelAccessor, blockPos, neighborPos);
+		if (this.chestCanConnectTo(neighborState)) {
 			ChestType chestType = blockState3.getValue(ChestBlock.TYPE);
 			if (!chestType.equals(ChestType.SINGLE) && getConnectedDirection(blockState3) == direction) {
-				return blockState2.getBlock().withPropertiesOf(blockState3);
+				return neighborState.getBlock().withPropertiesOf(blockState3);
 			}
 		}
 
@@ -133,8 +130,8 @@ public class CopperChestBlock extends ChestBlock {
 	}
 
 	public static BlockState getFromCopperBlock(Block block, Direction direction, Level level, BlockPos blockPos) {
-		CopperChestBlock copperChestBlock = (CopperChestBlock)((Supplier)COPPER_TO_COPPER_CHEST_MAPPING.getOrDefault(block, Blocks.COPPER_CHEST::asBlock)).get();
-		ChestType chestType = copperChestBlock.getChestType(level, blockPos, direction);
+		CopperChestBlock copperChestBlock = (CopperChestBlock)((Supplier)COPPER_TO_COPPER_CHEST_MAPPING.getOrDefault(block, () -> ModBlocks.COPPER_CHEST)).get();
+		ChestType chestType = ChestType.SINGLE;
 		BlockState blockState = copperChestBlock.defaultBlockState().setValue(FACING, direction).setValue(TYPE, chestType);
 		return getLeastOxidizedChestOfConnectedBlocks(blockState, level, blockPos);
 	}
@@ -143,8 +140,7 @@ public class CopperChestBlock extends ChestBlock {
 		return true;
 	}
 
-	@Override
 	public boolean shouldChangedStateKeepBlockEntity(BlockState blockState) {
-		return blockState.is(BlockTags.COPPER_CHESTS);
+		return blockState.is(ModBlockTags.COPPER_CHESTS);
 	}
 }

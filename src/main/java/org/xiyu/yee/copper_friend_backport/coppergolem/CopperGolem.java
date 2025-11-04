@@ -10,7 +10,6 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -44,20 +43,19 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.CopperGolemStatueBlock;
-import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
-import net.minecraft.world.level.block.entity.CopperGolemStatueBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.pathfinder.PathType;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
+import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock;
+import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
 
-public class CopperGolem extends AbstractGolem implements ContainerUser, Shearable {
+public class CopperGolem extends AbstractGolem implements Shearable {
 	private static final long IGNORE_WEATHERING_TICK = -2L;
 	private static final long UNSET_WEATHERING_TICK = -1L;
 	private static final int WEATHERING_TICK_FROM = 504000;
@@ -69,10 +67,10 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 	private static final int SPAWN_COOLDOWN_MIN = 60;
 	private static final int SPAWN_COOLDOWN_MAX = 100;
 	private static final EntityDataAccessor<WeatheringCopper.WeatherState> DATA_WEATHER_STATE = SynchedEntityData.defineId(
-		CopperGolem.class, EntityDataSerializers.WEATHERING_COPPER_STATE
+		CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.WEATHERING_COPPER_STATE
 	);
 	private static final EntityDataAccessor<CopperGolemState> COPPER_GOLEM_STATE = SynchedEntityData.defineId(
-		CopperGolem.class, EntityDataSerializers.COPPER_GOLEM_STATE
+		CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.COPPER_GOLEM_STATE
 	);
 	@Nullable
 	private BlockPos openedChestPos;
@@ -85,22 +83,26 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 	private final AnimationState interactionGetNoItemAnimationState = new AnimationState();
 	private final AnimationState interactionDropItemAnimationState = new AnimationState();
 	private final AnimationState interactionDropNoItemAnimationState = new AnimationState();
-	public static final EquipmentSlot EQUIPMENT_SLOT_ANTENNA = EquipmentSlot.SADDLE;
+	// 1.20.1 doesn't have SADDLE or BODY slots, using CHEST as antenna slot
+	public static final EquipmentSlot EQUIPMENT_SLOT_ANTENNA = EquipmentSlot.CHEST;
 
 	public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
 		super(entityType, level);
-		this.getNavigation().setRequiredPathLength(48.0F);
-		this.getNavigation().setCanOpenDoors(true);
+		// setRequiredPathLength doesn't exist in 1.20.1
+		// this.getNavigation().setRequiredPathLength(48.0F);
+		this.getNavigation().setCanFloat(true);
 		this.setPersistenceRequired();
 		this.setState(CopperGolemState.IDLE);
-		this.setPathfindingMalus(PathType.DANGER_FIRE, 16.0F);
-		this.setPathfindingMalus(PathType.DANGER_OTHER, 16.0F);
-		this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
-		this.getBrain().setMemory(MemoryModuleType.TRANSPORT_ITEMS_COOLDOWN_TICKS, this.getRandom().nextInt(60, 100));
+		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
+		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+		this.getBrain().setMemory(CopperGolemAi.TRANSPORT_ITEMS_COOLDOWN_TICKS, this.getRandom().nextInt(60, 100));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2F).add(Attributes.STEP_HEIGHT, 1.0).add(Attributes.MAX_HEALTH, 12.0);
+		return Mob.createMobAttributes()
+			.add(Attributes.MOVEMENT_SPEED, 0.2F)
+			.add(Attributes.MAX_HEALTH, 12.0);
 	}
 
 	public CopperGolemState getState() {
@@ -163,38 +165,44 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 	}
 
 	@Override
-	protected void defineSynchedData(SynchedEntityData.Builder builder) {
-		super.defineSynchedData(builder);
-		builder.define(DATA_WEATHER_STATE, WeatheringCopper.WeatherState.UNAFFECTED);
-		builder.define(COPPER_GOLEM_STATE, CopperGolemState.IDLE);
+	protected void defineSynchedData() {
+		super.defineSynchedData();
+		this.entityData.define(DATA_WEATHER_STATE, WeatheringCopper.WeatherState.UNAFFECTED);
+		this.entityData.define(COPPER_GOLEM_STATE, CopperGolemState.IDLE);
 	}
 
 	@Override
-	public void addAdditionalSaveData(ValueOutput valueOutput) {
-		super.addAdditionalSaveData(valueOutput);
-		valueOutput.putLong("next_weather_age", this.nextWeatheringTick);
-		valueOutput.store("weather_state", WeatheringCopper.WeatherState.CODEC, this.getWeatherState());
+	public void addAdditionalSaveData(CompoundTag compoundTag) {
+		super.addAdditionalSaveData(compoundTag);
+		compoundTag.putLong("next_weather_age", this.nextWeatheringTick);
+		compoundTag.putString("weather_state", this.getWeatherState().getSerializedName());
 	}
 
 	@Override
-	public void readAdditionalSaveData(ValueInput valueInput) {
-		super.readAdditionalSaveData(valueInput);
-		this.nextWeatheringTick = valueInput.getLongOr("next_weather_age", -1L);
-		this.setWeatherState(
-			(WeatheringCopper.WeatherState)valueInput.read("weather_state", WeatheringCopper.WeatherState.CODEC).orElse(WeatheringCopper.WeatherState.UNAFFECTED)
-		);
+	public void readAdditionalSaveData(CompoundTag compoundTag) {
+		super.readAdditionalSaveData(compoundTag);
+		this.nextWeatheringTick = compoundTag.getLong("next_weather_age");
+		if (compoundTag.contains("weather_state", 8)) {
+			String weatherStateName = compoundTag.getString("weather_state");
+			for (WeatheringCopper.WeatherState state : WeatheringCopper.WeatherState.values()) {
+				if (state.getSerializedName().equals(weatherStateName)) {
+					this.setWeatherState(state);
+					return;
+				}
+			}
+		}
+		this.setWeatherState(WeatheringCopper.WeatherState.UNAFFECTED);
 	}
 
 	@Override
-	protected void customServerAiStep(ServerLevel serverLevel) {
-		ProfilerFiller profilerFiller = Profiler.get();
-		profilerFiller.push("copperGolemBrain");
-		this.getBrain().tick(serverLevel, this);
-		profilerFiller.pop();
-		profilerFiller.push("copperGolemActivityUpdate");
+	protected void customServerAiStep() {
+		this.level().getProfiler().push("copperGolemBrain");
+		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.level().getProfiler().pop();
+		this.level().getProfiler().push("copperGolemActivityUpdate");
 		CopperGolemAi.updateActivity(this);
-		profilerFiller.pop();
-		super.customServerAiStep(serverLevel);
+		this.level().getProfiler().pop();
+		super.customServerAiStep();
 	}
 
 	@Override
@@ -224,35 +232,37 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 		Level level = this.level();
 		if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
 			if (level instanceof ServerLevel serverLevel) {
-				this.shear(serverLevel, SoundSource.PLAYERS, itemStack);
+				this.shear(SoundSource.PLAYERS);
 				this.gameEvent(GameEvent.SHEAR, player);
-				itemStack.hurtAndBreak(1, player, interactionHand);
+				itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
 			}
 
 			return InteractionResult.SUCCESS;
 		} else if (level.isClientSide()) {
 			return InteractionResult.PASS;
 		} else if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L) {
-			level.levelEvent(this, 3003, this.blockPosition(), 0);
+			level.levelEvent(player, 3003, this.blockPosition(), 0);
 			this.nextWeatheringTick = -2L;
-			this.usePlayerItem(player, interactionHand, itemStack);
-			return InteractionResult.SUCCESS_SERVER;
+			if (!player.getAbilities().instabuild) {
+				itemStack.shrink(1);
+			}
+			return InteractionResult.SUCCESS;
 		} else if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L) {
 			level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
-			level.levelEvent(this, 3004, this.blockPosition(), 0);
+			level.levelEvent(player, 3004, this.blockPosition(), 0);
 			this.nextWeatheringTick = -1L;
-			itemStack.hurtAndBreak(1, player, interactionHand.asEquipmentSlot());
-			return InteractionResult.SUCCESS_SERVER;
+			itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+			return InteractionResult.SUCCESS;
 		} else {
 			if (itemStack.is(ItemTags.AXES)) {
 				WeatheringCopper.WeatherState weatherState = this.getWeatherState();
 				if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
 					level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
-					level.levelEvent(this, 3005, this.blockPosition(), 0);
+					level.levelEvent(player, 3005, this.blockPosition(), 0);
 					this.nextWeatheringTick = -1L;
-					this.entityData.set(DATA_WEATHER_STATE, weatherState.previous(), true);
-					itemStack.hurtAndBreak(1, player, interactionHand.asEquipmentSlot());
-					return InteractionResult.SUCCESS_SERVER;
+					this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
+					itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+					return InteractionResult.SUCCESS;
 				}
 			}
 
@@ -289,7 +299,7 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 		BlockPos blockPos = this.blockPosition();
 		serverLevel.setBlock(
 			blockPos,
-			Blocks.OXIDIZED_COPPER_GOLEM_STATUE
+			org.xiyu.yee.copper_friend_backport.registry.ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE
 				.defaultBlockState()
 				.setValue(CopperGolemStatueBlock.POSE, CopperGolemStatueBlock.Pose.values()[this.random.nextInt(0, CopperGolemStatueBlock.Pose.values().length)])
 				.setValue(CopperGolemStatueBlock.FACING, Direction.fromYRot(this.getYRot())),
@@ -297,14 +307,14 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 		);
 		if (serverLevel.getBlockEntity(blockPos) instanceof CopperGolemStatueBlockEntity copperGolemStatueBlockEntity) {
 			copperGolemStatueBlockEntity.createStatue(this);
-			this.dropPreservedEquipment(serverLevel);
+			this.dropPreservedEquipment(serverLevel, (itemStack) -> true);
 			this.discard();
-			this.playSound(SoundEvents.COPPER_GOLEM_BECOME_STATUE);
+			this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_BECOME_STATUE);
 			if (this.isLeashed()) {
 				if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-					this.dropLeash();
+					this.dropLeash(true, true);
 				} else {
-					this.removeLeash();
+					this.dropLeash(false, false);
 				}
 			}
 		}
@@ -370,14 +380,14 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, net.minecraft.world.entity.MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable net.minecraft.nbt.CompoundTag compoundTag
 	) {
 		this.playSpawnSound();
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public void playSpawnSound() {
-		this.playSound(SoundEvents.COPPER_GOLEM_SPAWN);
+		this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SPAWN);
 	}
 
 	private void playHeadSpinSound() {
@@ -410,7 +420,7 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 		return new Vec3(0.0, 0.75F * this.getEyeHeight(), 0.0);
 	}
 
-	@Override
+	// ContainerUser interface method - not available in 1.20.1
 	public boolean hasContainerOpen(ContainerOpenersCounter containerOpenersCounter, BlockPos blockPos) {
 		if (this.openedChestPos == null) {
 			return false;
@@ -427,17 +437,19 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
         return blockPos.relative(direction);
     }
 
-	@Override
+	// ContainerUser interface method - not available in 1.20.1
 	public double getContainerInteractionRange() {
 		return 3.0;
 	}
 
 	@Override
-	public void shear(ServerLevel serverLevel, SoundSource soundSource, ItemStack itemStack) {
-		this.level().playSound(null, this, SoundEvents.COPPER_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
-		ItemStack itemStack2 = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
-		this.setItemSlot(EQUIPMENT_SLOT_ANTENNA, ItemStack.EMPTY);
-		this.spawnAtLocation(serverLevel, itemStack2, 1.5F);
+	public void shear(SoundSource soundSource) {
+		if (this.level() instanceof ServerLevel serverLevel) {
+			serverLevel.playSound(null, this, org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
+			ItemStack itemStack2 = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
+			this.setItemSlot(EQUIPMENT_SLOT_ANTENNA, ItemStack.EMPTY);
+			this.spawnAtLocation(itemStack2, 1.5F);
+		}
 	}
 
     @Override
@@ -446,33 +458,37 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 	}
 
 	@Override
-	protected void dropEquipment(ServerLevel serverLevel) {
+	protected void dropEquipment() {
 		super.dropEquipment();
-		this.dropPreservedEquipment(serverLevel,i->true);
+		if (this.level() instanceof ServerLevel serverLevel) {
+			this.dropPreservedEquipment(serverLevel, i -> true);
+		}
 	}
 
-    public Set<EquipmentSlot> dropPreservedEquipment(ServerLevel serverLevel, Predicate<ItemStack> predicate) {
-        Set<EquipmentSlot> set = new HashSet();
+	public Set<EquipmentSlot> dropPreservedEquipment(ServerLevel serverLevel, Predicate<ItemStack> predicate) {
+		Set<EquipmentSlot> set = new HashSet<>();
 
-        for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
-            ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-            if (!itemStack.isEmpty()) {
-                if (!predicate.test(itemStack)) {
-                    set.add(equipmentSlot);
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+			ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+			if (!itemStack.isEmpty()) {
+				if (!predicate.test(itemStack)) {
+					set.add(equipmentSlot);
+				} else {
+					// In 1.20.1, we check drop chance directly
+					if (this.getEquipmentDropChance(equipmentSlot) > 1.0F) {
+						this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
+						this.spawnAtLocation(itemStack);
+					}
+				}
+			}
+		}
 
-                } else if (this.dropChances.isPreserved(equipmentSlot)) {
-                    this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
-                    this.spawnAtLocation(serverLevel, itemStack);
-                }
-            }
-        }
-
-        return set;
-    }
+		return set;
+	}
 
 	@Override
-	protected void actuallyHurt(ServerLevel serverLevel, DamageSource damageSource, float f) {
-		super.actuallyHurt(serverLevel, damageSource, f);
+	protected void actuallyHurt(DamageSource damageSource, float f) {
+		super.actuallyHurt(damageSource, f);
 		this.setState(CopperGolemState.IDLE);
 	}
 
@@ -485,7 +501,7 @@ public class CopperGolem extends AbstractGolem implements ContainerUser, Shearab
 			WeatheringCopper.WeatherState weatherState = this.getWeatherState();
 			if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
 				this.nextWeatheringTick = -1L;
-				this.entityData.set(DATA_WEATHER_STATE, weatherState.previous(), true);
+				this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
 			}
 		}
 	}

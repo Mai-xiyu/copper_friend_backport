@@ -27,10 +27,8 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.CopperGolemStatueBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -47,7 +45,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
+import org.xiyu.yee.copper_friend_backport.registry.ModBlockTags;
 import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
+import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
 
 public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	public static final MapCodec<CopperGolemStatueBlock> CODEC = RecordCodecBuilder.mapCodec(
@@ -148,54 +148,50 @@ public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWat
 		return new CopperGolemStatueBlockEntity(blockPos, blockState);
 	}
 
-	@Override
 	public boolean shouldChangedStateKeepBlockEntity(BlockState blockState) {
-		return blockState.is(BlockTags.COPPER_GOLEM_STATUES);
+		return blockState.is(ModBlockTags.COPPER_GOLEM_STATUES);
 	}
 
 	@Override
-	protected boolean hasAnalogOutputSignal(BlockState blockState) {
+	public boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}
 
 	@Override
-	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos, Direction direction) {
+	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		return ((CopperGolemStatueBlock.Pose)blockState.getValue(POSE)).ordinal() + 1;
 	}
 
 	@Override
-	protected ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState, boolean bl) {
-		return levelReader.getBlockEntity(blockPos) instanceof CopperGolemStatueBlockEntity copperGolemStatueBlockEntity
+	public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+		return blockGetter.getBlockEntity(blockPos) instanceof CopperGolemStatueBlockEntity copperGolemStatueBlockEntity
 			? copperGolemStatueBlockEntity.getItem(this.asItem().getDefaultInstance(), blockState.getValue(POSE))
-			: super.getCloneItemStack(levelReader, blockPos, blockState, bl);
+			: super.getCloneItemStack(blockGetter, blockPos, blockState);
 	}
 
-	@Override
 	protected void affectNeighborsAfterRemoval(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
 		serverLevel.updateNeighbourForOutputSignal(blockPos, blockState.getBlock());
 	}
 
 	@Override
-	protected FluidState getFluidState(BlockState blockState) {
+	public FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
 	}
 
 	@Override
-	protected BlockState updateShape(
+	public BlockState updateShape(
 		BlockState blockState,
-		LevelReader levelReader,
-		ScheduledTickAccess scheduledTickAccess,
-		BlockPos blockPos,
 		Direction direction,
-		BlockPos blockPos2,
-		BlockState blockState2,
-		RandomSource randomSource
+		BlockState neighborState,
+		net.minecraft.world.level.LevelAccessor levelAccessor,
+		BlockPos blockPos,
+		BlockPos neighborPos
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
+			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 		}
 
-		return super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
+		return super.updateShape(blockState, direction, neighborState, levelAccessor, blockPos, neighborPos);
 	}
 
 	public static enum Pose implements StringRepresentable {

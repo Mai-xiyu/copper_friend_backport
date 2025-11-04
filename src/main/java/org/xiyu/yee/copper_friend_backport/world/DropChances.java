@@ -16,7 +16,7 @@ public record DropChances(Map<EquipmentSlot, Float> byEquipment) {
 	public static final float PRESERVE_ITEM_DROP_CHANCE_THRESHOLD = 1.0F;
 	public static final int PRESERVE_ITEM_DROP_CHANCE = 2;
 	public static final DropChances DEFAULT = new DropChances(makeEnumMap(EquipmentSlot.class, equipmentSlot -> 0.085F));
-	public static final Codec<DropChances> CODEC = Codec.unboundedMap(EquipmentSlot.CODEC, ExtraCodecs.NON_NEGATIVE_FLOAT)
+	public static final Codec<DropChances> CODEC = Codec.unboundedMap(Codec.STRING.xmap(EquipmentSlot::byName, EquipmentSlot::getName), Codec.FLOAT)
 		.xmap(DropChances::toEnumMap, DropChances::filterDefaultValues)
 		.xmap(DropChances::new, DropChances::byEquipment);
 
@@ -28,8 +28,8 @@ public record DropChances(Map<EquipmentSlot, Float> byEquipment) {
     public static <K extends Enum<K>, V> Map<K, V> makeEnumMap(Class<K> class_, Function<K, V> function) {
         EnumMap<K, V> enumMap = new EnumMap(class_);
 
-        for (K enum_ : (Enum[])class_.getEnumConstants()) {
-            enumMap.put(enum_, function.apply(enum_));
+        for (K k : class_.getEnumConstants()) {
+            enumMap.put(k, function.apply(k));
         }
 
         return enumMap;

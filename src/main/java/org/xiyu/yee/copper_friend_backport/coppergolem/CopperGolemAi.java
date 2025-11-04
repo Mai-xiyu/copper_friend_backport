@@ -33,8 +33,8 @@ import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
 import net.minecraft.world.entity.ai.behavior.RunOne;
 import net.minecraft.world.entity.ai.behavior.SetEntityLookTargetSometimes;
-import net.minecraft.world.entity.ai.behavior.TransportItemsBetweenContainers;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import org.xiyu.yee.copper_friend_backport.coppergolem.behavior.TransportItemsBetweenContainers;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
@@ -43,6 +43,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
+import org.xiyu.yee.copper_friend_backport.registry.ModBlockTags;
 
 public class CopperGolemAi {
     public static final MemoryModuleType<Integer> TRANSPORT_ITEMS_COOLDOWN_TICKS = register("transport_items_cooldown_ticks");
@@ -61,13 +63,13 @@ public class CopperGolemAi {
     private static <U> MemoryModuleType<U> register(String string) {
         return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, ResourceLocation.withDefaultNamespace(string), new MemoryModuleType<>(Optional.empty()));
     }
-    private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 1.5F;
+	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 1.5F;
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
 	private static final int TRANSPORT_ITEM_HORIZONTAL_SEARCH_RADIUS = 32;
 	private static final int TRANSPORT_ITEM_VERTICAL_SEARCH_RADIUS = 8;
 	private static final int TICK_TO_START_ON_REACHED_INTERACTION = 1;
 	private static final int TICK_TO_PLAY_ON_REACHED_SOUND = 9;
-	private static final Predicate<BlockState> TRANSPORT_ITEM_SOURCE_BLOCK = blockState -> blockState.is(BlockTags.COPPER_CHESTS);
+	private static final Predicate<BlockState> TRANSPORT_ITEM_SOURCE_BLOCK = blockState -> blockState.is(ModBlockTags.COPPER_CHESTS);
 	private static final Predicate<BlockState> TRANSPORT_ITEM_DESTINATION_BLOCK = blockState -> blockState.is(Blocks.CHEST) || blockState.is(Blocks.TRAPPED_CHEST);
 	private static final ImmutableList<SensorType<? extends Sensor<? super CopperGolem>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY
@@ -111,12 +113,12 @@ public class CopperGolemAi {
 			Activity.CORE,
 			0,
 			ImmutableList.of(
-				new AnimalPanic<>(1.5F),
+				new AnimalPanic(1.5F),
 				new LookAtTargetSink(45, 90),
 				new MoveToTargetSink(),
 				InteractWithDoor.create(),
 				new CountDownCooldownTicks(MemoryModuleType.GAZE_COOLDOWN_TICKS),
-				new CountDownCooldownTicks(MemoryModuleType.TRANSPORT_ITEMS_COOLDOWN_TICKS)
+				new CountDownCooldownTicks(TRANSPORT_ITEMS_COOLDOWN_TICKS)
 			)
 		);
 	}
@@ -135,7 +137,7 @@ public class CopperGolemAi {
 				Pair.of(
 					2,
 					new RunOne<>(
-						ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.TRANSPORT_ITEMS_COOLDOWN_TICKS, MemoryStatus.VALUE_PRESENT),
+						ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, TRANSPORT_ITEMS_COOLDOWN_TICKS, MemoryStatus.VALUE_PRESENT),
 						ImmutableList.of(Pair.of(RandomStroll.stroll(1.0F, 2, 2), 1), Pair.of(new DoNothing(30, 60), 1))
 					)
 				)
@@ -146,13 +148,13 @@ public class CopperGolemAi {
 	private static Map<TransportItemsBetweenContainers.ContainerInteractionState, TransportItemsBetweenContainers.OnTargetReachedInteraction> getTargetReachedInteractions() {
 		return Map.of(
 			TransportItemsBetweenContainers.ContainerInteractionState.PICKUP_ITEM,
-			onReachedTargetInteraction(CopperGolemState.GETTING_ITEM, SoundEvents.COPPER_GOLEM_ITEM_GET),
+			onReachedTargetInteraction(CopperGolemState.GETTING_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_GET),
 			TransportItemsBetweenContainers.ContainerInteractionState.PICKUP_NO_ITEM,
-			onReachedTargetInteraction(CopperGolemState.GETTING_NO_ITEM, SoundEvents.COPPER_GOLEM_ITEM_NO_GET),
+			onReachedTargetInteraction(CopperGolemState.GETTING_NO_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_NO_GET),
 			TransportItemsBetweenContainers.ContainerInteractionState.PLACE_ITEM,
-			onReachedTargetInteraction(CopperGolemState.DROPPING_ITEM, SoundEvents.COPPER_GOLEM_ITEM_DROP),
+			onReachedTargetInteraction(CopperGolemState.DROPPING_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_DROP),
 			TransportItemsBetweenContainers.ContainerInteractionState.PLACE_NO_ITEM,
-			onReachedTargetInteraction(CopperGolemState.DROPPING_NO_ITEM, SoundEvents.COPPER_GOLEM_ITEM_NO_DROP)
+			onReachedTargetInteraction(CopperGolemState.DROPPING_NO_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_NO_DROP)
 		);
 	}
 
@@ -163,7 +165,8 @@ public class CopperGolemAi {
 			if (pathfinderMob instanceof CopperGolem copperGolem) {
 				Container container = transportItemTarget.container();
 				if (integer == 1) {
-					container.startOpen(copperGolem);
+					// Container.startOpen/stopOpen only accept Player in 1.20.1
+					// We'll manage the chest state directly through the block entity
 					copperGolem.setOpenedChestPos(transportItemTarget.pos());
 					copperGolem.setState(copperGolemState);
 				}
@@ -173,10 +176,6 @@ public class CopperGolemAi {
 				}
 
 				if (integer == 60) {
-					if (container.getEntitiesWithContainerOpen().contains(pathfinderMob)) {
-						container.stopOpen(copperGolem);
-					}
-
 					copperGolem.clearOpenedChestPos();
 				}
 			}
@@ -193,8 +192,8 @@ public class CopperGolemAi {
 	}
 
 	private static Predicate<TransportItemsBetweenContainers.TransportItemTarget> shouldQueueForTarget() {
-		return transportItemTarget -> transportItemTarget.blockEntity() instanceof ChestBlockEntity chestBlockEntity
-			? !chestBlockEntity.getEntitiesWithContainerOpen().isEmpty()
-			: false;
+		// In 1.20.1, ChestBlockEntity doesn't have getEntitiesWithContainerOpen()
+		// We'll just return false to not queue
+		return transportItemTarget -> false;
 	}
 }

@@ -46,9 +46,7 @@ public class WeatheringCopperChestBlock extends CopperChestBlock implements Weat
 
 	@Override
     public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
-		if (!((ChestType)blockState.getValue(ChestBlock.TYPE)).equals(ChestType.RIGHT)
-			&& serverLevel.getBlockEntity(blockPos) instanceof ChestBlockEntity chestBlockEntity
-			&& chestBlockEntity.getEntitiesWithContainerOpen().isEmpty()) {
+		if (!((ChestType)blockState.getValue(ChestBlock.TYPE)).equals(ChestType.RIGHT)) {
 			this.changeOverTime(blockState, serverLevel, blockPos, randomSource);
 		}
 	}
