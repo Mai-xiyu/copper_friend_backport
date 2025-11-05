@@ -45,24 +45,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 import org.xiyu.yee.copper_friend_backport.registry.ModBlockTags;
+import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
 
 public class CopperGolemAi {
-    public static final MemoryModuleType<Integer> TRANSPORT_ITEMS_COOLDOWN_TICKS = register("transport_items_cooldown_ticks");
-
-    public static final MemoryModuleType<Set<GlobalPos>> VISITED_BLOCK_POSITIONS = register(
-            "visited_block_positions", GlobalPos.CODEC.listOf().xmap(Sets::newHashSet, Lists::newArrayList)
-    );
-    public static final MemoryModuleType<Set<GlobalPos>> UNREACHABLE_TRANSPORT_BLOCK_POSITIONS = register(
-            "unreachable_transport_block_positions", GlobalPos.CODEC.listOf().xmap(Sets::newHashSet, Lists::newArrayList)
-    );
-
-    private static <U> MemoryModuleType<U> register(String string, Codec<U> codec) {
-        return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, ResourceLocation.withDefaultNamespace(string), new MemoryModuleType<>(Optional.of(codec)));
-    }
-
-    private static <U> MemoryModuleType<U> register(String string) {
-        return Registry.register(BuiltInRegistries.MEMORY_MODULE_TYPE, ResourceLocation.withDefaultNamespace(string), new MemoryModuleType<>(Optional.empty()));
-    }
 	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 1.5F;
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
 	private static final int TRANSPORT_ITEM_HORIZONTAL_SEARCH_RADIUS = 32;

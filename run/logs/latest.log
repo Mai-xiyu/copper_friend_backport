@@ -1,114 +1,317 @@
-[0411月2025 23:56:01.960] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, MOD_DEV, --assetIndex, 5, --assetsDir, /home/xiyu/.gradle/caches/forge_gradle/assets, --gameDir, ., --fml.forgeVersion, 47.4.0, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, --mixin.config, copper_friend_backport.mixins.json]
-[0411月2025 23:56:01.963] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.16 by Microsoft; OS Linux arch amd64 version 6.14.0-34-generic
-[0411月2025 23:56:02.028] [main/WARN] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Configuration file /home/xiyu/IdeaProjects/copper_friend_backport/run/config/fml.toml is not correct. Correcting
-[0411月2025 23:56:02.028] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowSkipGLVersions] was corrected from null to []
-[0411月2025 23:56:02.029] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowLogHelpMessage] was corrected from null to true
-[0411月2025 23:56:02.029] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowSquir] was corrected from null to false
-[0411月2025 23:56:02.029] [main/INFO] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Incorrect key [earlyWindowShowCPU] was corrected from null to false
-[0411月2025 23:56:02.039] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
-[0411月2025 23:56:02.086] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
-[0411月2025 23:56:02.086] [main/INFO] [EARLYDISPLAY/]: If this message is the only thing at the bottom of your log before a crash, you probably have a driver issue.
 
-Possible solutions:
-A) Make sure Minecraft is set to prefer high performance graphics in the OS and/or driver control panel
-B) Check for driver updates on the graphics brand's website
-C) Try reinstalling your graphics drivers
-D) If still not working after trying all of the above, ask for further help on the Forge forums or Discord
-
-You can safely ignore this message if the game starts up successfully.
-[0411月2025 23:56:02.142] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
-[0411月2025 23:56:02.193] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/home/xiyu/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23116!/ Service=ModLauncher Env=CLIENT
-[0411月2025 23:56:02.202] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: Mesa Intel(R) Graphics (ARL) GL version 4.6 (Core Profile) Mesa 25.0.7-0ubuntu0.25.04.2, Intel
-[0411月2025 23:56:02.395] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/xiyu/.gradle/caches/modules-2/files-2.1/net.minecraftforge/javafmllanguage/1.20.1-47.4.0/f0c0b352173d0a378cbdcec9cfc4ba65899a721/javafmllanguage-1.20.1-47.4.0.jar is missing mods.toml file
-[0411月2025 23:56:02.396] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/xiyu/.gradle/caches/modules-2/files-2.1/net.minecraftforge/lowcodelanguage/1.20.1-47.4.0/e862740d8c84d08dbfedea412bef88fe42e727c5/lowcodelanguage-1.20.1-47.4.0.jar is missing mods.toml file
-[0411月2025 23:56:02.397] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/xiyu/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mclanguage/1.20.1-47.4.0/5719b3a297a33f877ed5dde4cb4bd75c859096af/mclanguage-1.20.1-47.4.0.jar is missing mods.toml file
-[0411月2025 23:56:02.398] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/xiyu/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlcore/1.20.1-47.4.0/235975dafa4309945b59c56b53f31dc5b65a6051/fmlcore-1.20.1-47.4.0.jar is missing mods.toml file
-[0411月2025 23:56:02.463] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
-[0411月2025 23:56:03.664] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, MOD_DEV, --gameDir, ., --assetsDir, /home/xiyu/.gradle/caches/forge_gradle/assets, --assetIndex, 5]
-[0411月2025 23:56:03.708] [main/WARN] [mixin/]: Reference map 'copper_friend_backport.refmap.json' for copper_friend_backport.mixins.json could not be read. If this is a development environment you can ignore this message
-[0411月2025 23:56:06.282] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 188 Datafixer optimizations took 80 milliseconds
-[0411月2025 23:56:07.890] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/xiyu/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2/forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar%23181!/assets/.mcassetsroot' uses unexpected schema
-[0411月2025 23:56:07.890] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/xiyu/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2/forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar%23181!/data/.mcassetsroot' uses unexpected schema
-[0411月2025 23:56:07.901] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
-[0411月2025 23:56:07.905] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
-[0411月2025 23:56:08.233] [Render thread/ERROR] [net.minecraftforge.logging.CrashReportAnalyser/]: Failed to append suspected mod(s) to crash report!
-java.lang.ClassFormatError: Duplicate method name "lambda$new$63" with signature "(Lnet.minecraft.network.chat.Component;Ljava.lang.Boolean;)Lnet.minecraft.network.chat.Component;" in class file net/minecraft/client/Options
-	at java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
-	at java.lang.ClassLoader.defineClass(ClassLoader.java:1017) ~[?:?]
-	at cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:119) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.lambda$findClass$15(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:229) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at java.lang.Class.getDeclaredMethods0(Native Method) ~[?:?]
-	at java.lang.Class.privateGetDeclaredMethods(Class.java:3402) ~[?:?]
-	at java.lang.Class.getDeclaredMethods(Class.java:2504) ~[?:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.findMixinMerged(CrashReportAnalyser.java:188) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.getMixinInfo(CrashReportAnalyser.java:211) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.identifyByMixins(CrashReportAnalyser.java:147) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.scanStacktrace(CrashReportAnalyser.java:116) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.scanThrowable(CrashReportAnalyser.java:102) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.analyseCrashReport(CrashReportAnalyser.java:55) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.appendSuspectedMods(CrashReportAnalyser.java:39) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.CrashReport.getDetails(CrashReport.java:60) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.CrashReport.getFriendlyReport(CrashReport.java:114) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.client.Minecraft.crash(Minecraft.java:842) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.client.main.Main.main(Main.java:192) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
-	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
-	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.4.0.jar:?]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.4.0.jar:?]
-	at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.4.0.jar:?]
-	at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.4.0.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
-[0411月2025 23:56:08.241] [Render thread/ERROR] [net.minecraftforge.logging.CrashReportAnalyser/]: Failed to append suspected mod(s) to crash report!
-java.lang.ClassFormatError: Duplicate method name "lambda$new$63" with signature "(Lnet.minecraft.network.chat.Component;Ljava.lang.Boolean;)Lnet.minecraft.network.chat.Component;" in class file net/minecraft/client/Options
-	at java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
-	at java.lang.ClassLoader.defineClass(ClassLoader.java:1017) ~[?:?]
-	at cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:119) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.lambda$findClass$15(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:229) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at java.lang.Class.getDeclaredMethods0(Native Method) ~[?:?]
-	at java.lang.Class.privateGetDeclaredMethods(Class.java:3402) ~[?:?]
-	at java.lang.Class.getDeclaredMethods(Class.java:2504) ~[?:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.findMixinMerged(CrashReportAnalyser.java:188) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.getMixinInfo(CrashReportAnalyser.java:211) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.identifyByMixins(CrashReportAnalyser.java:147) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.scanStacktrace(CrashReportAnalyser.java:116) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.scanThrowable(CrashReportAnalyser.java:102) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.analyseCrashReport(CrashReportAnalyser.java:55) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraftforge.logging.CrashReportAnalyser.appendSuspectedMods(CrashReportAnalyser.java:39) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.CrashReport.getDetails(CrashReport.java:60) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.CrashReport.getFriendlyReport(CrashReport.java:114) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.CrashReport.saveToFile(CrashReport.java:135) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.client.Minecraft.crash(Minecraft.java:846) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at net.minecraft.client.main.Main.main(Main.java:192) ~[forge-1.20.1-47.4.0_mapped_parchment_2023.10.08-1.20.2.jar:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
-	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
-	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:111) ~[fmlloader-1.20.1-47.4.0.jar:?]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:99) ~[fmlloader-1.20.1-47.4.0.jar:?]
-	at net.minecraftforge.fml.loading.targets.ForgeClientUserdevLaunchHandler.devService(ForgeClientUserdevLaunchHandler.java:19) ~[fmlloader-1.20.1-47.4.0.jar:?]
-	at net.minecraftforge.fml.loading.targets.CommonDevLaunchHandler.lambda$makeService$7(CommonDevLaunchHandler.java:135) ~[fmlloader-1.20.1-47.4.0.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+2025-11-05 16:00:03,795 main WARN Advanced terminal features are not available in this environment
+[16:00:03] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--username, God_xiyu, --version, 1.20.1-Forge, --gameDir, /home/xiyu/.local/share/SJMCL/.minecraft/versions/1.20.1-Forge, --assetsDir, /home/xiyu/.local/share/SJMCL/.minecraft/assets, --assetIndex, 5, --uuid, 89d586d8-4c10-4870-98b9-1ddc70894888, --accessToken, ❄❄❄❄❄❄❄❄, --clientId, , --xuid, , --userType, msa, --versionType, SJMCL 0.4.4, --width, 1280, --height, 720, --quickPlayPath, , --launchTarget, forgeclient, --fml.forgeVersion, 47.4.10, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412]
+[16:00:03] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.16 by Microsoft; OS Linux arch amd64 version 6.14.0-34-generic
+[16:00:03] [main/INFO] [ne.mi.fm.lo.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[16:00:03] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[16:00:04] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[16:00:04] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/home/xiyu/.local/share/SJMCL/.minecraft/libraries/org/spongepowered/mixin/0.8.5/mixin-0.8.5.jar%2374!/ Service=ModLauncher Env=CLIENT
+[16:00:04] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: Mesa Intel(R) Graphics (ARL) GL version 4.6 (Core Profile) Mesa 25.0.7-0ubuntu0.25.04.2, Intel
+[16:00:04] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/xiyu/.local/share/SJMCL/.minecraft/libraries/net/minecraftforge/fmlcore/1.20.1-47.4.10/fmlcore-1.20.1-47.4.10.jar is missing mods.toml file
+[16:00:04] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/xiyu/.local/share/SJMCL/.minecraft/libraries/net/minecraftforge/javafmllanguage/1.20.1-47.4.10/javafmllanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[16:00:04] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/xiyu/.local/share/SJMCL/.minecraft/libraries/net/minecraftforge/lowcodelanguage/1.20.1-47.4.10/lowcodelanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[16:00:04] [main/WARN] [ne.mi.fm.lo.mo.ModFileParser/LOADING]: Mod file /home/xiyu/.local/share/SJMCL/.minecraft/libraries/net/minecraftforge/mclanguage/1.20.1-47.4.10/mclanguage-1.20.1-47.4.10.jar is missing mods.toml file
+[16:00:04] [main/INFO] [ne.mi.fm.lo.mo.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
+[16:00:05] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclient' with arguments [--version, 1.20.1-Forge, --gameDir, /home/xiyu/.local/share/SJMCL/.minecraft/versions/1.20.1-Forge, --assetsDir, /home/xiyu/.local/share/SJMCL/.minecraft/assets, --uuid, 89d586d8-4c10-4870-98b9-1ddc70894888, --username, God_xiyu, --assetIndex, 5, --accessToken, ❄❄❄❄❄❄❄❄, --clientId, , --xuid, , --userType, msa, --versionType, SJMCL 0.4.4, --width, 1280, --height, 720, --quickPlayPath, ]
+[16:00:07] [Datafixer Bootstrap/INFO] [mojang/DataFixerBuilder]: 188 Datafixer optimizations took 76 milliseconds
+[16:00:08] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/xiyu/.local/share/SJMCL/.minecraft/libraries/net/minecraft/client/1.20.1-20230612.114412/client-1.20.1-20230612.114412-srg.jar%23148!/assets/.mcassetsroot' uses unexpected schema
+[16:00:08] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/home/xiyu/.local/share/SJMCL/.minecraft/libraries/net/minecraft/client/1.20.1-20230612.114412/client-1.20.1-20230612.114412-srg.jar%23148!/data/.mcassetsroot' uses unexpected schema
+[16:00:08] [Render thread/INFO] [mojang/YggdrasilAuthenticationService]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[16:00:09] [Render thread/INFO] [minecraft/Minecraft]: Setting user: God_xiyu
+[16:00:09] [Render thread/INFO] [minecraft/Minecraft]: Backend library: LWJGL version 3.3.1 build 7
+[16:00:10] [modloading-worker-0/INFO] [ne.mi.co.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.10, for MC 1.20.1 with MCP 20230612.114412
+[16:00:10] [modloading-worker-0/INFO] [ne.mi.co.MinecraftForge/FORGE]: MinecraftForge v47.4.10 Initialized
+[ALSOFT] (EE) Failed to set real-time priority for thread: 不允许的操作 (1)
+[16:00:10] [Render thread/INFO] [minecraft/ReloadableResourceManager]: Reloading ResourceManager: vanilla, mod_resources
+[16:00:10] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[16:00:10] [Worker-Main-14/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-15.0.06.hex, loading
+[16:00:12] [Forge Version Check/INFO] [ne.mi.fm.VersionChecker/]: [forge] Found status: AHEAD Current: 47.4.10 Target: null
+[16:00:12] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:item.goat_horn.play
+[16:00:12] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[ALSOFT] (EE) Failed to set real-time priority for thread: 不允许的操作 (1)
+[16:00:12] [Render thread/INFO] [mojang/Library]: OpenAL initialized on device USB Audio Device 模拟立体声
+[16:00:12] [Render thread/INFO] [minecraft/SoundEngine]: Sound engine started
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[16:00:12] [Render thread/WARN] [minecraft/ShaderInstance]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x0 minecraft:textures/atlas/particles.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
+[16:00:12] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[16:00:22] [Render thread/INFO] [minecraft/RecipeManager]: Loaded 7 recipes
+[16:00:22] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 1271 advancements
+[16:00:23] [Server thread/INFO] [minecraft/IntegratedServer]: Starting integrated minecraft server version 1.20.1
+[16:00:23] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[16:00:23] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[16:00:24] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[16:00:24] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[16:00:24] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[16:00:24] [Server thread/INFO] [ne.mi.se.pe.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[16:00:24] [Render thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 1437 ms
+[16:00:24] [Server thread/INFO] [minecraft/IntegratedServer]: Changing view distance to 12, from 10
+[16:00:24] [Server thread/INFO] [minecraft/IntegratedServer]: Changing simulation distance to 12, from 0
+[16:00:24] [Render thread/WARN] [io.ne.ut.in.SystemPropertyUtil/]: Unable to parse the boolean system property 'java.net.preferIPv6Addresses':system - using the default value: false
+[16:00:25] [Netty Local Client IO #0/INFO] [ne.mi.ne.NetworkHooks/]: Connected to a modded server.
+[16:00:25] [Server thread/INFO] [minecraft/PlayerList]: God_xiyu[local:E:8856e44b] logged in with entity id 97 at (1.4009988866799923, -60.0, 18.558890091197373)
+[16:00:25] [Server thread/INFO] [minecraft/MinecraftServer]: God_xiyu joined the game
+[16:00:25] [IO-Worker-24/ERROR] [minecraft/QuickPlayLog]: Failed to delete quickplay log file /home/xiyu/.local/share/SJMCL/.minecraft/versions/1.20.1-Forge
+java.nio.file.DirectoryNotEmptyException: /home/xiyu/.local/share/SJMCL/.minecraft/versions/1.20.1-Forge
+	at sun.nio.fs.UnixFileSystemProvider.implDelete(UnixFileSystemProvider.java:246) ~[?:?] {}
+	at sun.nio.fs.AbstractFileSystemProvider.deleteIfExists(AbstractFileSystemProvider.java:110) ~[?:?] {}
+	at java.nio.file.Files.deleteIfExists(Files.java:1191) ~[?:?] {}
+	at net.minecraft.client.quickplay.QuickPlayLog.m_278666_(QuickPlayLog.java:66) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?] {}
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?] {}
+	at java.lang.Thread.run(Thread.java:840) ~[?:?] {}
+[16:00:25] [IO-Worker-24/ERROR] [minecraft/QuickPlayLog]: Failed to write to quickplay log file /home/xiyu/.local/share/SJMCL/.minecraft/versions/1.20.1-Forge
+java.nio.file.FileSystemException: /home/xiyu/.local/share/SJMCL/.minecraft/versions/1.20.1-Forge: 是一个目录
+	at sun.nio.fs.UnixException.translateToIOException(UnixException.java:100) ~[?:?] {}
+	at sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:106) ~[?:?] {}
+	at sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:111) ~[?:?] {}
+	at sun.nio.fs.UnixFileSystemProvider.newByteChannel(UnixFileSystemProvider.java:218) ~[?:?] {}
+	at java.nio.file.spi.FileSystemProvider.newOutputStream(FileSystemProvider.java:484) ~[?:?] {}
+	at java.nio.file.Files.newOutputStream(Files.java:228) ~[?:?] {}
+	at java.nio.file.Files.write(Files.java:3512) ~[?:?] {}
+	at java.nio.file.Files.writeString(Files.java:3734) ~[?:?] {}
+	at java.nio.file.Files.writeString(Files.java:3674) ~[?:?] {}
+	at net.minecraft.client.quickplay.QuickPlayLog.m_278671_(QuickPlayLog.java:78) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at java.util.Optional.ifPresent(Optional.java:178) ~[?:?] {}
+	at net.minecraft.client.quickplay.QuickPlayLog.m_278666_(QuickPlayLog.java:75) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?] {}
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?] {}
+	at java.lang.Thread.run(Thread.java:840) ~[?:?] {}
+[16:00:25] [Render thread/INFO] [minecraft/AdvancementList]: Loaded 2 advancements
+[16:00:26] [Server thread/ERROR] [minecraft/MinecraftServer]: Encountered an unexpected exception
+java.lang.ExceptionInInitializerError: null
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem.m_5490_(CopperGolem.java:154) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:mixin,re:classloading}
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem.m_8075_(CopperGolem.java:159) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:mixin,re:classloading}
+	at net.minecraft.world.entity.LivingEntity.<init>(LivingEntity.java:245) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,re:mixin}
+	at net.minecraft.world.entity.Mob.<init>(Mob.java:123) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B,re:mixin,pl:accesstransformer:B}
+	at net.minecraft.world.entity.PathfinderMob.<init>(PathfinderMob.java:14) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,re:mixin}
+	at net.minecraft.world.entity.animal.AbstractGolem.<init>(AbstractGolem.java:13) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,re:mixin}
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem.<init>(CopperGolem.java:90) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:mixin,re:classloading}
+	at net.minecraft.world.entity.EntityType.m_20615_(EntityType.java:525) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:forge_method_redirector}
+	at net.minecraft.world.entity.EntityType.m_262451_(EntityType.java:403) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:forge_method_redirector}
+	at net.minecraft.world.entity.EntityType.m_262455_(EntityType.java:393) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:forge_method_redirector}
+	at net.minecraft.world.entity.EntityType.m_20592_(EntityType.java:361) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:forge_method_redirector}
+	at net.minecraft.world.item.SpawnEggItem.m_6225_(SpawnEggItem.java:85) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraftforge.common.ForgeHooks.onPlaceItemIntoWorld(ForgeHooks.java:586) ~[forge-1.20.1-47.4.10-universal.jar%23153!/:?] {re:classloading}
+	at net.minecraft.world.item.ItemStack.m_41661_(ItemStack.java:245) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:itemstack,re:mixin,xf:fml:forge:itemstack}
+	at net.minecraft.server.level.ServerPlayerGameMode.m_7179_(ServerPlayerGameMode.java:363) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.server.network.ServerGamePacketListenerImpl.m_6371_(ServerGamePacketListenerImpl.java:1057) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.network.protocol.game.ServerboundUseItemOnPacket.m_5797_(ServerboundUseItemOnPacket.java:34) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.network.protocol.game.ServerboundUseItemOnPacket.m_5797_(ServerboundUseItemOnPacket.java:8) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.network.protocol.PacketUtils.m_263899_(PacketUtils.java:22) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.server.TickTask.run(TickTask.java:18) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.util.thread.BlockableEventLoop.m_6367_(BlockableEventLoop.java:156) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.util.thread.ReentrantBlockableEventLoop.m_6367_(ReentrantBlockableEventLoop.java:23) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.server.MinecraftServer.m_6367_(MinecraftServer.java:770) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_6367_(MinecraftServer.java:161) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.util.thread.BlockableEventLoop.m_7245_(BlockableEventLoop.java:130) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_129961_(MinecraftServer.java:753) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_7245_(MinecraftServer.java:747) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.util.thread.BlockableEventLoop.m_18699_(BlockableEventLoop.java:115) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_130012_(MinecraftServer.java:732) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_130011_(MinecraftServer.java:665) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_206580_(MinecraftServer.java:251) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at java.lang.Thread.run(Thread.java:840) ~[?:?] {}
+Caused by: java.lang.IllegalStateException: Can not register to a locked registry. Modder should use Forge Register methods.
+	at net.minecraftforge.registries.NamespacedWrapper.m_203704_(NamespacedWrapper.java:75) ~[forge-1.20.1-47.4.10-universal.jar%23153!/:?] {re:classloading}
+	at net.minecraftforge.registries.NamespacedWrapper.m_255290_(NamespacedWrapper.java:91) ~[forge-1.20.1-47.4.10-universal.jar%23153!/:?] {re:classloading}
+	at net.minecraft.core.Registry.m_194579_(Registry.java:118) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.core.Registry.m_122965_(Registry.java:114) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemAi.register(CopperGolemAi.java:64) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:classloading}
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemAi.<clinit>(CopperGolemAi.java:50) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:classloading}
+	... 32 more
+[16:00:26] [Server thread/FATAL] [ne.mi.co.ForgeMod/]: Preparing crash report with UUID 405f0edc-6170-4957-bd7e-51cc8413e54e
+[16:00:26] [Server thread/ERROR] [minecraft/MinecraftServer]: This crash report has been saved to: /home/xiyu/.local/share/SJMCL/.minecraft/versions/1.20.1-Forge/crash-reports/crash-2025-11-05_16.00.26-server.txt
+[16:00:26] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[16:00:26] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[16:00:26] [Render thread/FATAL] [ne.mi.co.ForgeMod/]: Preparing crash report with UUID 66468961-8a88-43ad-b518-d553960ca267
+---- Minecraft Crash Report ----
+// On the bright side, I bought you a teddy bear!
+Time: 2025-11-05 16:00:26
+Description: Exception in server tick loop
+java.lang.ExceptionInInitializerError: null
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem.m_5490_(CopperGolem.java:154) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:mixin,re:classloading}
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem.m_8075_(CopperGolem.java:159) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:mixin,re:classloading}
+	at net.minecraft.world.entity.LivingEntity.<init>(LivingEntity.java:245) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,re:mixin}
+	at net.minecraft.world.entity.Mob.<init>(Mob.java:123) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B,re:mixin,pl:accesstransformer:B}
+	at net.minecraft.world.entity.PathfinderMob.<init>(PathfinderMob.java:14) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,re:mixin}
+	at net.minecraft.world.entity.animal.AbstractGolem.<init>(AbstractGolem.java:13) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,re:mixin}
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem.<init>(CopperGolem.java:90) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:mixin,re:classloading}
+	at net.minecraft.world.entity.EntityType.m_20615_(EntityType.java:525) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:forge_method_redirector}
+	at net.minecraft.world.entity.EntityType.m_262451_(EntityType.java:403) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:forge_method_redirector}
+	at net.minecraft.world.entity.EntityType.m_262455_(EntityType.java:393) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:forge_method_redirector}
+	at net.minecraft.world.entity.EntityType.m_20592_(EntityType.java:361) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:forge_method_redirector}
+	at net.minecraft.world.item.SpawnEggItem.m_6225_(SpawnEggItem.java:85) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraftforge.common.ForgeHooks.onPlaceItemIntoWorld(ForgeHooks.java:586) ~[forge-1.20.1-47.4.10-universal.jar%23153!/:?] {re:classloading}
+	at net.minecraft.world.item.ItemStack.m_41661_(ItemStack.java:245) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,xf:fml:forge:itemstack,re:mixin,xf:fml:forge:itemstack}
+	at net.minecraft.server.level.ServerPlayerGameMode.m_7179_(ServerPlayerGameMode.java:363) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.server.network.ServerGamePacketListenerImpl.m_6371_(ServerGamePacketListenerImpl.java:1057) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.network.protocol.game.ServerboundUseItemOnPacket.m_5797_(ServerboundUseItemOnPacket.java:34) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.network.protocol.game.ServerboundUseItemOnPacket.m_5797_(ServerboundUseItemOnPacket.java:8) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.network.protocol.PacketUtils.m_263899_(PacketUtils.java:22) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.server.TickTask.run(TickTask.java:18) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.util.thread.BlockableEventLoop.m_6367_(BlockableEventLoop.java:156) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.util.thread.ReentrantBlockableEventLoop.m_6367_(ReentrantBlockableEventLoop.java:23) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.server.MinecraftServer.m_6367_(MinecraftServer.java:770) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_6367_(MinecraftServer.java:161) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.util.thread.BlockableEventLoop.m_7245_(BlockableEventLoop.java:130) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_129961_(MinecraftServer.java:753) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_7245_(MinecraftServer.java:747) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.util.thread.BlockableEventLoop.m_18699_(BlockableEventLoop.java:115) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_130012_(MinecraftServer.java:732) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_130011_(MinecraftServer.java:665) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.m_206580_(MinecraftServer.java:251) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B}
+	at java.lang.Thread.run(Thread.java:840) ~[?:?] {}
+Caused by: java.lang.IllegalStateException: Can not register to a locked registry. Modder should use Forge Register methods.
+	at net.minecraftforge.registries.NamespacedWrapper.m_203704_(NamespacedWrapper.java:75) ~[forge-1.20.1-47.4.10-universal.jar%23153!/:?] {re:classloading}
+	at net.minecraftforge.registries.NamespacedWrapper.m_255290_(NamespacedWrapper.java:91) ~[forge-1.20.1-47.4.10-universal.jar%23153!/:?] {re:classloading}
+	at net.minecraft.core.Registry.m_194579_(Registry.java:118) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at net.minecraft.core.Registry.m_122965_(Registry.java:114) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemAi.register(CopperGolemAi.java:64) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:classloading}
+	at org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemAi.<clinit>(CopperGolemAi.java:50) ~[copper_friend_backport-1.0.jar%23147!/:1.0] {re:classloading}
+	... 32 more
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+-- System Details --
+Details:
+	Minecraft Version: 1.20.1
+	Minecraft Version ID: 1.20.1
+	Operating System: Linux (amd64) version 6.14.0-34-generic
+	Java Version: 17.0.16, Microsoft
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Microsoft
+	Memory: 1138745552 bytes (1085 MiB) / 2449473536 bytes (2336 MiB) up to 6882852864 bytes (6564 MiB)
+	CPUs: 24
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM) Ultra 9 275HX
+	Identifier: Intel64 Family 6 Model 198 Stepping 2
+	Microarchitecture: unknown
+	Frequency (GHz): 5.40
+	Number of physical packages: 1
+	Number of physical CPUs: 24
+	Number of logical CPUs: 24
+	Graphics card #0 name: Arrow Lake-S [Intel Graphics]
+	Graphics card #0 vendor: Intel Corporation (0x8086)
+	Graphics card #0 VRAM (MB): 272.00
+	Graphics card #0 deviceId: 0x7d67
+	Graphics card #0 versionInfo: unknown
+	Graphics card #1 name: AD108M [GeForce RTX 5070 Ti Max-Q / Mobile]
+	Graphics card #1 vendor: NVIDIA Corporation (0x10de)
+	Graphics card #1 VRAM (MB): 16416.00
+	Graphics card #1 deviceId: 0x2f58
+	Graphics card #1 versionInfo: unknown
+	Graphics card #2 name: Device
+	Graphics card #2 vendor: Intel Corporation (0x8086)
+	Graphics card #2 VRAM (MB): 0.00
+	Graphics card #2 deviceId: 0x7f2f
+	Graphics card #2 versionInfo: unknown
+	Virtual memory max (MB): 23693.66
+	Virtual memory used (MB): 30826.54
+	Swap memory total (MB): 8192.00
+	Swap memory used (MB): 5254.37
+	JVM Flags: 1 total; -Xmx6564m
+	Server Running: true
+	Player Count: 1 / 8; [ServerPlayer['God_xiyu'/97, l='ServerLevel[New World]', x=1.37, y=-60.00, z=18.31]]
+	Data Packs: vanilla, mod:forge, mod:copper_friend_backport
+	Enabled Feature Flags: minecraft:vanilla
+	World Generation: Stable
+	Type: Integrated Server (map_client.txt)
+	Is Modded: Definitely; Client brand changed to 'forge'; Server brand changed to 'forge'
+	Launched Version: 1.20.1-Forge
+	ModLauncher: 10.0.9+10.0.9+main.dcd20f30
+	ModLauncher launch target: forgeclient
+	ModLauncher naming: srg
+	ModLauncher services: 
+		mixin-0.8.5.jar mixin PLUGINSERVICE 
+		eventbus-6.0.5.jar eventbus PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar slf4jfixer PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar object_holder_definalize PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar runtime_enum_extender PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar capability_token_subclass PLUGINSERVICE 
+		accesstransformers-8.0.4.jar accesstransformer PLUGINSERVICE 
+		fmlloader-1.20.1-47.4.10.jar runtimedistcleaner PLUGINSERVICE 
+		modlauncher-10.0.9.jar mixin TRANSFORMATIONSERVICE 
+		modlauncher-10.0.9.jar fml TRANSFORMATIONSERVICE 
+	FML Language Providers: 
+		minecraft@1.0
+		lowcodefml@null
+		javafml@null
+	Mod List: 
+		client-1.20.1-20230612.114412-srg.jar             |Minecraft                     |minecraft                     |1.20.1              |DONE      |Manifest: a1:d4:5e:04:4f:d3:d6:e0:7b:37:97:cf:77:b0:de:ad:4a:47:ce:8c:96:49:5f:0a:cf:8c:ae:b2:6d:4b:8a:3f
+		forge-1.20.1-47.4.10-universal.jar                |Forge                         |forge                         |47.4.10             |DONE      |Manifest: 84:ce:76:e8:45:35:e4:0e:63:86:df:47:59:80:0f:67:6c:c1:5f:6e:5f:4d:b3:54:47:1a:9f:7f:ed:5e:f2:90
+		copper_friend_backport-1.0.jar                    |copper_friend_backport        |copper_friend_backport        |1.0                 |DONE      |Manifest: NOSIGNATURE
+	Crash Report UUID: 66468961-8a88-43ad-b518-d553960ca267
+	FML: 47.4
+	Forge: net.minecraftforge:47.4.10
+#@!@# Game crashed! Crash report saved to: #@!@# /home/xiyu/.local/share/SJMCL/.minecraft/versions/1.20.1-Forge/crash-reports/crash-2025-11-05_16.00.26-server.txt
+[16:00:26] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[16:00:27] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[16:00:27] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[16:00:27] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[16:00:27] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (New World): All chunks are saved
+[16:00:27] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[16:00:27] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[16:00:27] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[16:00:27] [Worker-Main-13/WARN] [mojang/YggdrasilMinecraftSessionService]: Couldn't look up profile properties for com.mojang.authlib.GameProfile@2fcd6cd5[id=89d586d8-4c10-4870-98b9-1ddc70894888,name=God_xiyu,properties={},legacy=false]
+com.mojang.authlib.exceptions.AuthenticationUnavailableException: Cannot contact authentication server
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:119) ~[authlib-4.0.43.jar%2383!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:91) ~[authlib-4.0.43.jar%2383!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService.fillGameProfile(YggdrasilMinecraftSessionService.java:175) ~[authlib-4.0.43.jar%2383!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService$1.load(YggdrasilMinecraftSessionService.java:51) ~[authlib-4.0.43.jar%2383!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService$1.load(YggdrasilMinecraftSessionService.java:48) ~[authlib-4.0.43.jar%2383!/:?] {}
+	at com.google.common.cache.LocalCache$LoadingValueReference.loadFuture(LocalCache.java:3533) ~[guava-31.1-jre.jar%23102!/:?] {}
+	at com.google.common.cache.LocalCache$Segment.loadSync(LocalCache.java:2282) ~[guava-31.1-jre.jar%23102!/:?] {}
+	at com.google.common.cache.LocalCache$Segment.lockedGetOrLoad(LocalCache.java:2159) ~[guava-31.1-jre.jar%23102!/:?] {}
+	at com.google.common.cache.LocalCache$Segment.get(LocalCache.java:2049) ~[guava-31.1-jre.jar%23102!/:?] {}
+	at com.google.common.cache.LocalCache.get(LocalCache.java:3966) ~[guava-31.1-jre.jar%23102!/:?] {}
+	at com.google.common.cache.LocalCache.getOrLoad(LocalCache.java:3989) ~[guava-31.1-jre.jar%23102!/:?] {}
+	at com.google.common.cache.LocalCache$LocalLoadingCache.get(LocalCache.java:4950) ~[guava-31.1-jre.jar%23102!/:?] {}
+	at com.google.common.cache.LocalCache$LocalLoadingCache.getUnchecked(LocalCache.java:4956) ~[guava-31.1-jre.jar%23102!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService.fillProfileProperties(YggdrasilMinecraftSessionService.java:149) ~[authlib-4.0.43.jar%2383!/:?] {}
+	at net.minecraft.client.Minecraft.m_91095_(Minecraft.java:2438) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading,pl:accesstransformer:B,pl:runtimedistcleaner:A}
+	at net.minecraft.client.resources.SkinManager.m_118821_(SkinManager.java:107) ~[client-1.20.1-20230612.114412-srg.jar%23148!/:?] {re:classloading}
+	at java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(ForkJoinTask.java:1395) ~[?:?] {}
+	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?] {}
+	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?] {}
+	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?] {}
+Caused by: javax.net.ssl.SSLHandshakeException: Remote host terminated the handshake
+	at sun.security.ssl.SSLSocketImpl.handleEOF(SSLSocketImpl.java:1719) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1518) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1425) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:426) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsClient.afterConnect(HttpsClient.java:589) ~[?:?] {}
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:187) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1703) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1627) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224) ~[?:?] {}
+	at com.mojang.authlib.HttpAuthenticationService.performGetRequest(HttpAuthenticationService.java:140) ~[authlib-4.0.43.jar%2383!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:96) ~[authlib-4.0.43.jar%2383!/:?] {}
+	... 21 more
+Caused by: java.io.EOFException: SSL peer shut down incorrectly
+	at sun.security.ssl.SSLSocketInputRecord.read(SSLSocketInputRecord.java:489) ~[?:?] {}
+	at sun.security.ssl.SSLSocketInputRecord.readHeader(SSLSocketInputRecord.java:478) ~[?:?] {}
+	at sun.security.ssl.SSLSocketInputRecord.decode(SSLSocketInputRecord.java:160) ~[?:?] {}
+	at sun.security.ssl.SSLTransport.decode(SSLTransport.java:111) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1510) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1425) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[?:?] {}
+	at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:426) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsClient.afterConnect(HttpsClient.java:589) ~[?:?] {}
+	at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:187) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1703) ~[?:?] {}
+	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1627) ~[?:?] {}
+	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224) ~[?:?] {}
+	at com.mojang.authlib.HttpAuthenticationService.performGetRequest(HttpAuthenticationService.java:140) ~[authlib-4.0.43.jar%2383!/:?] {}
+	at com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService.makeRequest(YggdrasilAuthenticationService.java:96) ~[authlib-4.0.43.jar%2383!/:?] {}
+	... 21 more

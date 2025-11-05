@@ -9,10 +9,14 @@ import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemState;
 
 
 public class EntityDataSerializers {
-    public static final EntityDataSerializer<WeatheringCopper.WeatherState> WEATHERING_COPPER_STATE = forValueType(
-            WeatheringCopper.WeatherState.STREAM_CODEC
-    );
-    public static final EntityDataSerializer<CopperGolemState> COPPER_GOLEM_STATE = forValueType(CopperGolemState.STREAM_CODEC);
+
+    // 在1.20.1中，直接创建序列化器实例，不需要注册
+    public static final EntityDataSerializer<WeatheringCopper.WeatherState> WEATHERING_COPPER_STATE = 
+            forValueType(WeatheringCopper.WeatherState.STREAM_CODEC);
+
+    public static final EntityDataSerializer<CopperGolemState> COPPER_GOLEM_STATE = 
+            forValueType(CopperGolemState.STREAM_CODEC);
+
     static <T> EntityDataSerializer<T> forValueType(StreamCodec<ByteBuf, T> streamCodec) {
         return new EntityDataSerializer<T>() {
             @Override

@@ -56,451 +56,453 @@ import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
 
 public class CopperGolem extends AbstractGolem implements Shearable {
-	private static final long IGNORE_WEATHERING_TICK = -2L;
-	private static final long UNSET_WEATHERING_TICK = -1L;
-	private static final int WEATHERING_TICK_FROM = 504000;
-	private static final int WEATHERING_TICK_TO = 552000;
-	private static final int SPIN_ANIMATION_MIN_COOLDOWN = 200;
-	private static final int SPIN_ANIMATION_MAX_COOLDOWN = 240;
-	private static final float SPIN_SOUND_TIME_INTERVAL_OFFSET = 10.0F;
-	private static final float TURN_TO_STATUE_CHANCE = 0.0058F;
-	private static final int SPAWN_COOLDOWN_MIN = 60;
-	private static final int SPAWN_COOLDOWN_MAX = 100;
-	private static final EntityDataAccessor<WeatheringCopper.WeatherState> DATA_WEATHER_STATE = SynchedEntityData.defineId(
-		CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.WEATHERING_COPPER_STATE
-	);
-	private static final EntityDataAccessor<CopperGolemState> COPPER_GOLEM_STATE = SynchedEntityData.defineId(
-		CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.COPPER_GOLEM_STATE
-	);
-	@Nullable
-	private BlockPos openedChestPos;
-	@Nullable
-	private UUID lastLightningBoltUUID;
-	private long nextWeatheringTick = -1L;
-	private int idleAnimationStartTick = 0;
-	private final AnimationState idleAnimationState = new AnimationState();
-	private final AnimationState interactionGetItemAnimationState = new AnimationState();
-	private final AnimationState interactionGetNoItemAnimationState = new AnimationState();
-	private final AnimationState interactionDropItemAnimationState = new AnimationState();
-	private final AnimationState interactionDropNoItemAnimationState = new AnimationState();
-	// 1.20.1 doesn't have SADDLE or BODY slots, using CHEST as antenna slot
-	public static final EquipmentSlot EQUIPMENT_SLOT_ANTENNA = EquipmentSlot.CHEST;
+    private static final long IGNORE_WEATHERING_TICK = -2L;
+    private static final long UNSET_WEATHERING_TICK = -1L;
+    private static final int WEATHERING_TICK_FROM = 504000;
+    private static final int WEATHERING_TICK_TO = 552000;
+    private static final int SPIN_ANIMATION_MIN_COOLDOWN = 200;
+    private static final int SPIN_ANIMATION_MAX_COOLDOWN = 240;
+    private static final float SPIN_SOUND_TIME_INTERVAL_OFFSET = 10.0F;
+    private static final float TURN_TO_STATUE_CHANCE = 0.0058F;
+    private static final int SPAWN_COOLDOWN_MIN = 60;
+    private static final int SPAWN_COOLDOWN_MAX = 100;
+    private static final EntityDataAccessor<WeatheringCopper.WeatherState> DATA_WEATHER_STATE = SynchedEntityData.defineId(
+            CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.WEATHERING_COPPER_STATE
+    );
+    private static final EntityDataAccessor<CopperGolemState> COPPER_GOLEM_STATE = SynchedEntityData.defineId(
+            CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.COPPER_GOLEM_STATE
+    );
+    @Nullable
+    private BlockPos openedChestPos;
+    @Nullable
+    private UUID lastLightningBoltUUID;
+    private long nextWeatheringTick = -1L;
+    private int idleAnimationStartTick = 0;
+    private final AnimationState idleAnimationState = new AnimationState();
+    private final AnimationState interactionGetItemAnimationState = new AnimationState();
+    private final AnimationState interactionGetNoItemAnimationState = new AnimationState();
+    private final AnimationState interactionDropItemAnimationState = new AnimationState();
+    private final AnimationState interactionDropNoItemAnimationState = new AnimationState();
+    // 1.20.1 doesn't have SADDLE or BODY slots, using CHEST as antenna slot
+    public static final EquipmentSlot EQUIPMENT_SLOT_ANTENNA = EquipmentSlot.CHEST;
 
-	public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
-		super(entityType, level);
-		this.getNavigation().setCanFloat(true);
-		this.setPersistenceRequired();
-		this.setState(CopperGolemState.IDLE);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
-		this.getBrain().setMemory(CopperGolemAi.TRANSPORT_ITEMS_COOLDOWN_TICKS, this.getRandom().nextInt(60, 100));
-	}
+    public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
+        super(entityType, level);
+        // setRequiredPathLength doesn't exist in 1.20.1
+        // this.getNavigation().setRequiredPathLength(48.0F);
+        this.getNavigation().setCanFloat(true);
+        this.setPersistenceRequired();
+        this.setState(CopperGolemState.IDLE);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+        this.getBrain().setMemory(CopperGolemAi.TRANSPORT_ITEMS_COOLDOWN_TICKS, this.getRandom().nextInt(60, 100));
+    }
 
-	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes()
-			.add(Attributes.MOVEMENT_SPEED, 0.2F)
-			.add(Attributes.MAX_HEALTH, 12.0);
-	}
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes()
+                .add(Attributes.MOVEMENT_SPEED, 0.2F)
+                .add(Attributes.MAX_HEALTH, 12.0);
+    }
 
-	public CopperGolemState getState() {
-		return this.entityData.get(COPPER_GOLEM_STATE);
-	}
+    public CopperGolemState getState() {
+        return this.entityData.get(COPPER_GOLEM_STATE);
+    }
 
-	public void setState(CopperGolemState copperGolemState) {
-		this.entityData.set(COPPER_GOLEM_STATE, copperGolemState);
-	}
+    public void setState(CopperGolemState copperGolemState) {
+        this.entityData.set(COPPER_GOLEM_STATE, copperGolemState);
+    }
 
-	public WeatheringCopper.WeatherState getWeatherState() {
-		return this.entityData.get(DATA_WEATHER_STATE);
-	}
+    public WeatheringCopper.WeatherState getWeatherState() {
+        return this.entityData.get(DATA_WEATHER_STATE);
+    }
 
-	public void setWeatherState(WeatheringCopper.WeatherState weatherState) {
-		this.entityData.set(DATA_WEATHER_STATE, weatherState);
-	}
+    public void setWeatherState(WeatheringCopper.WeatherState weatherState) {
+        this.entityData.set(DATA_WEATHER_STATE, weatherState);
+    }
 
-	public void setOpenedChestPos(BlockPos blockPos) {
-		this.openedChestPos = blockPos;
-	}
+    public void setOpenedChestPos(BlockPos blockPos) {
+        this.openedChestPos = blockPos;
+    }
 
-	public void clearOpenedChestPos() {
-		this.openedChestPos = null;
-	}
+    public void clearOpenedChestPos() {
+        this.openedChestPos = null;
+    }
 
-	public AnimationState getIdleAnimationState() {
-		return this.idleAnimationState;
-	}
+    public AnimationState getIdleAnimationState() {
+        return this.idleAnimationState;
+    }
 
-	public AnimationState getInteractionGetItemAnimationState() {
-		return this.interactionGetItemAnimationState;
-	}
+    public AnimationState getInteractionGetItemAnimationState() {
+        return this.interactionGetItemAnimationState;
+    }
 
-	public AnimationState getInteractionGetNoItemAnimationState() {
-		return this.interactionGetNoItemAnimationState;
-	}
+    public AnimationState getInteractionGetNoItemAnimationState() {
+        return this.interactionGetNoItemAnimationState;
+    }
 
-	public AnimationState getInteractionDropItemAnimationState() {
-		return this.interactionDropItemAnimationState;
-	}
+    public AnimationState getInteractionDropItemAnimationState() {
+        return this.interactionDropItemAnimationState;
+    }
 
-	public AnimationState getInteractionDropNoItemAnimationState() {
-		return this.interactionDropNoItemAnimationState;
-	}
+    public AnimationState getInteractionDropNoItemAnimationState() {
+        return this.interactionDropNoItemAnimationState;
+    }
 
-	@Override
-	protected Brain.Provider<CopperGolem> brainProvider() {
-		return CopperGolemAi.brainProvider();
-	}
+    @Override
+    protected Brain.Provider<CopperGolem> brainProvider() {
+        return CopperGolemAi.brainProvider();
+    }
 
-	@Override
-	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return CopperGolemAi.makeBrain(this.brainProvider().makeBrain(dynamic));
-	}
+    @Override
+    protected Brain<?> makeBrain(Dynamic<?> dynamic) {
+        return CopperGolemAi.makeBrain(this.brainProvider().makeBrain(dynamic));
+    }
 
-	@Override
-	public Brain<CopperGolem> getBrain() {
-		return (Brain<CopperGolem>)super.getBrain();
-	}
+    @Override
+    public Brain<CopperGolem> getBrain() {
+        return (Brain<CopperGolem>)super.getBrain();
+    }
 
-	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_WEATHER_STATE, WeatheringCopper.WeatherState.UNAFFECTED);
-		this.entityData.define(COPPER_GOLEM_STATE, CopperGolemState.IDLE);
-	}
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_WEATHER_STATE, WeatheringCopper.WeatherState.UNAFFECTED);
+        this.entityData.define(COPPER_GOLEM_STATE, CopperGolemState.IDLE);
+    }
 
-	@Override
-	public void addAdditionalSaveData(CompoundTag compoundTag) {
-		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putLong("next_weather_age", this.nextWeatheringTick);
-		compoundTag.putString("weather_state", this.getWeatherState().getSerializedName());
-	}
+    @Override
+    public void addAdditionalSaveData(CompoundTag compoundTag) {
+        super.addAdditionalSaveData(compoundTag);
+        compoundTag.putLong("next_weather_age", this.nextWeatheringTick);
+        compoundTag.putString("weather_state", this.getWeatherState().getSerializedName());
+    }
 
-	@Override
-	public void readAdditionalSaveData(CompoundTag compoundTag) {
-		super.readAdditionalSaveData(compoundTag);
-		this.nextWeatheringTick = compoundTag.getLong("next_weather_age");
-		if (compoundTag.contains("weather_state", 8)) {
-			String weatherStateName = compoundTag.getString("weather_state");
-			for (WeatheringCopper.WeatherState state : WeatheringCopper.WeatherState.values()) {
-				if (state.getSerializedName().equals(weatherStateName)) {
-					this.setWeatherState(state);
-					return;
-				}
-			}
-		}
-		this.setWeatherState(WeatheringCopper.WeatherState.UNAFFECTED);
-	}
+    @Override
+    public void readAdditionalSaveData(CompoundTag compoundTag) {
+        super.readAdditionalSaveData(compoundTag);
+        this.nextWeatheringTick = compoundTag.getLong("next_weather_age");
+        if (compoundTag.contains("weather_state", 8)) {
+            String weatherStateName = compoundTag.getString("weather_state");
+            for (WeatheringCopper.WeatherState state : WeatheringCopper.WeatherState.values()) {
+                if (state.getSerializedName().equals(weatherStateName)) {
+                    this.setWeatherState(state);
+                    return;
+                }
+            }
+        }
+        this.setWeatherState(WeatheringCopper.WeatherState.UNAFFECTED);
+    }
 
-	@Override
-	protected void customServerAiStep() {
-		this.level().getProfiler().push("copperGolemBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("copperGolemActivityUpdate");
-		CopperGolemAi.updateActivity(this);
-		this.level().getProfiler().pop();
-		super.customServerAiStep();
-	}
+    @Override
+    protected void customServerAiStep() {
+        this.level().getProfiler().push("copperGolemBrain");
+        this.getBrain().tick((ServerLevel)this.level(), this);
+        this.level().getProfiler().pop();
+        this.level().getProfiler().push("copperGolemActivityUpdate");
+        CopperGolemAi.updateActivity(this);
+        this.level().getProfiler().pop();
+        super.customServerAiStep();
+    }
 
-	@Override
-	public void tick() {
-		super.tick();
-		if (this.level().isClientSide()) {
-			if (!this.isNoAi()) {
-				this.setupAnimationStates();
-			}
-		} else {
-			this.updateWeathering((ServerLevel)this.level(), this.level().getRandom(), this.level().getGameTime());
-		}
-	}
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.level().isClientSide()) {
+            if (!this.isNoAi()) {
+                this.setupAnimationStates();
+            }
+        } else {
+            this.updateWeathering((ServerLevel)this.level(), this.level().getRandom(), this.level().getGameTime());
+        }
+    }
 
-	@Override
-	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.isEmpty()) {
-			ItemStack itemStack2 = this.getMainHandItem();
-			if (!itemStack2.isEmpty()) {
-				BehaviorUtils.throwItem(this, itemStack2, player.position());
-				this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-				return InteractionResult.SUCCESS;
-			}
-		}
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+        if (itemStack.isEmpty()) {
+            ItemStack itemStack2 = this.getMainHandItem();
+            if (!itemStack2.isEmpty()) {
+                BehaviorUtils.throwItem(this, itemStack2, player.position());
+                this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                return InteractionResult.SUCCESS;
+            }
+        }
 
-		Level level = this.level();
-		if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
-			if (level instanceof ServerLevel serverLevel) {
-				this.shear(SoundSource.PLAYERS);
-				this.gameEvent(GameEvent.SHEAR, player);
-				itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
-			}
+        Level level = this.level();
+        if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
+            if (level instanceof ServerLevel serverLevel) {
+                this.shear(SoundSource.PLAYERS);
+                this.gameEvent(GameEvent.SHEAR, player);
+                itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+            }
 
-			return InteractionResult.SUCCESS;
-		} else if (level.isClientSide()) {
-			return InteractionResult.PASS;
-		} else if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L) {
-			level.levelEvent(player, 3003, this.blockPosition(), 0);
-			this.nextWeatheringTick = -2L;
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
-			return InteractionResult.SUCCESS;
-		} else if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L) {
-			level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
-			level.levelEvent(player, 3004, this.blockPosition(), 0);
-			this.nextWeatheringTick = -1L;
-			itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
-			return InteractionResult.SUCCESS;
-		} else {
-			if (itemStack.is(ItemTags.AXES)) {
-				WeatheringCopper.WeatherState weatherState = this.getWeatherState();
-				if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
-					level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
-					level.levelEvent(player, 3005, this.blockPosition(), 0);
-					this.nextWeatheringTick = -1L;
-					this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
-					itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
-					return InteractionResult.SUCCESS;
-				}
-			}
+            return InteractionResult.SUCCESS;
+        } else if (level.isClientSide()) {
+            return InteractionResult.PASS;
+        } else if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L) {
+            level.levelEvent(player, 3003, this.blockPosition(), 0);
+            this.nextWeatheringTick = -2L;
+            if (!player.getAbilities().instabuild) {
+                itemStack.shrink(1);
+            }
+            return InteractionResult.SUCCESS;
+        } else if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L) {
+            level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
+            level.levelEvent(player, 3004, this.blockPosition(), 0);
+            this.nextWeatheringTick = -1L;
+            itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+            return InteractionResult.SUCCESS;
+        } else {
+            if (itemStack.is(ItemTags.AXES)) {
+                WeatheringCopper.WeatherState weatherState = this.getWeatherState();
+                if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
+                    level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
+                    level.levelEvent(player, 3005, this.blockPosition(), 0);
+                    this.nextWeatheringTick = -1L;
+                    this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
+                    itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+                    return InteractionResult.SUCCESS;
+                }
+            }
 
-			return super.mobInteract(player, interactionHand);
-		}
-	}
+            return super.mobInteract(player, interactionHand);
+        }
+    }
 
-	private void updateWeathering(ServerLevel serverLevel, RandomSource randomSource, long l) {
-		if (this.nextWeatheringTick != -2L) {
-			if (this.nextWeatheringTick == -1L) {
-				this.nextWeatheringTick = l + randomSource.nextIntBetweenInclusive(504000, 552000);
-			} else {
-				WeatheringCopper.WeatherState weatherState = this.entityData.get(DATA_WEATHER_STATE);
-				boolean bl = weatherState.equals(WeatheringCopper.WeatherState.OXIDIZED);
-				if (l >= this.nextWeatheringTick && !bl) {
-					WeatheringCopper.WeatherState weatherState2 = weatherState.next();
-					boolean bl2 = weatherState2.equals(WeatheringCopper.WeatherState.OXIDIZED);
-					this.setWeatherState(weatherState2);
-					this.nextWeatheringTick = bl2 ? 0L : this.nextWeatheringTick + randomSource.nextIntBetweenInclusive(504000, 552000);
-				}
+    private void updateWeathering(ServerLevel serverLevel, RandomSource randomSource, long l) {
+        if (this.nextWeatheringTick != -2L) {
+            if (this.nextWeatheringTick == -1L) {
+                this.nextWeatheringTick = l + randomSource.nextIntBetweenInclusive(504000, 552000);
+            } else {
+                WeatheringCopper.WeatherState weatherState = this.entityData.get(DATA_WEATHER_STATE);
+                boolean bl = weatherState.equals(WeatheringCopper.WeatherState.OXIDIZED);
+                if (l >= this.nextWeatheringTick && !bl) {
+                    WeatheringCopper.WeatherState weatherState2 = weatherState.next();
+                    boolean bl2 = weatherState2.equals(WeatheringCopper.WeatherState.OXIDIZED);
+                    this.setWeatherState(weatherState2);
+                    this.nextWeatheringTick = bl2 ? 0L : this.nextWeatheringTick + randomSource.nextIntBetweenInclusive(504000, 552000);
+                }
 
-				if (bl && this.canTurnToStatue(serverLevel)) {
-					this.turnToStatue(serverLevel);
-				}
-			}
-		}
-	}
+                if (bl && this.canTurnToStatue(serverLevel)) {
+                    this.turnToStatue(serverLevel);
+                }
+            }
+        }
+    }
 
-	private boolean canTurnToStatue(Level level) {
-		return level.getBlockState(this.blockPosition()).is(Blocks.AIR) && level.random.nextFloat() <= 0.0058F;
-	}
+    private boolean canTurnToStatue(Level level) {
+        return level.getBlockState(this.blockPosition()).is(Blocks.AIR) && level.random.nextFloat() <= 0.0058F;
+    }
 
-	private void turnToStatue(ServerLevel serverLevel) {
-		BlockPos blockPos = this.blockPosition();
-		serverLevel.setBlock(
-			blockPos,
-			org.xiyu.yee.copper_friend_backport.registry.ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE
-				.defaultBlockState()
-				.setValue(CopperGolemStatueBlock.POSE, CopperGolemStatueBlock.Pose.values()[this.random.nextInt(0, CopperGolemStatueBlock.Pose.values().length)])
-				.setValue(CopperGolemStatueBlock.FACING, Direction.fromYRot(this.getYRot())),
-			3
-		);
-		if (serverLevel.getBlockEntity(blockPos) instanceof CopperGolemStatueBlockEntity copperGolemStatueBlockEntity) {
-			copperGolemStatueBlockEntity.createStatue(this);
-			this.dropPreservedEquipment(serverLevel, (itemStack) -> true);
-			this.discard();
-			this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_BECOME_STATUE);
-			if (this.isLeashed()) {
-				if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-					this.dropLeash(true, true);
-				} else {
-					this.dropLeash(false, false);
-				}
-			}
-		}
-	}
+    private void turnToStatue(ServerLevel serverLevel) {
+        BlockPos blockPos = this.blockPosition();
+        serverLevel.setBlock(
+                blockPos,
+                org.xiyu.yee.copper_friend_backport.registry.ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE
+                        .defaultBlockState()
+                        .setValue(CopperGolemStatueBlock.POSE, CopperGolemStatueBlock.Pose.values()[this.random.nextInt(0, CopperGolemStatueBlock.Pose.values().length)])
+                        .setValue(CopperGolemStatueBlock.FACING, Direction.fromYRot(this.getYRot())),
+                3
+        );
+        if (serverLevel.getBlockEntity(blockPos) instanceof CopperGolemStatueBlockEntity copperGolemStatueBlockEntity) {
+            copperGolemStatueBlockEntity.createStatue(this);
+            this.dropPreservedEquipment(serverLevel, (itemStack) -> true);
+            this.discard();
+            this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_BECOME_STATUE);
+            if (this.isLeashed()) {
+                if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                    this.dropLeash(true, true);
+                } else {
+                    this.dropLeash(false, false);
+                }
+            }
+        }
+    }
 
-	private void setupAnimationStates() {
-		switch (this.getState()) {
-			case IDLE:
-				this.interactionGetNoItemAnimationState.stop();
-				this.interactionGetItemAnimationState.stop();
-				this.interactionDropItemAnimationState.stop();
-				this.interactionDropNoItemAnimationState.stop();
-				if (this.idleAnimationStartTick == this.tickCount) {
-					this.idleAnimationState.start(this.tickCount);
-				} else if (this.idleAnimationStartTick == 0) {
-					this.idleAnimationStartTick = this.tickCount + this.random.nextInt(200, 240);
-				}
+    private void setupAnimationStates() {
+        switch (this.getState()) {
+            case IDLE:
+                this.interactionGetNoItemAnimationState.stop();
+                this.interactionGetItemAnimationState.stop();
+                this.interactionDropItemAnimationState.stop();
+                this.interactionDropNoItemAnimationState.stop();
+                if (this.idleAnimationStartTick == this.tickCount) {
+                    this.idleAnimationState.start(this.tickCount);
+                } else if (this.idleAnimationStartTick == 0) {
+                    this.idleAnimationStartTick = this.tickCount + this.random.nextInt(200, 240);
+                }
 
-				if (this.tickCount == this.idleAnimationStartTick + 10.0F) {
-					this.playHeadSpinSound();
-					this.idleAnimationStartTick = 0;
-				}
-				break;
-			case GETTING_ITEM:
-				this.idleAnimationState.stop();
-				this.idleAnimationStartTick = 0;
-				this.interactionGetNoItemAnimationState.stop();
-				this.interactionDropItemAnimationState.stop();
-				this.interactionDropNoItemAnimationState.stop();
-				this.interactionGetItemAnimationState.startIfStopped(this.tickCount);
-				break;
-			case GETTING_NO_ITEM:
-				this.idleAnimationState.stop();
-				this.idleAnimationStartTick = 0;
-				this.interactionGetItemAnimationState.stop();
-				this.interactionDropNoItemAnimationState.stop();
-				this.interactionDropItemAnimationState.stop();
-				this.interactionGetNoItemAnimationState.startIfStopped(this.tickCount);
-				break;
-			case DROPPING_ITEM:
-				this.idleAnimationState.stop();
-				this.idleAnimationStartTick = 0;
-				this.interactionGetItemAnimationState.stop();
-				this.interactionGetNoItemAnimationState.stop();
-				this.interactionDropNoItemAnimationState.stop();
-				this.interactionDropItemAnimationState.startIfStopped(this.tickCount);
-				break;
-			case DROPPING_NO_ITEM:
-				this.idleAnimationState.stop();
-				this.idleAnimationStartTick = 0;
-				this.interactionGetItemAnimationState.stop();
-				this.interactionGetNoItemAnimationState.stop();
-				this.interactionDropItemAnimationState.stop();
-				this.interactionDropNoItemAnimationState.startIfStopped(this.tickCount);
-		}
-	}
+                if (this.tickCount == this.idleAnimationStartTick + 10.0F) {
+                    this.playHeadSpinSound();
+                    this.idleAnimationStartTick = 0;
+                }
+                break;
+            case GETTING_ITEM:
+                this.idleAnimationState.stop();
+                this.idleAnimationStartTick = 0;
+                this.interactionGetNoItemAnimationState.stop();
+                this.interactionDropItemAnimationState.stop();
+                this.interactionDropNoItemAnimationState.stop();
+                this.interactionGetItemAnimationState.startIfStopped(this.tickCount);
+                break;
+            case GETTING_NO_ITEM:
+                this.idleAnimationState.stop();
+                this.idleAnimationStartTick = 0;
+                this.interactionGetItemAnimationState.stop();
+                this.interactionDropNoItemAnimationState.stop();
+                this.interactionDropItemAnimationState.stop();
+                this.interactionGetNoItemAnimationState.startIfStopped(this.tickCount);
+                break;
+            case DROPPING_ITEM:
+                this.idleAnimationState.stop();
+                this.idleAnimationStartTick = 0;
+                this.interactionGetItemAnimationState.stop();
+                this.interactionGetNoItemAnimationState.stop();
+                this.interactionDropNoItemAnimationState.stop();
+                this.interactionDropItemAnimationState.startIfStopped(this.tickCount);
+                break;
+            case DROPPING_NO_ITEM:
+                this.idleAnimationState.stop();
+                this.idleAnimationStartTick = 0;
+                this.interactionGetItemAnimationState.stop();
+                this.interactionGetNoItemAnimationState.stop();
+                this.interactionDropItemAnimationState.stop();
+                this.interactionDropNoItemAnimationState.startIfStopped(this.tickCount);
+        }
+    }
 
-	public void spawn(WeatheringCopper.WeatherState weatherState) {
-		this.setWeatherState(weatherState);
-		this.playSpawnSound();
-	}
+    public void spawn(WeatheringCopper.WeatherState weatherState) {
+        this.setWeatherState(weatherState);
+        this.playSpawnSound();
+    }
 
-	@Nullable
-	@Override
-	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, net.minecraft.world.entity.MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable net.minecraft.nbt.CompoundTag compoundTag
-	) {
-		this.playSpawnSound();
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-	}
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(
+            ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, net.minecraft.world.entity.MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable net.minecraft.nbt.CompoundTag compoundTag
+    ) {
+        this.playSpawnSound();
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+    }
 
-	public void playSpawnSound() {
-		this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SPAWN);
-	}
+    public void playSpawnSound() {
+        this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SPAWN);
+    }
 
-	private void playHeadSpinSound() {
-		if (!this.isSilent()) {
-			this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSpinHeadSound(), this.getSoundSource(), 1.0F, 1.0F, false);
-		}
-	}
+    private void playHeadSpinSound() {
+        if (!this.isSilent()) {
+            this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSpinHeadSound(), this.getSoundSource(), 1.0F, 1.0F, false);
+        }
+    }
 
-	@Override
-	protected SoundEvent getHurtSound(DamageSource damageSource) {
-		return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).hurtSound();
-	}
+    @Override
+    protected SoundEvent getHurtSound(DamageSource damageSource) {
+        return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).hurtSound();
+    }
 
-	@Override
-	protected SoundEvent getDeathSound() {
-		return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).deathSound();
-	}
+    @Override
+    protected SoundEvent getDeathSound() {
+        return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).deathSound();
+    }
 
-	@Override
-	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
-		this.playSound(CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).stepSound(), 1.0F, 1.0F);
-	}
+    @Override
+    protected void playStepSound(BlockPos blockPos, BlockState blockState) {
+        this.playSound(CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).stepSound(), 1.0F, 1.0F);
+    }
 
-	private SoundEvent getSpinHeadSound() {
-		return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).spinHeadSound();
-	}
+    private SoundEvent getSpinHeadSound() {
+        return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).spinHeadSound();
+    }
 
-	@Override
-	public Vec3 getLeashOffset() {
-		return new Vec3(0.0, 0.75F * this.getEyeHeight(), 0.0);
-	}
+    @Override
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.75F * this.getEyeHeight(), 0.0);
+    }
 
-	// ContainerUser interface method - not available in 1.20.1
-	public boolean hasContainerOpen(ContainerOpenersCounter containerOpenersCounter, BlockPos blockPos) {
-		if (this.openedChestPos == null) {
-			return false;
-		} else {
-			BlockState blockState = this.level().getBlockState(this.openedChestPos);
-			return this.openedChestPos.equals(blockPos)
-				|| blockState.getBlock() instanceof ChestBlock
-					&& blockState.getValue(ChestBlock.TYPE) != ChestType.SINGLE
-					&& getConnectedBlockPos(this.openedChestPos, blockState).equals(blockPos);
-		}
-	}
+    // ContainerUser interface method - not available in 1.20.1
+    public boolean hasContainerOpen(ContainerOpenersCounter containerOpenersCounter, BlockPos blockPos) {
+        if (this.openedChestPos == null) {
+            return false;
+        } else {
+            BlockState blockState = this.level().getBlockState(this.openedChestPos);
+            return this.openedChestPos.equals(blockPos)
+                    || blockState.getBlock() instanceof ChestBlock
+                    && blockState.getValue(ChestBlock.TYPE) != ChestType.SINGLE
+                    && getConnectedBlockPos(this.openedChestPos, blockState).equals(blockPos);
+        }
+    }
     public static BlockPos getConnectedBlockPos(BlockPos blockPos, BlockState blockState) {
         Direction direction = ChestBlock.getConnectedDirection(blockState);
         return blockPos.relative(direction);
     }
 
-	// ContainerUser interface method - not available in 1.20.1
-	public double getContainerInteractionRange() {
-		return 3.0;
-	}
-
-	@Override
-	public void shear(SoundSource soundSource) {
-		if (this.level() instanceof ServerLevel serverLevel) {
-			serverLevel.playSound(null, this, org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
-			ItemStack itemStack2 = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
-			this.setItemSlot(EQUIPMENT_SLOT_ANTENNA, ItemStack.EMPTY);
-			this.spawnAtLocation(itemStack2, 1.5F);
-		}
-	}
+    // ContainerUser interface method - not available in 1.20.1
+    public double getContainerInteractionRange() {
+        return 3.0;
+    }
 
     @Override
-	public boolean readyForShearing() {
-		return this.isAlive() && this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA).is(Items.POPPY);
-	}
+    public void shear(SoundSource soundSource) {
+        if (this.level() instanceof ServerLevel serverLevel) {
+            serverLevel.playSound(null, this, org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
+            ItemStack itemStack2 = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
+            this.setItemSlot(EQUIPMENT_SLOT_ANTENNA, ItemStack.EMPTY);
+            this.spawnAtLocation(itemStack2, 1.5F);
+        }
+    }
 
-	@Override
-	protected void dropEquipment() {
-		super.dropEquipment();
-		if (this.level() instanceof ServerLevel serverLevel) {
-			this.dropPreservedEquipment(serverLevel, i -> true);
-		}
-	}
+    @Override
+    public boolean readyForShearing() {
+        return this.isAlive() && this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA).is(Items.POPPY);
+    }
 
-	public Set<EquipmentSlot> dropPreservedEquipment(ServerLevel serverLevel, Predicate<ItemStack> predicate) {
-		Set<EquipmentSlot> set = new HashSet<>();
+    @Override
+    protected void dropEquipment() {
+        super.dropEquipment();
+        if (this.level() instanceof ServerLevel serverLevel) {
+            this.dropPreservedEquipment(serverLevel, i -> true);
+        }
+    }
 
-		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-			ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-			if (!itemStack.isEmpty()) {
-				if (!predicate.test(itemStack)) {
-					set.add(equipmentSlot);
-				} else {
-					// In 1.20.1, we check drop chance directly
-					if (this.getEquipmentDropChance(equipmentSlot) > 1.0F) {
-						this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
-						this.spawnAtLocation(itemStack);
-					}
-				}
-			}
-		}
+    public Set<EquipmentSlot> dropPreservedEquipment(ServerLevel serverLevel, Predicate<ItemStack> predicate) {
+        Set<EquipmentSlot> set = new HashSet<>();
 
-		return set;
-	}
+        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+            ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+            if (!itemStack.isEmpty()) {
+                if (!predicate.test(itemStack)) {
+                    set.add(equipmentSlot);
+                } else {
+                    // In 1.20.1, we check drop chance directly
+                    if (this.getEquipmentDropChance(equipmentSlot) > 1.0F) {
+                        this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
+                        this.spawnAtLocation(itemStack);
+                    }
+                }
+            }
+        }
 
-	@Override
-	protected void actuallyHurt(DamageSource damageSource, float f) {
-		super.actuallyHurt(damageSource, f);
-		this.setState(CopperGolemState.IDLE);
-	}
+        return set;
+    }
 
-	@Override
-	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
-		super.thunderHit(serverLevel, lightningBolt);
-		UUID uUID = lightningBolt.getUUID();
-		if (!uUID.equals(this.lastLightningBoltUUID)) {
-			this.lastLightningBoltUUID = uUID;
-			WeatheringCopper.WeatherState weatherState = this.getWeatherState();
-			if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
-				this.nextWeatheringTick = -1L;
-				this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
-			}
-		}
-	}
+    @Override
+    protected void actuallyHurt(DamageSource damageSource, float f) {
+        super.actuallyHurt(damageSource, f);
+        this.setState(CopperGolemState.IDLE);
+    }
+
+    @Override
+    public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
+        super.thunderHit(serverLevel, lightningBolt);
+        UUID uUID = lightningBolt.getUUID();
+        if (!uUID.equals(this.lastLightningBoltUUID)) {
+            this.lastLightningBoltUUID = uUID;
+            WeatheringCopper.WeatherState weatherState = this.getWeatherState();
+            if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
+                this.nextWeatheringTick = -1L;
+                this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
+            }
+        }
+    }
 }
