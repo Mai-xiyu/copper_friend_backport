@@ -67,16 +67,14 @@ public class CopperGolemAi {
 		MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.WALK_TARGET,
 		MemoryModuleType.LOOK_TARGET,
-		MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
-		MemoryModuleType.PATH,
-		MemoryModuleType.GAZE_COOLDOWN_TICKS,
-		TRANSPORT_ITEMS_COOLDOWN_TICKS,
-		VISITED_BLOCK_POSITIONS,
-		UNREACHABLE_TRANSPORT_BLOCK_POSITIONS,
-		MemoryModuleType.DOORS_TO_CLOSE
-	);
-
-	public static Brain.Provider<CopperGolem> brainProvider() {
+	MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
+	MemoryModuleType.PATH,
+	MemoryModuleType.GAZE_COOLDOWN_TICKS,
+	ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(),
+	ModMemoryModules.VISITED_BLOCK_POSITIONS.get(),
+	ModMemoryModules.UNREACHABLE_TRANSPORT_BLOCK_POSITIONS.get(),
+	MemoryModuleType.DOORS_TO_CLOSE
+);	public static Brain.Provider<CopperGolem> brainProvider() {
 		return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
 	}
 
@@ -103,7 +101,7 @@ public class CopperGolemAi {
 				new MoveToTargetSink(),
 				InteractWithDoor.create(),
 				new CountDownCooldownTicks(MemoryModuleType.GAZE_COOLDOWN_TICKS),
-				new CountDownCooldownTicks(TRANSPORT_ITEMS_COOLDOWN_TICKS)
+				new CountDownCooldownTicks(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get())
 			)
 		);
 	}
@@ -122,7 +120,7 @@ public class CopperGolemAi {
 				Pair.of(
 					2,
 					new RunOne<>(
-						ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, TRANSPORT_ITEMS_COOLDOWN_TICKS, MemoryStatus.VALUE_PRESENT),
+						ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), MemoryStatus.VALUE_PRESENT),
 						ImmutableList.of(Pair.of(RandomStroll.stroll(1.0F, 2, 2), 1), Pair.of(new DoNothing(30, 60), 1))
 					)
 				)

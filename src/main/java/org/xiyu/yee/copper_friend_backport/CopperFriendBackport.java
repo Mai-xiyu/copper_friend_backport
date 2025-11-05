@@ -9,6 +9,7 @@ import org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers;
 import org.xiyu.yee.copper_friend_backport.registry.ModCreativeTabs;
 import org.xiyu.yee.copper_friend_backport.registry.ModEntity;
 import org.xiyu.yee.copper_friend_backport.registry.ModItems;
+import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
 
 
 @Mod(CopperFriendBackport.MOD_ID)
@@ -20,6 +21,9 @@ public class CopperFriendBackport {
         
         // Initialize entity data serializers (force static initialization)
         EntityDataSerializers.class.getName();
+        
+        // Register memory modules
+        ModMemoryModules.MEMORY_MODULE_TYPES.register(modEventBus);
         
         // Register entities
         ModEntity.ENTITIES.register(modEventBus);

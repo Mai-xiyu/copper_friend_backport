@@ -45,7 +45,7 @@ public class TransportItemsBetweenContainers extends Behavior<PathfinderMob> {
     ) {
         super(ImmutableMap.of(
                 MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT,
-                CopperGolemAi.TRANSPORT_ITEMS_COOLDOWN_TICKS, MemoryStatus.VALUE_ABSENT
+                org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), MemoryStatus.VALUE_ABSENT
         ));
         this.speedModifier = speedModifier;
         this.sourceBlockPredicate = sourceBlockPredicate;
