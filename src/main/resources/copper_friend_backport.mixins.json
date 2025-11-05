@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "copper_friend_backport.refmap.json",
   "mixins": [
+    "OfferFlowerGoalMixin"
   ],
   "client": [
   ],

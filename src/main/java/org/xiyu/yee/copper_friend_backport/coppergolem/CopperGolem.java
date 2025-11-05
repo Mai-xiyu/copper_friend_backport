@@ -88,8 +88,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
 	public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
 		super(entityType, level);
-		// setRequiredPathLength doesn't exist in 1.20.1
-		// this.getNavigation().setRequiredPathLength(48.0F);
 		this.getNavigation().setCanFloat(true);
 		this.setPersistenceRequired();
 		this.setState(CopperGolemState.IDLE);
