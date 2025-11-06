@@ -21,50 +21,50 @@ public class ModBlocks {
     public static final Block COPPER_CHEST = register(
             "copper_chest",
             properties -> new WeatheringCopperChestBlock(
-                    WeatheringCopper.WeatherState.UNAFFECTED, ModSoundEvents.COPPER_CHEST_OPEN, ModSoundEvents.COPPER_CHEST_CLOSE, properties
+                    WeatheringCopper.WeatherState.UNAFFECTED, ModSoundEvents.COPPER_CHEST_OPEN.get(), ModSoundEvents.COPPER_CHEST_CLOSE.get(), properties
             ),
             BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE).strength(3.0F, 6.0F).sound(SoundType.COPPER).requiresCorrectToolForDrops()
     );
     public static final Block EXPOSED_COPPER_CHEST = register(
             "exposed_copper_chest",
-            properties -> new WeatheringCopperChestBlock(WeatheringCopper.WeatherState.EXPOSED, ModSoundEvents.COPPER_CHEST_OPEN, ModSoundEvents.COPPER_CHEST_CLOSE, properties),
+            properties -> new WeatheringCopperChestBlock(WeatheringCopper.WeatherState.EXPOSED, ModSoundEvents.COPPER_CHEST_OPEN.get(), ModSoundEvents.COPPER_CHEST_CLOSE.get(), properties),
             BlockBehaviour.Properties.copy(COPPER_CHEST).mapColor(MapColor.TERRACOTTA_LIGHT_GRAY)
     );
     public static final Block WEATHERED_COPPER_CHEST = register(
             "weathered_copper_chest",
             properties -> new WeatheringCopperChestBlock(
-                    WeatheringCopper.WeatherState.WEATHERED, ModSoundEvents.COPPER_CHEST_WEATHERED_OPEN, ModSoundEvents.COPPER_CHEST_WEATHERED_CLOSE, properties
+                    WeatheringCopper.WeatherState.WEATHERED, ModSoundEvents.COPPER_CHEST_WEATHERED_OPEN.get(), ModSoundEvents.COPPER_CHEST_WEATHERED_CLOSE.get(), properties
             ),
             BlockBehaviour.Properties.copy(COPPER_CHEST).mapColor(MapColor.WARPED_STEM)
     );
     public static final Block OXIDIZED_COPPER_CHEST = register(
             "oxidized_copper_chest",
             properties -> new WeatheringCopperChestBlock(
-                    WeatheringCopper.WeatherState.OXIDIZED, ModSoundEvents.COPPER_CHEST_OXIDIZED_OPEN, ModSoundEvents.COPPER_CHEST_OXIDIZED_CLOSE, properties
+                    WeatheringCopper.WeatherState.OXIDIZED, ModSoundEvents.COPPER_CHEST_OXIDIZED_OPEN.get(), ModSoundEvents.COPPER_CHEST_OXIDIZED_CLOSE.get(), properties
             ),
             BlockBehaviour.Properties.copy(COPPER_CHEST).mapColor(MapColor.WARPED_NYLIUM)
     );
     public static final Block WAXED_COPPER_CHEST = register(
             "waxed_copper_chest",
-            properties -> new CopperChestBlock(WeatheringCopper.WeatherState.UNAFFECTED, ModSoundEvents.COPPER_CHEST_OPEN, ModSoundEvents.COPPER_CHEST_CLOSE, properties),
+            properties -> new CopperChestBlock(WeatheringCopper.WeatherState.UNAFFECTED, ModSoundEvents.COPPER_CHEST_OPEN.get(), ModSoundEvents.COPPER_CHEST_CLOSE.get(), properties),
             BlockBehaviour.Properties.copy(COPPER_CHEST)
     );
     public static final Block WAXED_EXPOSED_COPPER_CHEST = register(
             "waxed_exposed_copper_chest",
-            properties -> new CopperChestBlock(WeatheringCopper.WeatherState.EXPOSED, ModSoundEvents.COPPER_CHEST_OPEN, ModSoundEvents.COPPER_CHEST_CLOSE, properties),
+            properties -> new CopperChestBlock(WeatheringCopper.WeatherState.EXPOSED, ModSoundEvents.COPPER_CHEST_OPEN.get(), ModSoundEvents.COPPER_CHEST_CLOSE.get(), properties),
             BlockBehaviour.Properties.copy(EXPOSED_COPPER_CHEST)
     );
     public static final Block WAXED_WEATHERED_COPPER_CHEST = register(
             "waxed_weathered_copper_chest",
             properties -> new CopperChestBlock(
-                    WeatheringCopper.WeatherState.WEATHERED, ModSoundEvents.COPPER_CHEST_WEATHERED_OPEN, ModSoundEvents.COPPER_CHEST_WEATHERED_CLOSE, properties
+                    WeatheringCopper.WeatherState.WEATHERED, ModSoundEvents.COPPER_CHEST_WEATHERED_OPEN.get(), ModSoundEvents.COPPER_CHEST_WEATHERED_CLOSE.get(), properties
             ),
             BlockBehaviour.Properties.copy(WEATHERED_COPPER_CHEST)
     );
     public static final Block WAXED_OXIDIZED_COPPER_CHEST = register(
             "waxed_oxidized_copper_chest",
             properties -> new CopperChestBlock(
-                    WeatheringCopper.WeatherState.OXIDIZED, ModSoundEvents.COPPER_CHEST_OXIDIZED_OPEN, ModSoundEvents.COPPER_CHEST_OXIDIZED_CLOSE, properties
+                    WeatheringCopper.WeatherState.OXIDIZED, ModSoundEvents.COPPER_CHEST_OXIDIZED_OPEN.get(), ModSoundEvents.COPPER_CHEST_OXIDIZED_CLOSE.get(), properties
             ),
             BlockBehaviour.Properties.copy(OXIDIZED_COPPER_CHEST)
     );

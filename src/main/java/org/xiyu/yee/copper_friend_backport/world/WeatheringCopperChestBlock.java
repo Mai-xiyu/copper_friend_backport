@@ -21,8 +21,8 @@ public class WeatheringCopperChestBlock extends CopperChestBlock implements Weat
 	public static final MapCodec<WeatheringCopperChestBlock> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 				WeatheringCopper.WeatherState.CODEC.fieldOf("weathering_state").forGetter(CopperChestBlock::getState),
-                        BuiltInRegistries.SOUND_EVENT.byNameCodec().fieldOf("open_sound").forGetter( chestBlock -> ModSoundEvents.COPPER_CHEST_OPEN),
-                        BuiltInRegistries.SOUND_EVENT.byNameCodec().fieldOf("close_sound").forGetter(chestBlock -> ModSoundEvents.COPPER_CHEST_CLOSE),
+                        BuiltInRegistries.SOUND_EVENT.byNameCodec().fieldOf("open_sound").forGetter( chestBlock -> ModSoundEvents.COPPER_CHEST_OPEN.get()),
+                        BuiltInRegistries.SOUND_EVENT.byNameCodec().fieldOf("close_sound").forGetter(chestBlock -> ModSoundEvents.COPPER_CHEST_CLOSE.get()),
 				propertiesCodec()
 			)
 			.apply(instance, WeatheringCopperChestBlock::new)

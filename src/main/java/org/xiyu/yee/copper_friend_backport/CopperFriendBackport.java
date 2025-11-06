@@ -10,6 +10,7 @@ import org.xiyu.yee.copper_friend_backport.registry.ModCreativeTabs;
 import org.xiyu.yee.copper_friend_backport.registry.ModEntity;
 import org.xiyu.yee.copper_friend_backport.registry.ModItems;
 import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
+import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 
 
 @Mod(CopperFriendBackport.MOD_ID)
@@ -18,9 +19,8 @@ public class CopperFriendBackport {
     public static final Logger LOGGER = LogUtils.getLogger();
     public CopperFriendBackport(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
-        
-        // Initialize entity data serializers (force static initialization)
-        EntityDataSerializers.class.getName();
+
+        EntityDataSerializers.init();
         
         // Register memory modules
         ModMemoryModules.MEMORY_MODULE_TYPES.register(modEventBus);
@@ -33,5 +33,8 @@ public class CopperFriendBackport {
         
         // Register creative tabs
         ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
+        
+        // Register sound events
+        ModSoundEvents.SOUND_EVENTS.register(modEventBus);
     }
 }

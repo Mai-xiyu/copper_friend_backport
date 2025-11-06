@@ -3,25 +3,34 @@ package org.xiyu.yee.copper_friend_backport.registry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.DataPackRegistryEvent;
+import org.xiyu.yee.copper_friend_backport.CopperFriendBackport;
 import org.xiyu.yee.copper_friend_backport.StreamCodec;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemState;
 
 
+@Mod.EventBusSubscriber(modid = CopperFriendBackport.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class EntityDataSerializers {
+//实体的序列化nbt---------------
+    public static final EntityDataSerializer<WeatheringCopper.WeatherState> WEATHERING_COPPER_STATE;
+    public static final EntityDataSerializer<CopperGolemState> COPPER_GOLEM_STATE;
 
-    // 在1.20.1中，直接创建序列化器实例，不需要注册
-    public static final EntityDataSerializer<WeatheringCopper.WeatherState> WEATHERING_COPPER_STATE = 
-            forValueType(WeatheringCopper.WeatherState.STREAM_CODEC);
+    static {
+        WEATHERING_COPPER_STATE = forValueType(WeatheringCopper.WeatherState.STREAM_CODEC);
+        COPPER_GOLEM_STATE = forValueType(CopperGolemState.STREAM_CODEC);
 
-    public static final EntityDataSerializer<CopperGolemState> COPPER_GOLEM_STATE = 
-            forValueType(CopperGolemState.STREAM_CODEC);
+        net.minecraft.network.syncher.EntityDataSerializers.registerSerializer(WEATHERING_COPPER_STATE);
+        net.minecraft.network.syncher.EntityDataSerializers.registerSerializer(COPPER_GOLEM_STATE);
+    }
 
-    static <T> EntityDataSerializer<T> forValueType(StreamCodec<ByteBuf, T> streamCodec) {
+    private static <T> EntityDataSerializer<T> forValueType(StreamCodec<ByteBuf, T> streamCodec) {
         return new EntityDataSerializer<T>() {
             @Override
             public void write(FriendlyByteBuf pBuffer, T pValue) {
-                streamCodec.encode(pBuffer,pValue);
+                streamCodec.encode(pBuffer, pValue);
             }
 
             @Override
@@ -34,5 +43,9 @@ public class EntityDataSerializers {
                 return pValue;
             }
         };
+    }
+
+    public static void init() {
+        //这是石山
     }
 }

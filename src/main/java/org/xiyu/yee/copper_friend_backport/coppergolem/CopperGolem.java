@@ -80,6 +80,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     private long nextWeatheringTick = -1L;
     private int idleAnimationStartTick = 0;
     private final AnimationState idleAnimationState = new AnimationState();
+    private final AnimationState headSpinAnimationState = new AnimationState();
     private final AnimationState interactionGetItemAnimationState = new AnimationState();
     private final AnimationState interactionGetNoItemAnimationState = new AnimationState();
     private final AnimationState interactionDropItemAnimationState = new AnimationState();
@@ -97,7 +98,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
-        this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -132,6 +132,10 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
     public AnimationState getIdleAnimationState() {
         return this.idleAnimationState;
+    }
+
+    public AnimationState getHeadSpinAnimationState() {
+        return this.headSpinAnimationState;
     }
 
     public AnimationState getInteractionGetItemAnimationState() {
@@ -310,7 +314,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             copperGolemStatueBlockEntity.createStatue(this);
             this.dropPreservedEquipment(serverLevel, (itemStack) -> true);
             this.discard();
-            this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_BECOME_STATUE);
+            this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_BECOME_STATUE.get());
             if (this.isLeashed()) {
                 if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
                     this.dropLeash(true, true);
@@ -330,6 +334,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.interactionDropNoItemAnimationState.stop();
                 if (this.idleAnimationStartTick == this.tickCount) {
                     this.idleAnimationState.start(this.tickCount);
+                    this.headSpinAnimationState.start(this.tickCount);
                 } else if (this.idleAnimationStartTick == 0) {
                     this.idleAnimationStartTick = this.tickCount + this.random.nextInt(200, 240);
                 }
@@ -384,11 +389,13 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, net.minecraft.world.entity.MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable net.minecraft.nbt.CompoundTag compoundTag
     ) {
         this.playSpawnSound();
+        // Initialize memory after brain is fully set up
+        this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     public void playSpawnSound() {
-        this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SPAWN);
+        this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SPAWN.get());
     }
 
     private void playHeadSpinSound() {
@@ -446,7 +453,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     @Override
     public void shear(SoundSource soundSource) {
         if (this.level() instanceof ServerLevel serverLevel) {
-            serverLevel.playSound(null, this, org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
+            serverLevel.playSound(null, this, org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SHEAR.get(), soundSource, 1.0F, 1.0F);
             ItemStack itemStack2 = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
             this.setItemSlot(EQUIPMENT_SLOT_ANTENNA, ItemStack.EMPTY);
             this.spawnAtLocation(itemStack2, 1.5F);

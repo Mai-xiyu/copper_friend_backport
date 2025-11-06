@@ -131,13 +131,13 @@ public class CopperGolemAi {
 	private static Map<TransportItemsBetweenContainers.ContainerInteractionState, TransportItemsBetweenContainers.OnTargetReachedInteraction> getTargetReachedInteractions() {
 		return Map.of(
 			TransportItemsBetweenContainers.ContainerInteractionState.PICKUP_ITEM,
-			onReachedTargetInteraction(CopperGolemState.GETTING_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_GET),
+			onReachedTargetInteraction(CopperGolemState.GETTING_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_GET.get()),
 			TransportItemsBetweenContainers.ContainerInteractionState.PICKUP_NO_ITEM,
-			onReachedTargetInteraction(CopperGolemState.GETTING_NO_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_NO_GET),
+			onReachedTargetInteraction(CopperGolemState.GETTING_NO_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_NO_GET.get()),
 			TransportItemsBetweenContainers.ContainerInteractionState.PLACE_ITEM,
-			onReachedTargetInteraction(CopperGolemState.DROPPING_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_DROP),
+			onReachedTargetInteraction(CopperGolemState.DROPPING_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_DROP.get()),
 			TransportItemsBetweenContainers.ContainerInteractionState.PLACE_NO_ITEM,
-			onReachedTargetInteraction(CopperGolemState.DROPPING_NO_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_NO_DROP)
+			onReachedTargetInteraction(CopperGolemState.DROPPING_NO_ITEM, ModSoundEvents.COPPER_GOLEM_ITEM_NO_DROP.get())
 		);
 	}
 

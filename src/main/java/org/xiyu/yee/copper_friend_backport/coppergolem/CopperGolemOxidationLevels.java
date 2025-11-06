@@ -7,34 +7,34 @@ import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 
 public class CopperGolemOxidationLevels {
 	private static final CopperGolemOxidationLevel UNAFFECTED = new CopperGolemOxidationLevel(
-		ModSoundEvents.COPPER_GOLEM_SPIN,
-		ModSoundEvents.COPPER_GOLEM_HURT,
-		ModSoundEvents.COPPER_GOLEM_DEATH,
-		ModSoundEvents.COPPER_GOLEM_STEP,
+		ModSoundEvents.COPPER_GOLEM_SPIN.get(),
+		ModSoundEvents.COPPER_GOLEM_HURT.get(),
+		ModSoundEvents.COPPER_GOLEM_DEATH.get(),
+		ModSoundEvents.COPPER_GOLEM_STEP.get(),
 		ResourceLocation.withDefaultNamespace("textures/entity/copper_golem/copper_golem.png"),
 		ResourceLocation.withDefaultNamespace("textures/entity/copper_golem/copper_golem_eyes.png")
 	);
 	private static final CopperGolemOxidationLevel EXPOSED = new CopperGolemOxidationLevel(
-		ModSoundEvents.COPPER_GOLEM_SPIN,
-		ModSoundEvents.COPPER_GOLEM_HURT,
-		ModSoundEvents.COPPER_GOLEM_DEATH,
-		ModSoundEvents.COPPER_GOLEM_STEP,
+		ModSoundEvents.COPPER_GOLEM_SPIN.get(),
+		ModSoundEvents.COPPER_GOLEM_HURT.get(),
+		ModSoundEvents.COPPER_GOLEM_DEATH.get(),
+		ModSoundEvents.COPPER_GOLEM_STEP.get(),
 		ResourceLocation.withDefaultNamespace("textures/entity/copper_golem/exposed_copper_golem.png"),
 		ResourceLocation.withDefaultNamespace("textures/entity/copper_golem/exposed_copper_golem_eyes.png")
 	);
 	private static final CopperGolemOxidationLevel WEATHERED = new CopperGolemOxidationLevel(
-		ModSoundEvents.COPPER_GOLEM_WEATHERED_SPIN,
-		ModSoundEvents.COPPER_GOLEM_WEATHERED_HURT,
-		ModSoundEvents.COPPER_GOLEM_WEATHERED_DEATH,
-		ModSoundEvents.COPPER_GOLEM_WEATHERED_STEP,
+		ModSoundEvents.COPPER_GOLEM_WEATHERED_SPIN.get(),
+		ModSoundEvents.COPPER_GOLEM_WEATHERED_HURT.get(),
+		ModSoundEvents.COPPER_GOLEM_WEATHERED_DEATH.get(),
+		ModSoundEvents.COPPER_GOLEM_WEATHERED_STEP.get(),
 		ResourceLocation.withDefaultNamespace("textures/entity/copper_golem/weathered_copper_golem.png"),
 		ResourceLocation.withDefaultNamespace("textures/entity/copper_golem/weathered_copper_golem_eyes.png")
 	);
 	private static final CopperGolemOxidationLevel OXIDIZED = new CopperGolemOxidationLevel(
-		ModSoundEvents.COPPER_GOLEM_OXIDIZED_SPIN,
-		ModSoundEvents.COPPER_GOLEM_OXIDIZED_HURT,
-		ModSoundEvents.COPPER_GOLEM_OXIDIZED_DEATH,
-		ModSoundEvents.COPPER_GOLEM_OXIDIZED_STEP,
+		ModSoundEvents.COPPER_GOLEM_OXIDIZED_SPIN.get(),
+		ModSoundEvents.COPPER_GOLEM_OXIDIZED_HURT.get(),
+		ModSoundEvents.COPPER_GOLEM_OXIDIZED_DEATH.get(),
+		ModSoundEvents.COPPER_GOLEM_OXIDIZED_STEP.get(),
 		ResourceLocation.withDefaultNamespace("textures/entity/copper_golem/oxidized_copper_golem.png"),
 		ResourceLocation.withDefaultNamespace("textures/entity/copper_golem/oxidized_copper_golem_eyes.png")
 	);
