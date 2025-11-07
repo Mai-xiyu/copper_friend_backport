@@ -52,7 +52,7 @@ import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
 public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
     public static final Codec<BlockBehaviour.Properties> PropertiesCODEC = Codec.unit(Properties::of);
     
-    protected static <B extends Block> RecordCodecBuilder<B, BlockBehaviour.Properties> propertiesCodec() {
+    public static <B extends Block> RecordCodecBuilder<B, BlockBehaviour.Properties> propertiesCodec() {
         return PropertiesCODEC.fieldOf("properties").forGetter((Function<B, Properties>) Properties::copy);
     }
     

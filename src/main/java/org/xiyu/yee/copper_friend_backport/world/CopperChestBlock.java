@@ -43,21 +43,21 @@ public class CopperChestBlock extends ChestBlock {
 	);
 	private static final Map<Block, Supplier<Block>> COPPER_TO_COPPER_CHEST_MAPPING = Map.of(
             Blocks.COPPER_BLOCK,
-		(Supplier)() -> ModBlocks.COPPER_CHEST,
+		(Supplier)() -> ModBlocks.COPPER_CHEST.get(),
             Blocks.EXPOSED_COPPER,
-		(Supplier)() -> ModBlocks.EXPOSED_COPPER_CHEST,
+		(Supplier)() -> ModBlocks.EXPOSED_COPPER_CHEST.get(),
             Blocks.WEATHERED_COPPER,
-		(Supplier)() -> ModBlocks.WEATHERED_COPPER_CHEST,
+		(Supplier)() -> ModBlocks.WEATHERED_COPPER_CHEST.get(),
             Blocks.OXIDIZED_COPPER,
-		(Supplier)() -> ModBlocks.OXIDIZED_COPPER_CHEST,
+		(Supplier)() -> ModBlocks.OXIDIZED_COPPER_CHEST.get(),
             Blocks.WAXED_COPPER_BLOCK,
-		(Supplier)() -> ModBlocks.COPPER_CHEST,
+		(Supplier)() -> ModBlocks.COPPER_CHEST.get(),
             Blocks.WAXED_EXPOSED_COPPER,
-		(Supplier)() -> ModBlocks.EXPOSED_COPPER_CHEST,
+		(Supplier)() -> ModBlocks.EXPOSED_COPPER_CHEST.get(),
             Blocks.WAXED_WEATHERED_COPPER,
-		(Supplier)() -> ModBlocks.WEATHERED_COPPER_CHEST,
+		(Supplier)() -> ModBlocks.WEATHERED_COPPER_CHEST.get(),
             Blocks.WAXED_OXIDIZED_COPPER,
-		(Supplier)() -> ModBlocks.OXIDIZED_COPPER_CHEST
+		(Supplier)() -> ModBlocks.OXIDIZED_COPPER_CHEST.get()
 	);
 	private final WeatheringCopper.WeatherState weatherState;
 
@@ -130,7 +130,7 @@ public class CopperChestBlock extends ChestBlock {
 	}
 
 	public static BlockState getFromCopperBlock(Block block, Direction direction, Level level, BlockPos blockPos) {
-		CopperChestBlock copperChestBlock = (CopperChestBlock)((Supplier)COPPER_TO_COPPER_CHEST_MAPPING.getOrDefault(block, () -> ModBlocks.COPPER_CHEST)).get();
+		CopperChestBlock copperChestBlock = (CopperChestBlock)((Supplier)COPPER_TO_COPPER_CHEST_MAPPING.getOrDefault(block, () -> ModBlocks.COPPER_CHEST.get())).get();
 		ChestType chestType = ChestType.SINGLE;
 		BlockState blockState = copperChestBlock.defaultBlockState().setValue(FACING, direction).setValue(TYPE, chestType);
 		return getLeastOxidizedChestOfConnectedBlocks(blockState, level, blockPos);

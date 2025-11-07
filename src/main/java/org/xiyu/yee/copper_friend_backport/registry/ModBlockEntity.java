@@ -1,40 +1,46 @@
 package org.xiyu.yee.copper_friend_backport.registry;
 
-import com.mojang.datafixers.types.Type;
-import net.minecraft.Util;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.datafix.fixes.References;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.xiyu.yee.copper_friend_backport.CopperFriendBackport;
+import org.xiyu.yee.copper_friend_backport.copper_chest.CopperChestBlockEntity;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
 
-import java.util.Set;
-
 public class ModBlockEntity {
-    public static final BlockEntityType<CopperGolemStatueBlockEntity> COPPER_GOLEM_STATUE = register(
-            "copper_golem_statue",
-            CopperGolemStatueBlockEntity::new,
-            ModBlocks.COPPER_GOLEM_STATUE,
-            ModBlocks.EXPOSED_COPPER_GOLEM_STATUE,
-            ModBlocks.WEATHERED_COPPER_GOLEM_STATUE,
-            ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE,
-            ModBlocks.WAXED_COPPER_GOLEM_STATUE,
-            ModBlocks.WAXED_EXPOSED_COPPER_GOLEM_STATUE,
-            ModBlocks.WAXED_WEATHERED_COPPER_GOLEM_STATUE,
-            ModBlocks.WAXED_OXIDIZED_COPPER_GOLEM_STATUE
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(
+            ForgeRegistries.BLOCK_ENTITY_TYPES, CopperFriendBackport.MOD_ID
     );
-    private static <T extends BlockEntity> BlockEntityType<T> register(
-            String string, BlockEntityType.BlockEntitySupplier<? extends T> blockEntitySupplier, Block... blocks
-    ) {
-        if (blocks.length == 0) {
-            CopperFriendBackport.LOGGER.warn("Block entity type {} requires at least one valid block to be defined!", string);
-        }
 
-        Type<?> type = Util.fetchChoiceType(References.BLOCK_ENTITY, string);
-        return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, string, new BlockEntityType<>(blockEntitySupplier, Set.of(blocks),type));
-    }
+    public static final RegistryObject<BlockEntityType<CopperGolemStatueBlockEntity>> COPPER_GOLEM_STATUE = BLOCK_ENTITY_TYPES.register(
+            "copper_golem_statue",
+            () -> BlockEntityType.Builder.of(
+                    CopperGolemStatueBlockEntity::new,
+                    ModBlocks.COPPER_GOLEM_STATUE.get(),
+                    ModBlocks.EXPOSED_COPPER_GOLEM_STATUE.get(),
+                    ModBlocks.WEATHERED_COPPER_GOLEM_STATUE.get(),
+                    ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE.get(),
+                    ModBlocks.WAXED_COPPER_GOLEM_STATUE.get(),
+                    ModBlocks.WAXED_EXPOSED_COPPER_GOLEM_STATUE.get(),
+                    ModBlocks.WAXED_WEATHERED_COPPER_GOLEM_STATUE.get(),
+                    ModBlocks.WAXED_OXIDIZED_COPPER_GOLEM_STATUE.get()
+            ).build(null)
+    );
+
+    public static final RegistryObject<BlockEntityType<CopperChestBlockEntity>> COPPER_CHEST = BLOCK_ENTITY_TYPES.register(
+            "copper_chest",
+            () -> BlockEntityType.Builder.of(
+                    CopperChestBlockEntity::new,
+                    ModBlocks.COPPER_CHEST.get(),
+                    ModBlocks.EXPOSED_COPPER_CHEST.get(),
+                    ModBlocks.WEATHERED_COPPER_CHEST.get(),
+                    ModBlocks.OXIDIZED_COPPER_CHEST.get(),
+                    ModBlocks.WAXED_COPPER_CHEST.get(),
+                    ModBlocks.WAXED_EXPOSED_COPPER_CHEST.get(),
+                    ModBlocks.WAXED_WEATHERED_COPPER_CHEST.get(),
+                    ModBlocks.WAXED_OXIDIZED_COPPER_CHEST.get()
+            ).build(null)
+    );
 }

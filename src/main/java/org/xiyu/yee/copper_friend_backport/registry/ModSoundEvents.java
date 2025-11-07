@@ -51,7 +51,7 @@ public class ModSoundEvents {
     public static final RegistryObject<SoundEvent> COPPER_GRATE_FALL = register("block.copper_grate.fall");
 
     private static RegistryObject<SoundEvent> register(String name) {
-        ResourceLocation location = new ResourceLocation(CopperFriendBackport.MOD_ID, name);
+        ResourceLocation location = ResourceLocation.tryBuild(CopperFriendBackport.MOD_ID, name);
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(location));
     }
 }

@@ -32,12 +32,12 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
 			.put(Blocks.CUT_COPPER_STAIRS, Blocks.EXPOSED_CUT_COPPER_STAIRS)
 			.put(Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.WEATHERED_CUT_COPPER_STAIRS)
 			.put(Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_CUT_COPPER_STAIRS)
-			.put(ModBlocks.COPPER_CHEST, ModBlocks.EXPOSED_COPPER_CHEST)
-			.put(ModBlocks.EXPOSED_COPPER_CHEST, ModBlocks.WEATHERED_COPPER_CHEST)
-			.put(ModBlocks.WEATHERED_COPPER_CHEST, ModBlocks.OXIDIZED_COPPER_CHEST)
-			.put(ModBlocks.COPPER_GOLEM_STATUE, ModBlocks.EXPOSED_COPPER_GOLEM_STATUE)
-			.put(ModBlocks.EXPOSED_COPPER_GOLEM_STATUE, ModBlocks.WEATHERED_COPPER_GOLEM_STATUE)
-			.put(ModBlocks.WEATHERED_COPPER_GOLEM_STATUE, ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE)
+			.put(ModBlocks.COPPER_CHEST.get(), ModBlocks.EXPOSED_COPPER_CHEST.get())
+			.put(ModBlocks.EXPOSED_COPPER_CHEST.get(), ModBlocks.WEATHERED_COPPER_CHEST.get())
+			.put(ModBlocks.WEATHERED_COPPER_CHEST.get(), ModBlocks.OXIDIZED_COPPER_CHEST.get())
+			.put(ModBlocks.COPPER_GOLEM_STATUE.get(), ModBlocks.EXPOSED_COPPER_GOLEM_STATUE.get())
+			.put(ModBlocks.EXPOSED_COPPER_GOLEM_STATUE.get(), ModBlocks.WEATHERED_COPPER_GOLEM_STATUE.get())
+			.put(ModBlocks.WEATHERED_COPPER_GOLEM_STATUE.get(), ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE.get())
 			.build()
 	);
 	Supplier<BiMap<Block, Block>> PREVIOUS_BY_BLOCK = Suppliers.memoize(() -> ((BiMap)NEXT_BY_BLOCK.get()).inverse());
