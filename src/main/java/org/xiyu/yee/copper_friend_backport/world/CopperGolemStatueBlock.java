@@ -50,16 +50,18 @@ import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
 
 public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
+    public static final Codec<BlockBehaviour.Properties> PropertiesCODEC = Codec.unit(Properties::of);
+    
+    protected static <B extends Block> RecordCodecBuilder<B, BlockBehaviour.Properties> propertiesCodec() {
+        return PropertiesCODEC.fieldOf("properties").forGetter((Function<B, Properties>) Properties::copy);
+    }
+    
 	public static final MapCodec<CopperGolemStatueBlock> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 				WeatheringCopper.WeatherState.CODEC.fieldOf("weathering_state").forGetter(CopperGolemStatueBlock::getWeatheringState), propertiesCodec()
 			)
 			.apply(instance, CopperGolemStatueBlock::new)
 	);
-    public static final Codec<BlockBehaviour.Properties> PropertiesCODEC = Codec.unit(Properties::of);
-    protected static <B extends Block> RecordCodecBuilder<B, BlockBehaviour.Properties> propertiesCodec() {
-        return PropertiesCODEC.fieldOf("properties").forGetter((Function<B, Properties>) Properties::copy);
-    }
     public static final EnumProperty<CopperGolemStatueBlock.Pose> COPPER_GOLEM_POSE = EnumProperty.create("copper_golem_pose", CopperGolemStatueBlock.Pose.class);
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final EnumProperty<CopperGolemStatueBlock.Pose> POSE = COPPER_GOLEM_POSE;

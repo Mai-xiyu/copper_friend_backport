@@ -1,0 +1,30 @@
+package org.xiyu.yee.copper_friend_backport.client;
+
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.xiyu.yee.copper_friend_backport.CopperFriendBackport;
+import org.xiyu.yee.copper_friend_backport.client.model.CopperGolemModel;
+import org.xiyu.yee.copper_friend_backport.client.renderer.entity.CopperGolemRenderer;
+import org.xiyu.yee.copper_friend_backport.registry.ModEntity;
+
+@Mod.EventBusSubscriber(modid = CopperFriendBackport.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+public class ClientSetup {
+    
+    public static final ModelLayerLocation COPPER_GOLEM_LAYER = new ModelLayerLocation(
+            new ResourceLocation(CopperFriendBackport.MOD_ID, "copper_golem"), "main"
+    );
+
+    @SubscribeEvent
+    public static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(COPPER_GOLEM_LAYER, CopperGolemModel::createBodyLayer);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntity.COPPER_GOLEM.get(), CopperGolemRenderer::new);
+    }
+}

@@ -1,14 +1,13 @@
 package org.xiyu.yee.copper_friend_backport.registry;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import org.xiyu.yee.copper_friend_backport.CopperFriendBackport;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
 import org.xiyu.yee.copper_friend_backport.world.WeatheringCopperChestBlock;
 import org.xiyu.yee.copper_friend_backport.world.CopperChestBlock;
@@ -114,13 +113,11 @@ public class ModBlocks {
     );
 
     private static Block register(String string, Function<BlockBehaviour.Properties, Block> function, BlockBehaviour.Properties properties) {
-        return register(vanillaBlockId(string).toString(), function, properties);
+        Block block = function.apply(properties);
+        return Registry.register(BuiltInRegistries.BLOCK, CopperFriendBackport.MOD_ID + ":" + string, block);
     }
 
     private static Block register(String string, BlockBehaviour.Properties properties) {
         return register(string, Block::new, properties);
-    }
-    private static ResourceKey<Block> vanillaBlockId(String string) {
-        return ResourceKey.create(Registries.BLOCK, ResourceLocation.withDefaultNamespace(string));
     }
 }
