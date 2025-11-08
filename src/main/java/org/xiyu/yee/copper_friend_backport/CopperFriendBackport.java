@@ -25,7 +25,7 @@ public class CopperFriendBackport {
         EntityDataSerializers.init();
         
         // Register memory modules
-        ModMemoryModules.MEMORY_MODULE_TYPES.register(modEventBus);
+        ModMemoryModules.REGISTER.register(modEventBus);
         
         // Register entities
         ModEntity.ENTITIES.register(modEventBus);

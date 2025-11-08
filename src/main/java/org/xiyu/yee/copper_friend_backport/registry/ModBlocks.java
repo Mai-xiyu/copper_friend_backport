@@ -10,8 +10,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.xiyu.yee.copper_friend_backport.CopperFriendBackport;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
-import org.xiyu.yee.copper_friend_backport.copper_chest.OxidizableCopperChestBlock;
-import org.xiyu.yee.copper_friend_backport.copper_chest.WaxedCopperChestBlock;
+import org.xiyu.yee.copper_friend_backport.world.CopperChestBlock;
 import org.xiyu.yee.copper_friend_backport.world.WeatheringCopperGolemStatueBlock;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock;
 
@@ -23,7 +22,7 @@ public class ModBlocks {
     // Copper Chests - Oxidizable variants
     public static final RegistryObject<Block> COPPER_CHEST = BLOCKS.register(
             "copper_chest",
-            () -> new OxidizableCopperChestBlock(
+            () -> new CopperChestBlock(
                     WeatheringCopper.WeatherState.UNAFFECTED, 
                     ModSoundEvents.COPPER_CHEST_OPEN.get(), 
                     ModSoundEvents.COPPER_CHEST_CLOSE.get(), 
@@ -37,7 +36,7 @@ public class ModBlocks {
     
     public static final RegistryObject<Block> EXPOSED_COPPER_CHEST = BLOCKS.register(
             "exposed_copper_chest",
-            () -> new OxidizableCopperChestBlock(
+            () -> new CopperChestBlock(
                     WeatheringCopper.WeatherState.EXPOSED, 
                     ModSoundEvents.COPPER_CHEST_OPEN.get(), 
                     ModSoundEvents.COPPER_CHEST_CLOSE.get(), 
@@ -48,7 +47,7 @@ public class ModBlocks {
     
     public static final RegistryObject<Block> WEATHERED_COPPER_CHEST = BLOCKS.register(
             "weathered_copper_chest",
-            () -> new OxidizableCopperChestBlock(
+            () -> new CopperChestBlock(
                     WeatheringCopper.WeatherState.WEATHERED, 
                     ModSoundEvents.COPPER_CHEST_WEATHERED_OPEN.get(), 
                     ModSoundEvents.COPPER_CHEST_WEATHERED_CLOSE.get(), 
@@ -59,7 +58,7 @@ public class ModBlocks {
     
     public static final RegistryObject<Block> OXIDIZED_COPPER_CHEST = BLOCKS.register(
             "oxidized_copper_chest",
-            () -> new OxidizableCopperChestBlock(
+            () -> new CopperChestBlock(
                     WeatheringCopper.WeatherState.OXIDIZED, 
                     ModSoundEvents.COPPER_CHEST_OXIDIZED_OPEN.get(), 
                     ModSoundEvents.COPPER_CHEST_OXIDIZED_CLOSE.get(), 
@@ -71,7 +70,7 @@ public class ModBlocks {
     // Copper Chests - Waxed variants
     public static final RegistryObject<Block> WAXED_COPPER_CHEST = BLOCKS.register(
             "waxed_copper_chest",
-            () -> new WaxedCopperChestBlock(
+            () -> new CopperChestBlock(
                     WeatheringCopper.WeatherState.UNAFFECTED, 
                     ModSoundEvents.COPPER_CHEST_OPEN.get(), 
                     ModSoundEvents.COPPER_CHEST_CLOSE.get(), 
@@ -81,7 +80,7 @@ public class ModBlocks {
     
     public static final RegistryObject<Block> WAXED_EXPOSED_COPPER_CHEST = BLOCKS.register(
             "waxed_exposed_copper_chest",
-            () -> new WaxedCopperChestBlock(
+            () -> new CopperChestBlock(
                     WeatheringCopper.WeatherState.EXPOSED, 
                     ModSoundEvents.COPPER_CHEST_OPEN.get(), 
                     ModSoundEvents.COPPER_CHEST_CLOSE.get(), 
@@ -91,7 +90,7 @@ public class ModBlocks {
     
     public static final RegistryObject<Block> WAXED_WEATHERED_COPPER_CHEST = BLOCKS.register(
             "waxed_weathered_copper_chest",
-            () -> new WaxedCopperChestBlock(
+            () -> new CopperChestBlock(
                     WeatheringCopper.WeatherState.WEATHERED, 
                     ModSoundEvents.COPPER_CHEST_WEATHERED_OPEN.get(), 
                     ModSoundEvents.COPPER_CHEST_WEATHERED_CLOSE.get(), 
@@ -101,7 +100,7 @@ public class ModBlocks {
     
     public static final RegistryObject<Block> WAXED_OXIDIZED_COPPER_CHEST = BLOCKS.register(
             "waxed_oxidized_copper_chest",
-            () -> new WaxedCopperChestBlock(
+            () -> new CopperChestBlock(
                     WeatheringCopper.WeatherState.OXIDIZED, 
                     ModSoundEvents.COPPER_CHEST_OXIDIZED_OPEN.get(), 
                     ModSoundEvents.COPPER_CHEST_OXIDIZED_CLOSE.get(), 

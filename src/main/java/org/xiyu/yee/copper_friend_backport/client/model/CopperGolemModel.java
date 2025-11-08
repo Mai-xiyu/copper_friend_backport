@@ -12,6 +12,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.xiyu.yee.copper_friend_backport.client.animation.CopperGolemAnimation;
 import org.xiyu.yee.copper_friend_backport.client.animation.CopperGolemAnimations;
 import org.xiyu.yee.copper_friend_backport.client.animation.KeyframeAnimation;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem;
@@ -45,13 +46,13 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
         this.leftLeg = root.getChild("left_leg");
         
         // 烘焙动画
-        this.walkAnimation = KeyframeAnimation.bake(root, CopperGolemAnimations.WALKING_WITHOUT_ITEM);
-        this.walkWithItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimations.WALKING_WITH_ITEM);
-        this.spinHeadAnimation = KeyframeAnimation.bake(root, CopperGolemAnimations.SPIN_HEAD);
-        this.gettingItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimations.GETTING_ITEM);
-        this.gettingNoItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimations.GETTING_NO_ITEM);
-        this.droppingItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimations.DROPPING_ITEM);
-        this.droppingNoItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimations.DROPPING_NO_ITEM);
+        this.walkAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_WALK);
+        this.walkWithItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_WALK_ITEM);
+        this.spinHeadAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_IDLE);
+        this.gettingItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_CHEST_INTERACTION_NOITEM_GET);
+        this.gettingNoItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_CHEST_INTERACTION_NOITEM_NOGET);
+        this.droppingItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_CHEST_INTERACTION_ITEM_DROP);
+        this.droppingNoItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_CHEST_INTERACTION_ITEM_NODROP);
     }
 
     public static LayerDefinition createBodyLayer() {
