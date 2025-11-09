@@ -112,7 +112,7 @@ src/main/java/org/xiyu/yee/copper_friend_backport/
 ### 构建步骤
 ```bash
 # 克隆仓库
-git clone <repository-url>
+git clone https://github.com/Mai-xiyu/copper_friend_backport.git
 cd copper_friend_backport
 
 # Linux/Mac
