@@ -65,7 +65,7 @@ public class CopperChestBlock extends ChestBlock {
 		return CODEC;
 	}
 
-	public CopperChestBlock(WeatheringCopper.WeatherState weatherState, SoundEvent soundEvent, SoundEvent soundEvent2, BlockBehaviour.Properties properties) {
+	public CopperChestBlock(WeatheringCopper.WeatherState weatherState, SoundEvent soundEvent, SoundEvent soundEvent2, Properties properties) {
 		super(properties, () -> BlockEntityType.CHEST);
 		this.weatherState = weatherState;
 	}

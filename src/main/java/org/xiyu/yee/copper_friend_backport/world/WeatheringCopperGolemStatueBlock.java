@@ -14,14 +14,14 @@ import static org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock.p
 public class WeatheringCopperGolemStatueBlock extends CopperGolemStatueBlock implements WeatheringCopper {
 	public static final MapCodec<WeatheringCopperGolemStatueBlock> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-				WeatheringCopper.WeatherState.CODEC.fieldOf("weathering_state").forGetter(CopperGolemStatueBlock::getWeatheringState),
+				WeatherState.CODEC.fieldOf("weathering_state").forGetter(CopperGolemStatueBlock::getWeatheringState),
 				propertiesCodec()
 			)
 			.apply(instance, WeatheringCopperGolemStatueBlock::new)
 	);
 
 	public WeatheringCopperGolemStatueBlock(
-		WeatheringCopper.WeatherState weatherState, BlockBehaviour.Properties properties
+		WeatherState weatherState, Properties properties
 	) {
 		super(weatherState, properties);
 	}
@@ -36,7 +36,7 @@ public class WeatheringCopperGolemStatueBlock extends CopperGolemStatueBlock imp
 		this.changeOverTime(blockState, serverLevel, blockPos, randomSource);
 	}
 
-	public WeatheringCopper.WeatherState getAge() {
+	public WeatherState getAge() {
 		return this.getWeatheringState();
 	}
 

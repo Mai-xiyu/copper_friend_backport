@@ -60,7 +60,7 @@ public interface StreamCodec<B, V> extends StreamDecoder<B, V>, StreamEncoder<B,
 		};
 	}
 
-	default <O> StreamCodec<B, O> apply(StreamCodec.CodecOperation<B, V, O> codecOperation) {
+	default <O> StreamCodec<B, O> apply(CodecOperation<B, V, O> codecOperation) {
 		return codecOperation.apply(this);
 	}
 

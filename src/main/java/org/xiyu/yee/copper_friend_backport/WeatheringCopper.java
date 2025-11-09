@@ -35,9 +35,9 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
 			.put(ModBlocks.COPPER_CHEST.get(), ModBlocks.EXPOSED_COPPER_CHEST.get())
 			.put(ModBlocks.EXPOSED_COPPER_CHEST.get(), ModBlocks.WEATHERED_COPPER_CHEST.get())
 			.put(ModBlocks.WEATHERED_COPPER_CHEST.get(), ModBlocks.OXIDIZED_COPPER_CHEST.get())
-			.put(ModBlocks.COPPER_GOLEM_STATUE.get(), ModBlocks.EXPOSED_COPPER_GOLEM_STATUE.get())
-			.put(ModBlocks.EXPOSED_COPPER_GOLEM_STATUE.get(), ModBlocks.WEATHERED_COPPER_GOLEM_STATUE.get())
-			.put(ModBlocks.WEATHERED_COPPER_GOLEM_STATUE.get(), ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE.get())
+			// .put(ModBlocks.COPPER_GOLEM_STATUE.get(), ModBlocks.EXPOSED_COPPER_GOLEM_STATUE.get())
+			// .put(ModBlocks.EXPOSED_COPPER_GOLEM_STATUE.get(), ModBlocks.WEATHERED_COPPER_GOLEM_STATUE.get())
+			// .put(ModBlocks.WEATHERED_COPPER_GOLEM_STATUE.get(), ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE.get())
 			.build()
 	);
 	Supplier<BiMap<Block, Block>> PREVIOUS_BY_BLOCK = Suppliers.memoize(() -> ((BiMap)NEXT_BY_BLOCK.get()).inverse());
@@ -75,7 +75,7 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
 
 	@Override
 	default float getChanceModifier() {
-		return this.getAge() == WeatheringCopper.WeatherState.UNAFFECTED ? 0.75F : 1.0F;
+		return this.getAge() == WeatherState.UNAFFECTED ? 0.75F : 1.0F;
 	}
 
 	public static enum WeatherState implements StringRepresentable {
@@ -84,9 +84,9 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
 		WEATHERED("weathered"),
 		OXIDIZED("oxidized");
 
-		public static final IntFunction<WeatheringCopper.WeatherState> BY_ID = ByIdMap.continuous(Enum::ordinal, values(), ByIdMap.OutOfBoundsStrategy.CLAMP);
-		public static final Codec<WeatheringCopper.WeatherState> CODEC = StringRepresentable.fromEnum(WeatheringCopper.WeatherState::values);
-		public static final StreamCodec<ByteBuf, WeatheringCopper.WeatherState> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Enum::ordinal);
+		public static final IntFunction<WeatherState> BY_ID = ByIdMap.continuous(Enum::ordinal, values(), ByIdMap.OutOfBoundsStrategy.CLAMP);
+		public static final Codec<WeatherState> CODEC = StringRepresentable.fromEnum(WeatherState::values);
+		public static final StreamCodec<ByteBuf, WeatherState> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Enum::ordinal);
 		private final String name;
 
 		private WeatherState(final String string2) {
@@ -98,12 +98,12 @@ public interface WeatheringCopper extends ChangeOverTimeBlock<WeatheringCopper.W
 			return this.name;
 		}
 
-		public WeatheringCopper.WeatherState next() {
-			return (WeatheringCopper.WeatherState)BY_ID.apply(this.ordinal() + 1);
+		public WeatherState next() {
+			return (WeatherState)BY_ID.apply(this.ordinal() + 1);
 		}
 
-		public WeatheringCopper.WeatherState previous() {
-			return (WeatheringCopper.WeatherState)BY_ID.apply(this.ordinal() - 1);
+		public WeatherState previous() {
+			return (WeatherState)BY_ID.apply(this.ordinal() - 1);
 		}
 	}
 }

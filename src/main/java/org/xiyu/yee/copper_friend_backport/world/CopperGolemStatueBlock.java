@@ -50,9 +50,9 @@ import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
 
 public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
-    public static final Codec<BlockBehaviour.Properties> PropertiesCODEC = Codec.unit(Properties::of);
+    public static final Codec<Properties> PropertiesCODEC = Codec.unit(Properties::of);
     
-    public static <B extends Block> RecordCodecBuilder<B, BlockBehaviour.Properties> propertiesCodec() {
+    public static <B extends Block> RecordCodecBuilder<B, Properties> propertiesCodec() {
         return PropertiesCODEC.fieldOf("properties").forGetter((Function<B, Properties>) Properties::copy);
     }
     
@@ -62,9 +62,9 @@ public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWat
 			)
 			.apply(instance, CopperGolemStatueBlock::new)
 	);
-    public static final EnumProperty<CopperGolemStatueBlock.Pose> COPPER_GOLEM_POSE = EnumProperty.create("copper_golem_pose", CopperGolemStatueBlock.Pose.class);
+    public static final EnumProperty<Pose> COPPER_GOLEM_POSE = EnumProperty.create("copper_golem_pose", Pose.class);
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
-	public static final EnumProperty<CopperGolemStatueBlock.Pose> POSE = COPPER_GOLEM_POSE;
+	public static final EnumProperty<Pose> POSE = COPPER_GOLEM_POSE;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private static final VoxelShape SHAPE = column(10.0, 0.0, 14.0);
 
@@ -80,11 +80,11 @@ public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWat
 	private final WeatheringCopper.WeatherState weatheringState;
 
 
-	public CopperGolemStatueBlock(WeatheringCopper.WeatherState weatherState, BlockBehaviour.Properties properties) {
+	public CopperGolemStatueBlock(WeatheringCopper.WeatherState weatherState, Properties properties) {
 		super(properties);
 		this.weatheringState = weatherState;
 		this.registerDefaultState(
-			this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(POSE, CopperGolemStatueBlock.Pose.STANDING).setValue(WATERLOGGED, false)
+			this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(POSE, Pose.STANDING).setValue(WATERLOGGED, false)
 		);
 	}
 
@@ -135,7 +135,7 @@ public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWat
 
 	void updatePose(Level level, BlockState blockState, BlockPos blockPos, Player player) {
 		level.playSound(null, blockPos, ModSoundEvents.COPPER_GOLEM_BECOME_STATUE.get(), SoundSource.BLOCKS);
-		level.setBlock(blockPos, blockState.setValue(POSE, ((CopperGolemStatueBlock.Pose)blockState.getValue(POSE)).getNextPose()), 3);
+		level.setBlock(blockPos, blockState.setValue(POSE, ((Pose)blockState.getValue(POSE)).getNextPose()), 3);
 		level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 	}
 
@@ -161,7 +161,7 @@ public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWat
 
 	@Override
 	public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-		return ((CopperGolemStatueBlock.Pose)blockState.getValue(POSE)).ordinal() + 1;
+		return ((Pose)blockState.getValue(POSE)).ordinal() + 1;
 	}
 
 	@Override
@@ -202,8 +202,8 @@ public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWat
 		RUNNING("running"),
 		STAR("star");
 
-		public static final IntFunction<CopperGolemStatueBlock.Pose> BY_ID = ByIdMap.continuous(Enum::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
-		public static final Codec<CopperGolemStatueBlock.Pose> CODEC = StringRepresentable.fromEnum(CopperGolemStatueBlock.Pose::values);
+		public static final IntFunction<Pose> BY_ID = ByIdMap.continuous(Enum::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+		public static final Codec<Pose> CODEC = StringRepresentable.fromEnum(Pose::values);
 		private final String name;
 
 		private Pose(final String string2) {
@@ -215,8 +215,8 @@ public class CopperGolemStatueBlock extends BaseEntityBlock implements SimpleWat
 			return this.name;
 		}
 
-		public CopperGolemStatueBlock.Pose getNextPose() {
-			return (CopperGolemStatueBlock.Pose)BY_ID.apply(this.ordinal() + 1);
+		public Pose getNextPose() {
+			return (Pose)BY_ID.apply(this.ordinal() + 1);
 		}
 	}
 }

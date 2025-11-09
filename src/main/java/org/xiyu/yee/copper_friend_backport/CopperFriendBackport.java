@@ -22,10 +22,13 @@ public class CopperFriendBackport {
     public CopperFriendBackport(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
+        // Register configuration
+        CopperGolemConfig.register();
+        
         EntityDataSerializers.init();
         
         // Register memory modules
-        ModMemoryModules.REGISTER.register(modEventBus);
+        ModMemoryModules.MEMORY_MODULE_TYPES.register(modEventBus);
         
         // Register entities
         ModEntity.ENTITIES.register(modEventBus);

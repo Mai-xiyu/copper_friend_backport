@@ -1,0 +1,61 @@
+{
+  "block.copper_friend_backport.copper_chest": "Copper Chest",
+  "block.copper_friend_backport.exposed_copper_chest": "Exposed Copper Chest",
+  "block.copper_friend_backport.weathered_copper_chest": "Weathered Copper Chest",
+  "block.copper_friend_backport.oxidized_copper_chest": "Oxidized Copper Chest",
+  "block.copper_friend_backport.waxed_copper_chest": "Waxed Copper Chest",
+  "block.copper_friend_backport.waxed_exposed_copper_chest": "Waxed Exposed Copper Chest",
+  "block.copper_friend_backport.waxed_weathered_copper_chest": "Waxed Weathered Copper Chest",
+  "block.copper_friend_backport.waxed_oxidized_copper_chest": "Waxed Oxidized Copper Chest",
+  
+  "block.copper_friend_backport.copper_golem_statue": "Copper Golem Statue",
+  "block.copper_friend_backport.exposed_copper_golem_statue": "Exposed Copper Golem Statue",
+  "block.copper_friend_backport.weathered_copper_golem_statue": "Weathered Copper Golem Statue",
+  "block.copper_friend_backport.oxidized_copper_golem_statue": "Oxidized Copper Golem Statue",
+  "block.copper_friend_backport.waxed_copper_golem_statue": "Waxed Copper Golem Statue",
+  "block.copper_friend_backport.waxed_exposed_copper_golem_statue": "Waxed Exposed Copper Golem Statue",
+  "block.copper_friend_backport.waxed_weathered_copper_golem_statue": "Waxed Weathered Copper Golem Statue",
+  "block.copper_friend_backport.waxed_oxidized_copper_golem_statue": "Waxed Oxidized Copper Golem Statue",
+  
+  "block.copper_friend_backport.copper_button": "Copper Button",
+  "block.copper_friend_backport.exposed_copper_button": "Exposed Copper Button",
+  "block.copper_friend_backport.weathered_copper_button": "Weathered Copper Button",
+  "block.copper_friend_backport.oxidized_copper_button": "Oxidized Copper Button",
+  "block.copper_friend_backport.waxed_copper_button": "Waxed Copper Button",
+  "block.copper_friend_backport.waxed_exposed_copper_button": "Waxed Exposed Copper Button",
+  "block.copper_friend_backport.waxed_weathered_copper_button": "Waxed Weathered Copper Button",
+  "block.copper_friend_backport.waxed_oxidized_copper_button": "Waxed Oxidized Copper Button",
+  
+  "block.copper_friend_backport.copper_door": "Copper Door",
+  "block.copper_friend_backport.exposed_copper_door": "Exposed Copper Door",
+  "block.copper_friend_backport.weathered_copper_door": "Weathered Copper Door",
+  "block.copper_friend_backport.oxidized_copper_door": "Oxidized Copper Door",
+  "block.copper_friend_backport.waxed_copper_door": "Waxed Copper Door",
+  "block.copper_friend_backport.waxed_exposed_copper_door": "Waxed Exposed Copper Door",
+  "block.copper_friend_backport.waxed_weathered_copper_door": "Waxed Weathered Copper Door",
+  "block.copper_friend_backport.waxed_oxidized_copper_door": "Waxed Oxidized Copper Door",
+  
+  "block.copper_friend_backport.copper_trapdoor": "Copper Trapdoor",
+  "block.copper_friend_backport.exposed_copper_trapdoor": "Exposed Copper Trapdoor",
+  "block.copper_friend_backport.weathered_copper_trapdoor": "Weathered Copper Trapdoor",
+  "block.copper_friend_backport.oxidized_copper_trapdoor": "Oxidized Copper Trapdoor",
+  "block.copper_friend_backport.waxed_copper_trapdoor": "Waxed Copper Trapdoor",
+  "block.copper_friend_backport.waxed_exposed_copper_trapdoor": "Waxed Exposed Copper Trapdoor",
+  "block.copper_friend_backport.waxed_weathered_copper_trapdoor": "Waxed Weathered Copper Trapdoor",
+  "block.copper_friend_backport.waxed_oxidized_copper_trapdoor": "Waxed Oxidized Copper Trapdoor",
+  
+  "block.copper_friend_backport.lightning_rod": "Lightning Rod",
+  
+  "entity.copper_friend_backport.copper_golem": "Copper Golem",
+  
+  "item.copper_friend_backport.copper_golem_spawn_egg": "Copper Golem Spawn Egg",
+  
+  "itemGroup.copper_friend_backport": "Copper Friend",
+  
+  "container.copper_chest": "Copper Chest",
+  
+  "subtitles.entity.copper_golem.step": "Copper Golem steps",
+  "subtitles.entity.copper_golem.hurt": "Copper Golem hurts",
+  "subtitles.entity.copper_golem.death": "Copper Golem dies",
+  "subtitles.entity.copper_golem.spin": "Copper Golem spins"
+}

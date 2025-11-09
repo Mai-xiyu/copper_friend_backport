@@ -85,7 +85,7 @@ public class KeyframeAnimation {
             java.lang.reflect.Field childrenField = ModelPart.class.getDeclaredField("children");
             childrenField.setAccessible(true);
             @SuppressWarnings("unchecked")
-            java.util.Map<String, ModelPart> children = (java.util.Map<String, ModelPart>) childrenField.get(parent);
+            Map<String, ModelPart> children = (Map<String, ModelPart>) childrenField.get(parent);
             
             // 检查直接子部件
             if (children.containsKey(name)) {

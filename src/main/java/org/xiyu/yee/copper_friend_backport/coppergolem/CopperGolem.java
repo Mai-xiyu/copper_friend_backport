@@ -7,11 +7,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -73,12 +75,20 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	private static final EntityDataAccessor<CopperGolemState> COPPER_GOLEM_STATE = SynchedEntityData.defineId(
 		CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.COPPER_GOLEM_STATE
 	);
+	private static final EntityDataAccessor<Boolean> DATA_IS_LANTERN = SynchedEntityData.defineId(
+		CopperGolem.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN
+	);
+	private static final EntityDataAccessor<Boolean> DATA_HAS_POPPY = SynchedEntityData.defineId(
+		CopperGolem.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN
+	);
 	@Nullable
 	private BlockPos openedChestPos;
 	@Nullable
 	private UUID lastLightningBoltUUID;
 	private long nextWeatheringTick = -1L;
 	private int idleAnimationStartTick = 0;
+	private int animationTickOffset = 0; // 持久化的动画偏移，用于错开多个铜傀儡的动画
+	private boolean idleAnimationInitialized = false; // 标记idle动画是否已经初始化
 	private final AnimationState idleAnimationState = new AnimationState();
 	private final AnimationState headSpinAnimationState = new AnimationState();
 	private final AnimationState interactionGetItemAnimationState = new AnimationState();
@@ -98,6 +108,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
 		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+		// 给每个铜傀儡一个随机的动画偏移（0-240 ticks），避免多个傀儡动画同步
+		this.animationTickOffset = this.random.nextInt(240);
+		this.idleAnimationStartTick = this.animationTickOffset;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -120,6 +133,55 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
 	public void setWeatherState(WeatheringCopper.WeatherState weatherState) {
 		this.entityData.set(DATA_WEATHER_STATE, weatherState);
+	}
+
+	/**
+	 * Sets this golem as waxed (prevents oxidation).
+	 */
+	public void setWaxed() {
+		this.nextWeatheringTick = -2L;
+	}
+
+	/**
+	 * Checks if this golem is waxed.
+	 */
+	public boolean isWaxed() {
+		return this.nextWeatheringTick == -2L;
+	}
+
+	/**
+	 * Sets whether this golem is a lantern (emits light).
+	 */
+	public void setLantern(boolean isLantern) {
+		this.entityData.set(DATA_IS_LANTERN, isLantern);
+	}
+
+	/**
+	 * Checks if this golem is a lantern (emits light).
+	 */
+	public boolean isLantern() {
+		return this.entityData.get(DATA_IS_LANTERN);
+	}
+
+	/**
+	 * Sets whether this golem has a poppy on its head.
+	 */
+	public void setHasPoppy(boolean hasPoppy) {
+		this.entityData.set(DATA_HAS_POPPY, hasPoppy);
+	}
+
+	/**
+	 * Checks if this golem has a poppy on its head.
+	 */
+	public boolean hasPoppy() {
+		return this.entityData.get(DATA_HAS_POPPY);
+	}
+
+	/**
+	 * Returns the light emission level for this golem.
+	 */
+	public int getLightEmission() {
+		return this.isLantern() ? 14 : 0;
 	}
 
 	public void setOpenedChestPos(BlockPos blockPos) {
@@ -174,6 +236,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		super.defineSynchedData();
 		this.entityData.define(DATA_WEATHER_STATE, WeatheringCopper.WeatherState.UNAFFECTED);
 		this.entityData.define(COPPER_GOLEM_STATE, CopperGolemState.IDLE);
+		this.entityData.define(DATA_IS_LANTERN, false);
+		this.entityData.define(DATA_HAS_POPPY, false);
 	}
 
 	@Override
@@ -181,12 +245,25 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putLong("next_weather_age", this.nextWeatheringTick);
 		compoundTag.putInt("weather_state", this.getWeatherState().ordinal());
+		compoundTag.putBoolean("is_lantern", this.isLantern());
+		compoundTag.putBoolean("has_poppy", this.hasPoppy());
+		compoundTag.putInt("animation_tick_offset", this.animationTickOffset);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		this.nextWeatheringTick = compoundTag.getLong("next_weather_age");
+		if (compoundTag.contains("is_lantern")) {
+			this.setLantern(compoundTag.getBoolean("is_lantern"));
+		}
+		if (compoundTag.contains("has_poppy")) {
+			this.setHasPoppy(compoundTag.getBoolean("has_poppy"));
+		}
+		if (compoundTag.contains("animation_tick_offset")) {
+			this.animationTickOffset = compoundTag.getInt("animation_tick_offset");
+			this.idleAnimationStartTick = this.animationTickOffset; // 使用保存的偏移初始化
+		}
 		if (compoundTag.contains("weather_state", 99)) { // 99 = any numeric type
 			int weatherStateId = compoundTag.getInt("weather_state");
 			WeatheringCopper.WeatherState state = WeatheringCopper.WeatherState.BY_ID.apply(weatherStateId);
@@ -231,6 +308,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
+		
+		// Handle empty hand - retrieve item from golem
 		if (itemStack.isEmpty()) {
 			ItemStack itemStack2 = this.getMainHandItem();
 			if (!itemStack2.isEmpty()) {
@@ -241,44 +320,103 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		}
 
 		Level level = this.level();
-		if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
-			if (level instanceof ServerLevel serverLevel) {
-				this.shear(SoundSource.PLAYERS);
-				this.gameEvent(GameEvent.SHEAR, player);
-				itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+		
+		// Handle shears - remove poppy first, then handle oxidation
+		if (itemStack.is(Items.SHEARS)) {
+			// First check if golem has a poppy to remove
+			if (this.hasPoppy()) {
+				if (level instanceof ServerLevel serverLevel) {
+					// Drop poppy
+					ItemStack poppyStack = new ItemStack(Items.POPPY);
+					this.spawnAtLocation(poppyStack);
+					this.setHasPoppy(false);
+					
+					// Play sound
+					level.playSound(null, this, SoundEvents.SHEEP_SHEAR, this.getSoundSource(), 1.0F, 1.0F);
+					this.gameEvent(GameEvent.SHEAR, player);
+					itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+				}
+				return InteractionResult.SUCCESS;
 			}
-
-			return InteractionResult.SUCCESS;
-		} else if (level.isClientSide()) {
-			return InteractionResult.PASS;
-		} else if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L) {
-			level.levelEvent(player, 3003, this.blockPosition(), 0);
-			this.nextWeatheringTick = -2L;
+			// If no poppy, check for oxidation shearing
+			else if (this.readyForShearing()) {
+				if (level instanceof ServerLevel serverLevel) {
+					this.shear(SoundSource.PLAYERS);
+					this.gameEvent(GameEvent.SHEAR, player);
+					itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+				}
+				return InteractionResult.SUCCESS;
+			}
+		}
+		
+		// Handle poppy - golem accepts it and wears on head
+		if (itemStack.is(Items.POPPY) && !this.hasPoppy()) {
+			this.setHasPoppy(true);
+			level.playSound(null, this, SoundEvents.ITEM_PICKUP, this.getSoundSource(), 1.0F, 1.0F);
+			
 			if (!player.getAbilities().instabuild) {
 				itemStack.shrink(1);
 			}
 			return InteractionResult.SUCCESS;
-		} else if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L) {
+		}
+		
+		if (level.isClientSide()) {
+			return InteractionResult.PASS;
+		}
+		
+		// Handle honeycomb - apply wax (requires sneaking)
+		if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L && player.isCrouching()) {
+			// Play wax on sound
+			level.playSound(null, this, SoundEvents.HONEYCOMB_WAX_ON, this.getSoundSource(), 1.0F, 1.0F);
+			level.levelEvent(player, 3003, this.blockPosition(), 0);
+			this.nextWeatheringTick = -2L;
+			
+			// Grant advancement
+			if (player instanceof ServerPlayer serverPlayer) {
+				CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
+			}
+			
+			if (!player.getAbilities().instabuild) {
+				itemStack.shrink(1);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		
+		// Handle axe - dewax (requires sneaking)
+		if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L && player.isCrouching()) {
 			level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
-			level.levelEvent(player, 3004, this.blockPosition(), 0);
+			level.levelEvent(player, 3004, this.blockPosition(), 0); // Wax off particles
 			this.nextWeatheringTick = -1L;
+			
+			// Grant advancement
+			if (player instanceof ServerPlayer serverPlayer) {
+				CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
+			}
+			
 			itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
 			return InteractionResult.SUCCESS;
-		} else {
-			if (itemStack.is(ItemTags.AXES)) {
-				WeatheringCopper.WeatherState weatherState = this.getWeatherState();
-				if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
-					level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
-					level.levelEvent(player, 3005, this.blockPosition(), 0);
-					this.nextWeatheringTick = -1L;
-					this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
-					itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
-					return InteractionResult.SUCCESS;
-				}
-			}
-
-			return super.mobInteract(player, interactionHand);
 		}
+		
+		// Handle axe - scrape oxidation (requires sneaking)
+		if (itemStack.is(ItemTags.AXES) && player.isCrouching()) {
+			WeatheringCopper.WeatherState weatherState = this.getWeatherState();
+			if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
+				level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
+				level.levelEvent(player, 3005, this.blockPosition(), 0); // Scrape particles
+				this.nextWeatheringTick = -1L;
+				this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
+				
+				// Grant advancement
+				if (player instanceof ServerPlayer serverPlayer) {
+					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
+				}
+				
+				itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+				return InteractionResult.SUCCESS;
+			}
+		}
+
+		return super.mobInteract(player, interactionHand);
 	}
 
 	private void updateWeathering(ServerLevel serverLevel, RandomSource randomSource, long l) {
@@ -309,6 +447,12 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	}
 
 	private void turnToStatue(ServerLevel serverLevel) {
+		// Drop poppy if golem has one
+		if (this.hasPoppy()) {
+			ItemStack poppyStack = new ItemStack(Items.POPPY);
+			this.spawnAtLocation(poppyStack);
+		}
+		
 		// TODO: 临时禁用 - 等待方块注册完成后启用
 		// 这样可以先测试动画系统
 		/*
@@ -344,21 +488,24 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				this.interactionGetItemAnimationState.stop();
 				this.interactionDropItemAnimationState.stop();
 				this.interactionDropNoItemAnimationState.stop();
-				if (this.idleAnimationStartTick == this.tickCount) {
-					this.idleAnimationState.start(this.tickCount);
-					this.headSpinAnimationState.start(this.tickCount);
-				} else if (this.idleAnimationStartTick == 0) {
-					this.idleAnimationStartTick = this.tickCount + this.random.nextInt(200, 240);
+				
+				// 只在第一次初始化动画，使用负偏移让每个铜傀儡从不同阶段开始
+				if (!this.idleAnimationInitialized) {
+					this.idleAnimationState.start(this.tickCount - this.animationTickOffset);
+					this.headSpinAnimationState.start(this.tickCount - this.animationTickOffset);
+					this.idleAnimationInitialized = true;
 				}
-
-				if (this.tickCount == this.idleAnimationStartTick + 10.0F) {
+				
+				// 音效播放：使用偏移后的tick判断
+				int adjustedTick = (this.tickCount + this.animationTickOffset) % 240;
+				if (adjustedTick == 10) {
 					this.playHeadSpinSound();
-					this.idleAnimationStartTick = 0;
 				}
 				break;
 			case GETTING_ITEM:
 				this.idleAnimationState.stop();
 				this.headSpinAnimationState.stop();
+				this.idleAnimationInitialized = false; // 重置标记
 				this.idleAnimationStartTick = 0;
 				this.interactionGetNoItemAnimationState.stop();
 				this.interactionDropItemAnimationState.stop();
@@ -368,6 +515,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			case GETTING_NO_ITEM:
 				this.idleAnimationState.stop();
 				this.headSpinAnimationState.stop();
+				this.idleAnimationInitialized = false; // 重置标记
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionDropNoItemAnimationState.stop();
@@ -377,6 +525,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			case DROPPING_ITEM:
 				this.idleAnimationState.stop();
 				this.headSpinAnimationState.stop();
+				this.idleAnimationInitialized = false; // 重置标记
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionGetNoItemAnimationState.stop();
@@ -386,6 +535,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			case DROPPING_NO_ITEM:
 				this.idleAnimationState.stop();
 				this.headSpinAnimationState.stop();
+				this.idleAnimationInitialized = false; // 重置标记
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionGetNoItemAnimationState.stop();
@@ -402,7 +552,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, net.minecraft.world.entity.MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable net.minecraft.nbt.CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, net.minecraft.world.entity.MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag
 	) {
 		this.playSpawnSound();
 		// Initialize memory after brain is fully set up
@@ -514,6 +664,16 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	protected void actuallyHurt(DamageSource damageSource, float f) {
 		super.actuallyHurt(damageSource, f);
 		this.setState(CopperGolemState.IDLE);
+	}
+
+	@Override
+	protected void dropAllDeathLoot(DamageSource damageSource) {
+		// Drop poppy if golem has one
+		if (this.hasPoppy()) {
+			ItemStack poppyStack = new ItemStack(Items.POPPY);
+			this.spawnAtLocation(poppyStack);
+		}
+		super.dropAllDeathLoot(damageSource);
 	}
 
 	@Override

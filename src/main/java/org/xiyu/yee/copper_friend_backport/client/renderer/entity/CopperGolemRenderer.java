@@ -12,6 +12,7 @@ import org.xiyu.yee.copper_friend_backport.client.ClientSetup;
 import org.xiyu.yee.copper_friend_backport.client.model.CopperGolemModel;
 import org.xiyu.yee.copper_friend_backport.client.renderer.entity.layers.CopperGolemAntennaBlockLayer;
 import org.xiyu.yee.copper_friend_backport.client.renderer.entity.layers.CopperGolemEyesLayer;
+import org.xiyu.yee.copper_friend_backport.client.renderer.entity.layers.CopperGolemPoppyLayer;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemOxidationLevels;
 
@@ -23,6 +24,7 @@ public class CopperGolemRenderer extends MobRenderer<CopperGolem, CopperGolemMod
         this.addLayer(new CopperGolemEyesLayer(this));
         this.addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
         this.addLayer(new CopperGolemAntennaBlockLayer(this, context.getBlockRenderDispatcher()));
+        this.addLayer(new CopperGolemPoppyLayer(this)); // 虞美人渲染层
     }
 
     @Override
@@ -32,6 +34,16 @@ public class CopperGolemRenderer extends MobRenderer<CopperGolem, CopperGolemMod
 
     @Override
     public void render(CopperGolem entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+        // If the golem is a lantern, use maximum brightness
+        if (entity.isLantern()) {
+            packedLight = 15728880; // Maximum light level (sky light 15, block light 15)
+        }
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
+    }
+
+    @Override
+    protected int getBlockLightLevel(CopperGolem entity, net.minecraft.core.BlockPos pos) {
+        // If the golem is a lantern, it emits light level 14
+        return entity.isLantern() ? 14 : super.getBlockLightLevel(entity, pos);
     }
 }

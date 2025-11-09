@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.behavior.RandomStroll;
 import net.minecraft.world.entity.ai.behavior.RunOne;
 import net.minecraft.world.entity.ai.behavior.SetEntityLookTargetSometimes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import org.xiyu.yee.copper_friend_backport.CopperGolemConfig;
 import org.xiyu.yee.copper_friend_backport.coppergolem.behavior.TransportItemsBetweenContainers;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -48,12 +49,7 @@ import org.xiyu.yee.copper_friend_backport.registry.ModBlockTags;
 import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
 
 public class CopperGolemAi {
-	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 1.5F;
-	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
-	private static final int TRANSPORT_ITEM_HORIZONTAL_SEARCH_RADIUS = 32;
-	private static final int TRANSPORT_ITEM_VERTICAL_SEARCH_RADIUS = 8;
-	private static final int TICK_TO_START_ON_REACHED_INTERACTION = 1;
-	private static final int TICK_TO_PLAY_ON_REACHED_SOUND = 9;
+	// Constants are now loaded from config
 	private static final Predicate<BlockState> TRANSPORT_ITEM_SOURCE_BLOCK = blockState -> blockState.is(ModBlockTags.COPPER_CHESTS);
 	private static final Predicate<BlockState> TRANSPORT_ITEM_DESTINATION_BLOCK = blockState -> blockState.is(Blocks.CHEST) || blockState.is(Blocks.TRAPPED_CHEST);
 	private static final ImmutableList<SensorType<? extends Sensor<? super CopperGolem>>> SENSOR_TYPES = ImmutableList.of(
@@ -96,7 +92,7 @@ public class CopperGolemAi {
 			Activity.CORE,
 			0,
 			ImmutableList.of(
-				new AnimalPanic(1.5F),
+				new AnimalPanic(CopperGolemConfig.getPanicSpeedMultiplier()),
 				new LookAtTargetSink(45, 90),
 				new MoveToTargetSink(),
 				InteractWithDoor.create(),
@@ -113,15 +109,36 @@ public class CopperGolemAi {
 				Pair.of(
 					0,
 					new TransportItemsBetweenContainers(
-						1.0F, TRANSPORT_ITEM_SOURCE_BLOCK, TRANSPORT_ITEM_DESTINATION_BLOCK, 32, 8, getTargetReachedInteractions(), onTravelling(), shouldQueueForTarget()
+						CopperGolemConfig.getIdleSpeedMultiplier(),
+						TRANSPORT_ITEM_SOURCE_BLOCK,
+						TRANSPORT_ITEM_DESTINATION_BLOCK,
+						CopperGolemConfig.getTransportHorizontalSearchRadius(),
+						CopperGolemConfig.getTransportVerticalSearchRadius(),
+						getTargetReachedInteractions(),
+						onTravelling(),
+						shouldQueueForTarget()
 					)
 				),
-				Pair.of(1, SetEntityLookTargetSometimes.create(EntityType.PLAYER, 6.0F, UniformInt.of(40, 80))),
+				Pair.of(1, SetEntityLookTargetSometimes.create(
+					EntityType.PLAYER,
+					CopperGolemConfig.getLookAtPlayerDistance(),
+					UniformInt.of(CopperGolemConfig.getLookAtPlayerMinDuration(), CopperGolemConfig.getLookAtPlayerMaxDuration())
+				)),
 				Pair.of(
 					2,
 					new RunOne<>(
 						ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), MemoryStatus.VALUE_PRESENT),
-						ImmutableList.of(Pair.of(RandomStroll.stroll(1.0F, 2, 2), 1), Pair.of(new DoNothing(30, 60), 1))
+						ImmutableList.of(
+							Pair.of(RandomStroll.stroll(
+								CopperGolemConfig.getRandomStrollSpeed(),
+								CopperGolemConfig.getRandomStrollMinDistance(),
+								CopperGolemConfig.getRandomStrollMaxDistance()
+							), 1),
+							Pair.of(new DoNothing(
+								CopperGolemConfig.getDoNothingMinDuration(),
+								CopperGolemConfig.getDoNothingMaxDuration()
+							), 1)
+						)
 					)
 				)
 			)
@@ -147,18 +164,18 @@ public class CopperGolemAi {
 		return (pathfinderMob, transportItemTarget, integer) -> {
 			if (pathfinderMob instanceof CopperGolem copperGolem) {
 				Container container = transportItemTarget.container();
-				if (integer == 1) {
+				if (integer == CopperGolemConfig.getTickToStartInteraction()) {
 					// Container.startOpen/stopOpen only accept Player in 1.20.1
 					// We'll manage the chest state directly through the block entity
 					copperGolem.setOpenedChestPos(transportItemTarget.pos());
 					copperGolem.setState(copperGolemState);
 				}
 
-				if (integer == 9 && soundEvent != null) {
+				if (integer == CopperGolemConfig.getTickToPlaySound() && soundEvent != null) {
 					copperGolem.playSound(soundEvent);
 				}
 
-				if (integer == 60) {
+				if (integer == CopperGolemConfig.getChestInteractionDuration()) {
 					copperGolem.clearOpenedChestPos();
 				}
 			}

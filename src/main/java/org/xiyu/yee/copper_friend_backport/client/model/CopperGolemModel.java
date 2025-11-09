@@ -13,15 +13,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.xiyu.yee.copper_friend_backport.client.animation.CopperGolemAnimation;
-import org.xiyu.yee.copper_friend_backport.client.animation.CopperGolemAnimations;
 import org.xiyu.yee.copper_friend_backport.client.animation.KeyframeAnimation;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem;
 
 @OnlyIn(Dist.CLIENT)
 public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<T> implements ArmedModel, HeadedModel {
     private final ModelPart root;
-    private final ModelPart head;
     private final ModelPart body;
+    private final ModelPart head;
+    private final ModelPart antenna; // 天线作为独立部件
     private final ModelPart rightArm;
     private final ModelPart leftArm;
     private final ModelPart rightLeg;
@@ -40,12 +40,13 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
         this.root = root;
         this.body = root.getChild("body");
         this.head = this.body.getChild("head");
+        this.antenna = this.head.getChild("antenna"); // 获取天线部件
         this.rightArm = this.body.getChild("right_arm");
         this.leftArm = this.body.getChild("left_arm");
         this.rightLeg = root.getChild("right_leg");
         this.leftLeg = root.getChild("left_leg");
         
-        // 烘焙动画
+        // 烘焙动画 - 使用1.21.10的完整动画数据
         this.walkAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_WALK);
         this.walkWithItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_WALK_ITEM);
         this.spinHeadAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_IDLE);
@@ -66,18 +67,23 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
                         .addBox(-4.0F, -6.0F, -3.0F, 8.0F, 6.0F, 6.0F, CubeDeformation.NONE),
                 PartPose.offset(0.0F, 18.0F, 0.0F));
 
-        // 头部
+        // 头部（不包含天线）
         PartDefinition head = body.addOrReplaceChild("head",
                 CubeListBuilder.create()
                         .texOffs(0, 0)
                         .addBox(-4.0F, -5.0F, -5.0F, 8.0F, 5.0F, 10.0F, new CubeDeformation(0.015F))
                         .texOffs(56, 0)
-                        .addBox(-1.0F, -2.0F, -6.0F, 2.0F, 3.0F, 2.0F, CubeDeformation.NONE)
-                        .texOffs(37, 8)
-                        .addBox(-1.0F, -9.0F, -1.0F, 2.0F, 4.0F, 2.0F, new CubeDeformation(-0.015F))
-                        .texOffs(37, 0)
-                        .addBox(-2.0F, -13.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(-0.015F)),
+                        .addBox(-1.0F, -2.0F, -6.0F, 2.0F, 3.0F, 2.0F, CubeDeformation.NONE),
                 PartPose.offset(0.0F, -6.0F, 0.0F));
+
+        // 天线作为头部的子部件
+        PartDefinition antenna = head.addOrReplaceChild("antenna",
+                CubeListBuilder.create()
+                        .texOffs(37, 8)
+                        .addBox(-1.0F, -4.0F, -1.0F, 2.0F, 4.0F, 2.0F, new CubeDeformation(-0.015F))  // 天线杆
+                        .texOffs(37, 0)
+                        .addBox(-2.0F, -8.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(-0.015F)), // 天线头
+                PartPose.offset(0.0F, -5.0F, 0.0F)); // 天线位置在头部顶部（Y=-5）
 
         // 右臂 - 修正UV坐标从14改为16
         body.addOrReplaceChild("right_arm",
@@ -122,11 +128,6 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
         
         // 铜傀儡特有动画
         if (entity instanceof CopperGolem copperGolem) {
-            // 头部朝向 - 对应 1.21 的 pitch 和 yaw
-            // 必须在动画应用之前设置，让动画可以覆盖（与原版一致）
-            this.head.xRot = headPitch * ((float)Math.PI / 180F);
-            this.head.yRot = netHeadYaw * ((float)Math.PI / 180F);
-            
             // 行走动画 - 根据是否持有物品使用不同动画
             boolean hasItem = !copperGolem.getMainHandItem().isEmpty() || !copperGolem.getOffhandItem().isEmpty();
             
@@ -140,12 +141,17 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
             }
             
             // 应用各种动画状态 - 使用关键帧动画系统
-            // 转头动画会覆盖上面设置的 head.yRot
+            // spinHeadAnimation包含了IDLE动画（头部旋转和仰头）
             this.spinHeadAnimation.apply(copperGolem.getHeadSpinAnimationState(), ageInTicks);
             this.gettingItemAnimation.apply(copperGolem.getInteractionGetItemAnimationState(), ageInTicks);
             this.gettingNoItemAnimation.apply(copperGolem.getInteractionGetNoItemAnimationState(), ageInTicks);
             this.droppingItemAnimation.apply(copperGolem.getInteractionDropItemAnimationState(), ageInTicks);
             this.droppingNoItemAnimation.apply(copperGolem.getInteractionDropNoItemAnimationState(), ageInTicks);
+            
+            // 头部朝向 - 在动画之后累加，这样动画的旋转会保留，但会叠加实体的朝向
+            // 注意：动画已经设置了基础旋转，这里只是微调让头部跟随视角
+            this.head.xRot += headPitch * ((float)Math.PI / 180F);
+            this.head.yRot += netHeadYaw * ((float)Math.PI / 180F);
         }
     }
 
@@ -167,6 +173,10 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
     @Override
     public ModelPart getHead() {
         return this.head;
+    }
+
+    public ModelPart getAntenna() {
+        return this.antenna;
     }
 
     public void applyBlockOnAntennaTransform(PoseStack poseStack) {

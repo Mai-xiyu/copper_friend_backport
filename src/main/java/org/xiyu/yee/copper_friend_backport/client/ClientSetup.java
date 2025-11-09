@@ -8,6 +8,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.xiyu.yee.copper_friend_backport.CopperFriendBackport;
 import org.xiyu.yee.copper_friend_backport.client.model.CopperGolemModel;
+import org.xiyu.yee.copper_friend_backport.client.renderer.blockentity.CopperChestRenderer;
+import org.xiyu.yee.copper_friend_backport.client.renderer.blockentity.CopperGolemStatueRenderer;
 import org.xiyu.yee.copper_friend_backport.client.renderer.entity.CopperGolemRenderer;
 import org.xiyu.yee.copper_friend_backport.registry.ModBlockEntity;
 import org.xiyu.yee.copper_friend_backport.registry.ModEntity;
@@ -32,6 +34,7 @@ public class ClientSetup {
         event.registerEntityRenderer(ModEntity.COPPER_GOLEM.get(), CopperGolemRenderer::new);
         
         // Register block entity renderers
-        event.registerBlockEntityRenderer(ModBlockEntity.COPPER_GOLEM_STATUE.get(), CopperGolemStatueRenderer::new);
+        // event.registerBlockEntityRenderer(ModBlockEntity.COPPER_GOLEM_STATUE.get(), CopperGolemStatueRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntity.COPPER_CHEST.get(), CopperChestRenderer::new);
     }
 }

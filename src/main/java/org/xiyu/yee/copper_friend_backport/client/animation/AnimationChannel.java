@@ -5,25 +5,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3f;
 
-import java.util.Objects;
-
 /**
  * 动画通道 - 定义单个骨骼的单个属性动画
  */
 @OnlyIn(Dist.CLIENT)
-public final class AnimationChannel {
-    private final Target target;
-    private final Keyframe[] keyframes;
-
-    /**
-     *
-     */
-    public AnimationChannel(Target target, Keyframe ...keyframes) {
-        this.target = target;
-        this.keyframes = keyframes;
-    }
-
-
+public record AnimationChannel(Target target, Keyframe[] keyframes) {
+    
     public static AnimationChannel rotation(Keyframe... keyframes) {
         return new AnimationChannel(Target.ROTATION, keyframes);
     }
@@ -36,39 +23,10 @@ public final class AnimationChannel {
         return new AnimationChannel(Target.SCALE, keyframes);
     }
 
-    public Target target() {
-        return target;
-    }
-
-    public Keyframe[] keyframes() {
-        return keyframes;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (AnimationChannel) obj;
-        return Objects.equals(this.target, that.target) &&
-                Objects.equals(this.keyframes, that.keyframes);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(target, keyframes);
-    }
-
-    @Override
-    public String toString() {
-        return "AnimationChannel[" +
-                "target=" + target + ", " +
-                "keyframes=" + keyframes + ']';
-    }
-
-
     /**
      * 动画目标 - 定义动画影响模型部件的哪个属性
      */
+    @OnlyIn(Dist.CLIENT)
     public enum Target {
         POSITION {
             @Override
@@ -81,9 +39,10 @@ public final class AnimationChannel {
         ROTATION {
             @Override
             public void apply(ModelPart part, Vector3f vector) {
-                part.xRot += vector.x;
-                part.yRot += vector.y;
-                part.zRot += vector.z;
+                // 将度数转换为弧度 (1.21.10动画数据使用度数)
+                part.xRot += vector.x * ((float)Math.PI / 180F);
+                part.yRot += vector.y * ((float)Math.PI / 180F);
+                part.zRot += vector.z * ((float)Math.PI / 180F);
             }
         },
         SCALE {

@@ -5,8 +5,8 @@ public class CopperGolemAnimation {
 		.looping()
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(10.0F, 15.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(10.0F, -1.87F, -10.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(10.0F, -15.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
@@ -16,8 +16,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(-10.0F, 1.87F, 10.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
@@ -27,8 +27,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(70.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(-80.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.8333F, KeyframeAnimations.degreeVec(70.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM)
@@ -36,8 +36,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(-80.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(70.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.8333F, KeyframeAnimations.degreeVec(-80.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM)
@@ -45,8 +45,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(-60.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(60.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.8333F, KeyframeAnimations.degreeVec(-60.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM)
@@ -54,8 +54,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(60.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(-60.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.8333F, KeyframeAnimations.degreeVec(60.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM)
@@ -65,8 +65,8 @@ public class CopperGolemAnimation {
 	public static final AnimationDefinition COPPER_GOLEM_IDLE = new AnimationDefinition.Builder().length(3.5F)
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, -35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, -35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -79,8 +79,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -99,8 +99,8 @@ public class CopperGolemAnimation {
 		.looping()
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(10.0F, 7.5F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(10.0F, -1.87F, -5.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(10.0F, -7.5F, 0.0F), Keyframe.Interpolation.CATMULLROM),
@@ -110,8 +110,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(-10.0F, 1.87F, 10.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
@@ -121,27 +121,27 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(-59.78638F, -6.49053F, -3.76613F), Keyframe.Interpolation.LINEAR)
 			)
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION, new Keyframe(0.0F, KeyframeAnimations.degreeVec(-59.78638F, 6.49053F, 3.76613F), Keyframe.Interpolation.LINEAR)
+			AnimationChannel.rotation(
+				 new Keyframe(0.0F, KeyframeAnimations.degreeVec(-59.78638F, 6.49053F, 3.76613F), Keyframe.Interpolation.LINEAR)
 			)
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION, new Keyframe(0.0F, KeyframeAnimations.posVec(-0.21129F, -0.0212F, -0.07004F), Keyframe.Interpolation.LINEAR)
+			AnimationChannel.rotation(
+				 new Keyframe(0.0F, KeyframeAnimations.posVec(-0.21129F, -0.0212F, -0.07004F), Keyframe.Interpolation.LINEAR)
 			)
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(-30.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(30.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.8333F, KeyframeAnimations.degreeVec(-30.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM)
@@ -149,8 +149,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(30.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.4167F, KeyframeAnimations.degreeVec(-30.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM),
 				new Keyframe(0.8333F, KeyframeAnimations.degreeVec(30.0F, 0.0F, 0.0F), Keyframe.Interpolation.CATMULLROM)
@@ -161,8 +161,8 @@ public class CopperGolemAnimation {
 		.looping()
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(18.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -198,8 +198,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.6F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -220,8 +220,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(-20.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -261,8 +261,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.posVec(0.0F, -0.15451F, 0.47553F), Keyframe.Interpolation.LINEAR),
@@ -289,8 +289,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(-7.38733F, 1.29876F, 9.91615F), Keyframe.Interpolation.LINEAR),
@@ -322,8 +322,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2917F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -344,8 +344,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(25.0F, 0.0F, -37.5F), Keyframe.Interpolation.LINEAR),
@@ -375,8 +375,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -391,8 +391,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(7.5F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -410,8 +410,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -427,8 +427,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -445,8 +445,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -464,8 +464,8 @@ public class CopperGolemAnimation {
 		.looping()
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(18.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -495,8 +495,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.6F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -515,8 +515,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(-20.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -555,8 +555,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.posVec(0.0F, -0.15451F, 0.47553F), Keyframe.Interpolation.LINEAR),
@@ -584,8 +584,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(-7.38733F, 1.29876F, 9.91615F), Keyframe.Interpolation.LINEAR),
@@ -614,8 +614,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2917F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -641,8 +641,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(25.0F, 0.0F, -37.5F), Keyframe.Interpolation.LINEAR),
@@ -673,8 +673,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -696,8 +696,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(7.5F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -711,8 +711,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -726,8 +726,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(2.1667F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -736,8 +736,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -748,8 +748,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.SCALE,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.scaleVec(1.0f, 1.0f, 1.0f), Keyframe.Interpolation.LINEAR),
 				new Keyframe(3.0F, KeyframeAnimations.scaleVec(1.0f, 1.0f, 1.0f), Keyframe.Interpolation.LINEAR)
 			)
@@ -759,8 +759,8 @@ public class CopperGolemAnimation {
 		.looping()
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(18.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -796,8 +796,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.6F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -818,8 +818,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(-20.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -863,8 +863,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.posVec(0.0F, -0.15451F, 0.47553F), Keyframe.Interpolation.LINEAR),
@@ -894,8 +894,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(-7.38733F, 1.29876F, 9.91615F), Keyframe.Interpolation.LINEAR),
@@ -937,8 +937,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2917F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -972,8 +972,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(25.0F, 0.0F, -37.5F), Keyframe.Interpolation.LINEAR),
@@ -1003,8 +1003,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1019,8 +1019,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(7.5F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1034,8 +1034,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1048,8 +1048,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1065,8 +1065,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1085,8 +1085,8 @@ public class CopperGolemAnimation {
 		.looping()
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(18.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1114,8 +1114,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"body",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.6F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1132,8 +1132,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(-20.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1170,8 +1170,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"head",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.posVec(0.0F, -0.15451F, 0.47553F), Keyframe.Interpolation.LINEAR),
@@ -1193,8 +1193,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.1667F, KeyframeAnimations.degreeVec(-7.38733F, 1.29876F, 9.91615F), Keyframe.Interpolation.LINEAR),
@@ -1224,8 +1224,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2917F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1250,8 +1250,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(-2.5F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(25.0F, 0.0F, -37.5F), Keyframe.Interpolation.LINEAR),
@@ -1284,8 +1284,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_arm",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1304,8 +1304,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(7.5F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1316,8 +1316,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"right_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1328,8 +1328,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.ROTATION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.degreeVec(-10.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1341,8 +1341,8 @@ public class CopperGolemAnimation {
 		)
 		.addAnimation(
 			"left_leg",
-			new AnimationChannel(
-				AnimationChannel.Target.POSITION,
+			AnimationChannel.rotation(
+				
 				new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),

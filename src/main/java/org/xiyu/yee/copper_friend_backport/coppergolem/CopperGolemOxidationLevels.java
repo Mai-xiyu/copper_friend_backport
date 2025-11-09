@@ -52,5 +52,4 @@ public class CopperGolemOxidationLevels {
 	public static CopperGolemOxidationLevel getOxidationLevel(WeatheringCopper.WeatherState weatherState) {
 		return (CopperGolemOxidationLevel)WEATHERED_STATES.get(weatherState);
 	}
-
 }

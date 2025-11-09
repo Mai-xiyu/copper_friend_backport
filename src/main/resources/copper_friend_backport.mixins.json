@@ -5,6 +5,8 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "copper_friend_backport.refmap.json",
   "mixins": [
+    "ChestBlockEntityMixin",
+    "IronGolemMixin",
     "OfferFlowerGoalMixin"
   ],
   "client": [

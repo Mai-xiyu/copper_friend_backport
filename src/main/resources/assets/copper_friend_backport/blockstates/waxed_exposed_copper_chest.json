@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=east,type=single": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 90
+    },
+    "facing=north,type=single": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest"
+    },
+    "facing=south,type=single": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 180
+    },
+    "facing=west,type=single": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 270
+    },
+    "facing=east,type=left": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 90
+    },
+    "facing=north,type=left": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest"
+    },
+    "facing=south,type=left": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 180
+    },
+    "facing=west,type=left": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 270
+    },
+    "facing=east,type=right": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 90
+    },
+    "facing=north,type=right": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest"
+    },
+    "facing=south,type=right": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 180
+    },
+    "facing=west,type=right": {
+      "model": "copper_friend_backport:block/waxed_exposed_copper_chest",
+      "y": 270
+    }
+  }
+}

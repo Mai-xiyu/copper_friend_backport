@@ -20,7 +20,7 @@ import static org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock.p
 public class WeatheringCopperChestBlock extends CopperChestBlock implements WeatheringCopper {
 	public static final MapCodec<WeatheringCopperChestBlock> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-				WeatheringCopper.WeatherState.CODEC.fieldOf("weathering_state").forGetter(CopperChestBlock::getState),
+				WeatherState.CODEC.fieldOf("weathering_state").forGetter(CopperChestBlock::getState),
                         BuiltInRegistries.SOUND_EVENT.byNameCodec().fieldOf("open_sound").forGetter( chestBlock -> ModSoundEvents.COPPER_CHEST_OPEN.get()),
                         BuiltInRegistries.SOUND_EVENT.byNameCodec().fieldOf("close_sound").forGetter(chestBlock -> ModSoundEvents.COPPER_CHEST_CLOSE.get()),
 				propertiesCodec()
@@ -34,7 +34,7 @@ public class WeatheringCopperChestBlock extends CopperChestBlock implements Weat
 	}
 
 	public WeatheringCopperChestBlock(
-		WeatheringCopper.WeatherState weatherState, SoundEvent soundEvent, SoundEvent soundEvent2, BlockBehaviour.Properties properties
+		WeatherState weatherState, SoundEvent soundEvent, SoundEvent soundEvent2, Properties properties
 	) {
 		super(weatherState, soundEvent, soundEvent2, properties);
 	}
@@ -51,7 +51,7 @@ public class WeatheringCopperChestBlock extends CopperChestBlock implements Weat
 		}
 	}
 
-	public WeatheringCopper.WeatherState getAge() {
+	public WeatherState getAge() {
 		return this.getState();
 	}
 
