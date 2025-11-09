@@ -13,32 +13,59 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      # 新增发布release资产的权限
+      releases: write
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 确保获取完整历史，便于版本号处理
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
+        server-id: github
+        settings-path: ${{ github.workspace }}
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      with:
+        # 启用Gradle缓存加速构建
+        cache-read-only: false
 
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --info  # 增加详细日志便于调试
 
-    # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
-    # the publishing section of your build.gradle
+    - name: Run tests
+      run: ./gradlew test  # 新增测试步骤，确保代码质量
+
     - name: Publish to GitHub Packages
       run: ./gradlew publish
       env:
         USERNAME: ${{ github.actor }}
         TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Collect build artifacts
+      id: collect-artifacts
+      run: |
+        # 获取构建产物路径
+        ARTIFACT_PATH=$(find build/libs -name "*.jar" ! -name "*sources.jar" ! -name "*javadoc.jar" | head -n 1)
+        echo "ARTIFACT_PATH=$ARTIFACT_PATH" >> $GITHUB_OUTPUT
+        echo "ARTIFACT_NAME=$(basename $ARTIFACT_PATH)" >> $GITHUB_OUTPUT
+
+    - name: Upload build artifact to GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ steps.collect-artifacts.outputs.ARTIFACT_PATH }}
+        name: ${{ github.event.release.name }}
+        body: |
+          自动构建产物
+          - 模组文件: ${{ steps.collect-artifacts.outputs.ARTIFACT_NAME }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
