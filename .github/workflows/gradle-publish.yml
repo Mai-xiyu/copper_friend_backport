@@ -15,10 +15,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # 修正：发布Release资产需要此权限
       packages: write
-      # 新增发布release资产的权限
-      releases: write
 
     steps:
     - uses: actions/checkout@v4
@@ -36,7 +34,6 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
       with:
-        # 启用Gradle缓存加速构建
         cache-read-only: false
 
     - name: Build with Gradle
@@ -54,7 +51,6 @@ jobs:
     - name: Collect build artifacts
       id: collect-artifacts
       run: |
-        # 获取构建产物路径
         ARTIFACT_PATH=$(find build/libs -name "*.jar" ! -name "*sources.jar" ! -name "*javadoc.jar" | head -n 1)
         echo "ARTIFACT_PATH=$ARTIFACT_PATH" >> $GITHUB_OUTPUT
         echo "ARTIFACT_NAME=$(basename $ARTIFACT_PATH)" >> $GITHUB_OUTPUT
