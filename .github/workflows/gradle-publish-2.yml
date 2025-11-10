@@ -1,0 +1,67 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a package using Gradle and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#Publishing-using-gradle
+
+name: Gradle Package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 修正：发布Release资产需要此权限
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 确保获取完整历史，便于版本号处理
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        server-id: github
+        settings-path: ${{ github.workspace }}
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      with:
+        cache-read-only: false
+
+    - name: Build with Gradle
+      run: ./gradlew build --info  # 增加详细日志便于调试
+
+    - name: Run tests
+      run: ./gradlew test  # 新增测试步骤，确保代码质量
+
+    - name: Publish to GitHub Packages
+      run: ./gradlew publish
+      env:
+        USERNAME: ${{ github.actor }}
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Collect build artifacts
+      id: collect-artifacts
+      run: |
+        ARTIFACT_PATH=$(find build/libs -name "*.jar" ! -name "*sources.jar" ! -name "*javadoc.jar" | head -n 1)
+        echo "ARTIFACT_PATH=$ARTIFACT_PATH" >> $GITHUB_OUTPUT
+        echo "ARTIFACT_NAME=$(basename $ARTIFACT_PATH)" >> $GITHUB_OUTPUT
+
+    - name: Upload build artifact to GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ steps.collect-artifacts.outputs.ARTIFACT_PATH }}
+        name: ${{ github.event.release.name }}
+        body: |
+          自动构建产物
+          - 模组文件: ${{ steps.collect-artifacts.outputs.ARTIFACT_NAME }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
