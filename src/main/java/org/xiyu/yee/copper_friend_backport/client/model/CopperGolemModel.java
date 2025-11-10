@@ -147,10 +147,21 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
             this.droppingItemAnimation.apply(copperGolem.getInteractionDropItemAnimationState(), ageInTicks);
             this.droppingNoItemAnimation.apply(copperGolem.getInteractionDropNoItemAnimationState(), ageInTicks);
             
-            // 头部朝向 - 在动画之后累加，这样动画的旋转会保留，但会叠加实体的朝向
-            // 注意：动画已经设置了基础旋转，这里只是微调让头部跟随视角
-            this.head.xRot += headPitch * ((float)Math.PI / 180F);
-            this.head.yRot += netHeadYaw * ((float)Math.PI / 180F);
+            // 头部朝向 - 只在非交互动画时应用视角朝向
+            // 交互动画期间头部由动画控制，不需要额外的视角修正
+            boolean isInteracting = copperGolem.getInteractionGetItemAnimationState().isStarted() ||
+                                    copperGolem.getInteractionGetNoItemAnimationState().isStarted() ||
+                                    copperGolem.getInteractionDropItemAnimationState().isStarted() ||
+                                    copperGolem.getInteractionDropNoItemAnimationState().isStarted();
+            
+            if (!isInteracting) {
+                // IDLE状态下，头部转动由spinHeadAnimation控制，但仍需要轻微的视角跟随
+                // 限制视角影响，避免与动画冲突
+                float yawFactor = 0.25F;  // 减小水平转动影响
+                float pitchFactor = 0.5F; // 适度保留俯仰
+                this.head.xRot += headPitch * pitchFactor * ((float)Math.PI / 180F);
+                this.head.yRot += netHeadYaw * yawFactor * ((float)Math.PI / 180F);
+            }
         }
     }
 

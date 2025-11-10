@@ -89,9 +89,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	@Nullable
 	private UUID lastLightningBoltUUID;
 	private long nextWeatheringTick = -1L;
-	private int idleAnimationStartTick = 0;
-	private int animationTickOffset = 0; // 持久化的动画偏移，用于错开多个铜傀儡的动画
-	private boolean idleAnimationInitialized = false; // 标记idle动画是否已经初始化
+	private int idleAnimationStartTick = 0; // 1.21.10: 动画开始的目标tick，0表示未设置
 	private final AnimationState idleAnimationState = new AnimationState();
 	private final AnimationState headSpinAnimationState = new AnimationState();
 	private final AnimationState interactionGetItemAnimationState = new AnimationState();
@@ -111,9 +109,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
 		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
-		// 给每个铜傀儡一个随机的动画偏移（0-240 ticks），避免多个傀儡动画同步
-		this.animationTickOffset = this.random.nextInt(240);
-		this.idleAnimationStartTick = this.animationTickOffset;
+		// 1.21.10: Initialize cooldown in constructor
+		// Note: Brain may not be ready yet, will set in finalizeSpawn
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -250,7 +247,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		compoundTag.putInt("weather_state", this.getWeatherState().ordinal());
 		compoundTag.putBoolean("is_lantern", this.isLantern());
 		compoundTag.putBoolean("has_poppy", this.hasPoppy());
-		compoundTag.putInt("animation_tick_offset", this.animationTickOffset);
 	}
 
 	@Override
@@ -262,10 +258,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		}
 		if (compoundTag.contains("has_poppy")) {
 			this.setHasPoppy(compoundTag.getBoolean("has_poppy"));
-		}
-		if (compoundTag.contains("animation_tick_offset")) {
-			this.animationTickOffset = compoundTag.getInt("animation_tick_offset");
-			this.idleAnimationStartTick = this.animationTickOffset; // 使用保存的偏移初始化
 		}
 		if (compoundTag.contains("weather_state", 99)) { // 99 = any numeric type
 			int weatherStateId = compoundTag.getInt("weather_state");
@@ -492,6 +484,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	}
 
 	private void setupAnimationStates() {
+		// 1.21.10 logic: Delay animation start with random cooldown
 		switch (this.getState()) {
 			case IDLE:
 				this.interactionGetNoItemAnimationState.stop();
@@ -499,23 +492,28 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				this.interactionDropItemAnimationState.stop();
 				this.interactionDropNoItemAnimationState.stop();
 				
-				// 只在第一次初始化动画，使用负偏移让每个铜傀儡从不同阶段开始
-				if (!this.idleAnimationInitialized) {
-					this.idleAnimationState.start(this.tickCount - this.animationTickOffset);
-					this.headSpinAnimationState.start(this.tickCount - this.animationTickOffset);
-					this.idleAnimationInitialized = true;
+				// Check if it's time to start the animation
+				if (this.idleAnimationStartTick == this.tickCount) {
+					// Start the animation now
+					this.idleAnimationState.start(this.tickCount);
+					this.headSpinAnimationState.start(this.tickCount);
+				} else if (this.idleAnimationStartTick == 0) {
+					// Schedule next animation start (random delay 200-240 ticks)
+					this.idleAnimationStartTick = this.tickCount + this.random.nextInt(
+						CopperGolemConfig.getSpinAnimationMinCooldown(),
+						CopperGolemConfig.getSpinAnimationMaxCooldown()
+					);
 				}
 				
-				// 音效播放：使用偏移后的tick判断
-				int adjustedTick = (this.tickCount + this.animationTickOffset) % 240;
-				if (adjustedTick == 10) {
+				// Play sound 10 ticks after animation starts
+				if (this.tickCount == this.idleAnimationStartTick + 10) {
 					this.playHeadSpinSound();
+					this.idleAnimationStartTick = 0; // Reset for next cycle
 				}
 				break;
 			case GETTING_ITEM:
 				this.idleAnimationState.stop();
 				this.headSpinAnimationState.stop();
-				this.idleAnimationInitialized = false; // 重置标记
 				this.idleAnimationStartTick = 0;
 				this.interactionGetNoItemAnimationState.stop();
 				this.interactionDropItemAnimationState.stop();
@@ -525,7 +523,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			case GETTING_NO_ITEM:
 				this.idleAnimationState.stop();
 				this.headSpinAnimationState.stop();
-				this.idleAnimationInitialized = false; // 重置标记
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionDropNoItemAnimationState.stop();
@@ -535,7 +532,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			case DROPPING_ITEM:
 				this.idleAnimationState.stop();
 				this.headSpinAnimationState.stop();
-				this.idleAnimationInitialized = false; // 重置标记
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionGetNoItemAnimationState.stop();
@@ -545,7 +541,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			case DROPPING_NO_ITEM:
 				this.idleAnimationState.stop();
 				this.headSpinAnimationState.stop();
-				this.idleAnimationInitialized = false; // 重置标记
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionGetNoItemAnimationState.stop();
