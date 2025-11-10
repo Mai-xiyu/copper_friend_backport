@@ -39,6 +39,19 @@ public class CopperGolemConfig {
     // Chest Interaction Settings
     public static final ForgeConfigSpec.IntValue CHEST_INTERACTION_DURATION;
     
+    // Weathering/Oxidation Settings
+    public static final ForgeConfigSpec.IntValue WEATHERING_TICK_MIN;
+    public static final ForgeConfigSpec.IntValue WEATHERING_TICK_MAX;
+    public static final ForgeConfigSpec.DoubleValue TURN_TO_STATUE_CHANCE;
+    
+    // Animation Settings
+    public static final ForgeConfigSpec.IntValue SPIN_ANIMATION_MIN_COOLDOWN;
+    public static final ForgeConfigSpec.IntValue SPIN_ANIMATION_MAX_COOLDOWN;
+    
+    // Spawn Settings
+    public static final ForgeConfigSpec.IntValue SPAWN_COOLDOWN_MIN;
+    public static final ForgeConfigSpec.IntValue SPAWN_COOLDOWN_MAX;
+    
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         
@@ -136,6 +149,52 @@ public class CopperGolemConfig {
         builder.pop();
         builder.pop();
         
+        // Weathering/Oxidation Settings
+        builder.comment("Weathering and oxidation settings||风化和氧化设置")
+               .push("weathering");
+        
+        WEATHERING_TICK_MIN = builder
+            .comment("Minimum ticks before oxidation occurs (default: 504000, ~7 hours)||氧化发生前的最少刻数（默认值：504000，约7小时）")
+            .defineInRange("weatheringTickMin", 504000, 1, 2000000);
+        
+        WEATHERING_TICK_MAX = builder
+            .comment("Maximum ticks before oxidation occurs (default: 552000, ~7.7 hours)||氧化发生前的最多刻数（默认值：552000，约7.7小时）")
+            .defineInRange("weatheringTickMax", 552000, 1, 2000000);
+        
+        TURN_TO_STATUE_CHANCE = builder
+            .comment("Chance per tick for oxidized golem to turn into statue (default: 0.0058, ~0.58%)||氧化傀儡每刻变成雕像的概率（默认值：0.0058，约0.58%）")
+            .defineInRange("turnToStatueChance", 0.0058, 0.0, 1.0);
+        
+        builder.pop();
+        
+        // Animation Settings
+        builder.comment("Animation timing settings||动画计时设置")
+               .push("animation");
+        
+        SPIN_ANIMATION_MIN_COOLDOWN = builder
+            .comment("Minimum cooldown ticks between head spin animations (default: 200, 10 seconds)||头部旋转动画之间的最少冷却刻数（默认值：200，10秒）")
+            .defineInRange("spinAnimationMinCooldown", 200, 1, 1200);
+        
+        SPIN_ANIMATION_MAX_COOLDOWN = builder
+            .comment("Maximum cooldown ticks between head spin animations (default: 240, 12 seconds)||头部旋转动画之间的最多冷却刻数（默认值：240，12秒）")
+            .defineInRange("spinAnimationMaxCooldown", 240, 1, 1200);
+        
+        builder.pop();
+        
+        // Spawn Settings
+        builder.comment("Spawn behavior settings||生成行为设置")
+               .push("spawn");
+        
+        SPAWN_COOLDOWN_MIN = builder
+            .comment("Minimum cooldown ticks for item transport after spawn (default: 60, 3 seconds)||生成后物品传输的最少冷却刻数（默认值：60，3秒）")
+            .defineInRange("spawnCooldownMin", 60, 1, 1200);
+        
+        SPAWN_COOLDOWN_MAX = builder
+            .comment("Maximum cooldown ticks for item transport after spawn (default: 100, 5 seconds)||生成后物品传输的最多冷却刻数（默认值：100，5秒）")
+            .defineInRange("spawnCooldownMax", 100, 1, 1200);
+        
+        builder.pop();
+        
         COMMON_SPEC = builder.build();
     }
     
@@ -206,5 +265,36 @@ public class CopperGolemConfig {
     
     public static int getLookAtPlayerMaxDuration() {
         return LOOK_AT_PLAYER_MAX_LOOK_DURATION.get();
+    }
+    
+    // Weathering/Oxidation getters
+    public static int getWeatheringTickMin() {
+        return WEATHERING_TICK_MIN.get();
+    }
+    
+    public static int getWeatheringTickMax() {
+        return WEATHERING_TICK_MAX.get();
+    }
+    
+    public static float getTurnToStatueChance() {
+        return TURN_TO_STATUE_CHANCE.get().floatValue();
+    }
+    
+    // Animation getters
+    public static int getSpinAnimationMinCooldown() {
+        return SPIN_ANIMATION_MIN_COOLDOWN.get();
+    }
+    
+    public static int getSpinAnimationMaxCooldown() {
+        return SPIN_ANIMATION_MAX_COOLDOWN.get();
+    }
+    
+    // Spawn getters
+    public static int getSpawnCooldownMin() {
+        return SPAWN_COOLDOWN_MIN.get();
+    }
+    
+    public static int getSpawnCooldownMax() {
+        return SPAWN_COOLDOWN_MAX.get();
     }
 }

@@ -36,7 +36,9 @@ public class KeyframeAnimation {
             ModelPart part = getChildRecursive(root, boneName);
             
             if (part == null) {
-                throw new IllegalArgumentException("Cannot animate " + boneName + ", which does not exist in model");
+                // 在生产环境中,某些部件可能找不到,记录警告但不崩溃
+                System.err.println("Warning: Cannot find model part '" + boneName + "' for animation. Animation will be skipped for this part.");
+                continue; // 跳过这个部件的动画
             }
 
             for (AnimationChannel channel : channels) {
@@ -80,27 +82,48 @@ public class KeyframeAnimation {
      * 在模型树中递归查找指定名称的部件
      */
     private static ModelPart findChildInTree(ModelPart parent, String name) {
-        // 使用反射获取 children 字段进行递归查找
+        // 尝试使用getAllParts方法遍历所有部件
         try {
+            // 首先尝试使用反射获取children字段
             java.lang.reflect.Field childrenField = ModelPart.class.getDeclaredField("children");
             childrenField.setAccessible(true);
             @SuppressWarnings("unchecked")
             Map<String, ModelPart> children = (Map<String, ModelPart>) childrenField.get(parent);
             
             // 检查直接子部件
-            if (children.containsKey(name)) {
+            if (children != null && children.containsKey(name)) {
                 return children.get(name);
             }
             
             // 递归查找
-            for (ModelPart child : children.values()) {
-                ModelPart found = findChildInTree(child, name);
-                if (found != null) {
-                    return found;
+            if (children != null) {
+                for (ModelPart child : children.values()) {
+                    ModelPart found = findChildInTree(child, name);
+                    if (found != null) {
+                        return found;
+                    }
                 }
             }
+        } catch (NoSuchFieldException e) {
+            // 如果反射失败,尝试使用hasChild和getChild
+            try {
+                // 遍历可能的子部件名称
+                for (String possibleParent : new String[]{"body", "head", "root"}) {
+                    try {
+                        ModelPart parentPart = parent.getChild(possibleParent);
+                        if (parentPart != null) {
+                            try {
+                                return parentPart.getChild(name);
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            } catch (Exception ignored) {
+            }
         } catch (Exception e) {
-            // Ignore
+            // Ignore other exceptions
         }
         
         return null;

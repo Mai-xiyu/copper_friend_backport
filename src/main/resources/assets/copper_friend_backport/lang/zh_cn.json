@@ -16,36 +16,7 @@
   "block.copper_friend_backport.waxed_exposed_copper_golem_statue": "涂蜡斑驳的铜傀儡雕像",
   "block.copper_friend_backport.waxed_weathered_copper_golem_statue": "涂蜡锈蚀的铜傀儡雕像",
   "block.copper_friend_backport.waxed_oxidized_copper_golem_statue": "涂蜡氧化的铜傀儡雕像",
-  
-  "block.copper_friend_backport.copper_button": "铜按钮",
-  "block.copper_friend_backport.exposed_copper_button": "斑驳的铜按钮",
-  "block.copper_friend_backport.weathered_copper_button": "锈蚀的铜按钮",
-  "block.copper_friend_backport.oxidized_copper_button": "氧化的铜按钮",
-  "block.copper_friend_backport.waxed_copper_button": "涂蜡铜按钮",
-  "block.copper_friend_backport.waxed_exposed_copper_button": "涂蜡斑驳的铜按钮",
-  "block.copper_friend_backport.waxed_weathered_copper_button": "涂蜡锈蚀的铜按钮",
-  "block.copper_friend_backport.waxed_oxidized_copper_button": "涂蜡氧化的铜按钮",
-  
-  "block.copper_friend_backport.copper_door": "铜门",
-  "block.copper_friend_backport.exposed_copper_door": "斑驳的铜门",
-  "block.copper_friend_backport.weathered_copper_door": "锈蚀的铜门",
-  "block.copper_friend_backport.oxidized_copper_door": "氧化的铜门",
-  "block.copper_friend_backport.waxed_copper_door": "涂蜡铜门",
-  "block.copper_friend_backport.waxed_exposed_copper_door": "涂蜡斑驳的铜门",
-  "block.copper_friend_backport.waxed_weathered_copper_door": "涂蜡锈蚀的铜门",
-  "block.copper_friend_backport.waxed_oxidized_copper_door": "涂蜡氧化的铜门",
-  
-  "block.copper_friend_backport.copper_trapdoor": "铜活板门",
-  "block.copper_friend_backport.exposed_copper_trapdoor": "斑驳的铜活板门",
-  "block.copper_friend_backport.weathered_copper_trapdoor": "锈蚀的铜活板门",
-  "block.copper_friend_backport.oxidized_copper_trapdoor": "氧化的铜活板门",
-  "block.copper_friend_backport.waxed_copper_trapdoor": "涂蜡铜活板门",
-  "block.copper_friend_backport.waxed_exposed_copper_trapdoor": "涂蜡斑驳的铜活板门",
-  "block.copper_friend_backport.waxed_weathered_copper_trapdoor": "涂蜡锈蚀的铜活板门",
-  "block.copper_friend_backport.waxed_oxidized_copper_trapdoor": "涂蜡氧化的铜活板门",
-  
-  "block.copper_friend_backport.lightning_rod": "避雷针",
-  
+
   "entity.copper_friend_backport.copper_golem": "铜傀儡",
   
   "item.copper_friend_backport.copper_golem_spawn_egg": "铜傀儡刷怪蛋",
@@ -57,5 +28,21 @@
   "subtitles.entity.copper_golem.step": "铜傀儡：脚步声",
   "subtitles.entity.copper_golem.hurt": "铜傀儡：受伤",
   "subtitles.entity.copper_golem.death": "铜傀儡：死亡",
-  "subtitles.entity.copper_golem.spin": "铜傀儡：旋转"
+  "subtitles.entity.copper_golem.spin": "铜傀儡：旋转",
+  
+  "jade.copper_friend_backport.weather_state.unaffected": "氧化状态: 无氧化",
+  "jade.copper_friend_backport.weather_state.exposed": "氧化状态: 斑驳",
+  "jade.copper_friend_backport.weather_state.weathered": "氧化状态: 锈蚀",
+  "jade.copper_friend_backport.weather_state.oxidized": "氧化状态: 氧化",
+  "jade.copper_friend_backport.state.idle": "状态: 空闲",
+  "jade.copper_friend_backport.state.getting_item": "状态: 拾取物品",
+  "jade.copper_friend_backport.state.getting_no_item": "状态: 尝试拾取",
+  "jade.copper_friend_backport.state.dropping_item": "状态: 放下物品",
+  "jade.copper_friend_backport.state.dropping_no_item": "状态: 尝试放下",
+  "jade.copper_friend_backport.has_lantern": "持有灯笼",
+  "jade.copper_friend_backport.has_poppy": "持有虞美人",
+  
+  "jei.copper_friend_backport.copper_chest.info.1": "铜箱子是一种储物容器",
+  "jei.copper_friend_backport.copper_chest.info.2": "会随时间氧化变色",
+  "jei.copper_friend_backport.copper_chest.info.3": "使用蜜脾可以防止氧化"
 }

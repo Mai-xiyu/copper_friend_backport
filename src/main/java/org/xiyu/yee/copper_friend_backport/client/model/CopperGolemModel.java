@@ -141,7 +141,6 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
             }
             
             // 应用各种动画状态 - 使用关键帧动画系统
-            // spinHeadAnimation包含了IDLE动画（头部旋转和仰头）
             this.spinHeadAnimation.apply(copperGolem.getHeadSpinAnimationState(), ageInTicks);
             this.gettingItemAnimation.apply(copperGolem.getInteractionGetItemAnimationState(), ageInTicks);
             this.gettingNoItemAnimation.apply(copperGolem.getInteractionGetNoItemAnimationState(), ageInTicks);

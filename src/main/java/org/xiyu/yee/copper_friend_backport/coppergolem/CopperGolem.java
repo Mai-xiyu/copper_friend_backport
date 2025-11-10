@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import org.xiyu.yee.copper_friend_backport.CopperGolemConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -57,18 +58,20 @@ import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
 import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
+import org.xiyu.yee.copper_friend_backport.CopperGolemConfig;
 
 public class CopperGolem extends AbstractGolem implements Shearable {
 	private static final long IGNORE_WEATHERING_TICK = -2L;
 	private static final long UNSET_WEATHERING_TICK = -1L;
-	private static final int WEATHERING_TICK_FROM = 504000;
-	private static final int WEATHERING_TICK_TO = 552000;
-	private static final int SPIN_ANIMATION_MIN_COOLDOWN = 200;
-	private static final int SPIN_ANIMATION_MAX_COOLDOWN = 240;
+	// Note: Actual values are loaded from config via getters
+	// private static final int WEATHERING_TICK_FROM = 504000;
+	// private static final int WEATHERING_TICK_TO = 552000;
+	// private static final int SPIN_ANIMATION_MIN_COOLDOWN = 200;
+	// private static final int SPIN_ANIMATION_MAX_COOLDOWN = 240;
 	private static final float SPIN_SOUND_TIME_INTERVAL_OFFSET = 10.0F;
-	private static final float TURN_TO_STATUE_CHANCE = 0.0058F;
-	private static final int SPAWN_COOLDOWN_MIN = 60;
-	private static final int SPAWN_COOLDOWN_MAX = 100;
+	// private static final float TURN_TO_STATUE_CHANCE = 0.0058F;
+	// private static final int SPAWN_COOLDOWN_MIN = 60;
+	// private static final int SPAWN_COOLDOWN_MAX = 100;
 	private static final EntityDataAccessor<WeatheringCopper.WeatherState> DATA_WEATHER_STATE = SynchedEntityData.defineId(
 		CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.WEATHERING_COPPER_STATE
 	);
@@ -422,7 +425,10 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	private void updateWeathering(ServerLevel serverLevel, RandomSource randomSource, long l) {
 		if (this.nextWeatheringTick != -2L) {
 			if (this.nextWeatheringTick == -1L) {
-				this.nextWeatheringTick = l + randomSource.nextIntBetweenInclusive(504000, 552000);
+				this.nextWeatheringTick = l + randomSource.nextIntBetweenInclusive(
+					CopperGolemConfig.getWeatheringTickMin(), 
+					CopperGolemConfig.getWeatheringTickMax()
+				);
 			} else {
 			WeatheringCopper.WeatherState weatherState = this.entityData.get(DATA_WEATHER_STATE);
 			boolean bl = weatherState.equals(WeatheringCopper.WeatherState.OXIDIZED);
@@ -430,7 +436,10 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				WeatheringCopper.WeatherState weatherState2 = weatherState.next();
 				boolean bl2 = weatherState2.equals(WeatheringCopper.WeatherState.OXIDIZED);
 				this.setWeatherState(weatherState2);
-				this.nextWeatheringTick = bl2 ? 0L : this.nextWeatheringTick + randomSource.nextIntBetweenInclusive(504000, 552000);
+				this.nextWeatheringTick = bl2 ? 0L : this.nextWeatheringTick + randomSource.nextIntBetweenInclusive(
+					CopperGolemConfig.getWeatheringTickMin(), 
+					CopperGolemConfig.getWeatheringTickMax()
+				);
 			}
 
 			// TODO: 临时禁用 - 避免触发ModBlocks静态初始化导致注册表冻结错误
@@ -443,7 +452,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	}
 
 	private boolean canTurnToStatue(Level level) {
-		return level.getBlockState(this.blockPosition()).is(Blocks.AIR) && level.random.nextFloat() <= 0.0058F;
+		return level.getBlockState(this.blockPosition()).is(Blocks.AIR) 
+			&& level.random.nextFloat() <= CopperGolemConfig.getTurnToStatueChance();
 	}
 
 	private void turnToStatue(ServerLevel serverLevel) {
@@ -556,7 +566,12 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	) {
 		this.playSpawnSound();
 		// Initialize memory after brain is fully set up
-		this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
+		this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), 
+			this.getRandom().nextInt(
+				CopperGolemConfig.getSpawnCooldownMin(), 
+				CopperGolemConfig.getSpawnCooldownMax()
+			)
+		);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 

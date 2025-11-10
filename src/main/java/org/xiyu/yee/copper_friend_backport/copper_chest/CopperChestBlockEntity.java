@@ -7,12 +7,41 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
 import org.xiyu.yee.copper_friend_backport.registry.ModBlockEntity;
 import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 
 public class CopperChestBlockEntity extends ChestBlockEntity {
+    
+    // Custom openersCounter that plays copper chest sounds
+    private final ContainerOpenersCounter customOpenersCounter = new ContainerOpenersCounter() {
+        @Override
+        protected void onOpen(Level level, BlockPos pos, BlockState state) {
+            playCopperChestSound(level, pos, state, SoundEvents.CHEST_OPEN);
+        }
+
+        @Override
+        protected void onClose(Level level, BlockPos pos, BlockState state) {
+            playCopperChestSound(level, pos, state, SoundEvents.CHEST_CLOSE);
+        }
+
+        @Override
+        protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int oldCount, int newCount) {
+            level.blockEvent(pos, state.getBlock(), 1, newCount);
+        }
+
+        @Override
+        protected boolean isOwnContainer(Player player) {
+            if (player.containerMenu instanceof net.minecraft.world.inventory.ChestMenu) {
+                net.minecraft.world.Container container = ((net.minecraft.world.inventory.ChestMenu) player.containerMenu).getContainer();
+                return container == CopperChestBlockEntity.this;
+            }
+            return false;
+        }
+    };
     
     public CopperChestBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntity.COPPER_CHEST.get(), pos, state);
@@ -23,9 +52,29 @@ public class CopperChestBlockEntity extends ChestBlockEntity {
         return Component.translatable("container.copper_chest");
     }
 
+    @Override
+    public void startOpen(Player player) {
+        if (!this.remove && !player.isSpectator()) {
+            this.customOpenersCounter.incrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
+        }
+    }
+
+    @Override
+    public void stopOpen(Player player) {
+        if (!this.remove && !player.isSpectator()) {
+            this.customOpenersCounter.decrementOpeners(player, this.getLevel(), this.getBlockPos(), this.getBlockState());
+        }
+    }
+
+    @Override
+    public void recheckOpen() {
+        if (!this.remove) {
+            this.customOpenersCounter.recheckOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
+        }
+    }
+
     /**
-     * Override the sound playing to use custom copper chest sounds.
-     * This is called by the openersCounter when players open/close the chest.
+     * Play copper chest sound based on oxidation state
      */
     private static void playCopperChestSound(Level level, BlockPos pos, BlockState state, SoundEvent defaultSound) {
         if (state.getBlock() instanceof BaseCopperChestBlock copperChest) {
@@ -51,12 +100,5 @@ public class CopperChestBlockEntity extends ChestBlockEntity {
             level.playSound(null, pos, soundToPlay, SoundSource.BLOCKS, 0.5F, 
                 level.random.nextFloat() * 0.1F + 0.9F);
         }
-    }
-    
-    /**
-     * Public method for Mixin to call
-     */
-    public static void playSound(Level level, BlockPos pos, BlockState state, SoundEvent defaultSound) {
-        playCopperChestSound(level, pos, state, defaultSound);
     }
 }

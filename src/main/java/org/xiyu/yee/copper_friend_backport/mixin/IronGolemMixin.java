@@ -17,7 +17,6 @@ public class IronGolemMixin {
     @Inject(method = "registerGoals", at = @At("TAIL"))
     private void addOfferFlowerGoal(CallbackInfo ci) {
         IronGolem ironGolem = (IronGolem) (Object) this;
-        // 添加送花AI，优先级2（在LookAtPlayerGoal之前）
         ironGolem.goalSelector.addGoal(2, new IronGolemOfferFlowerGoal(ironGolem));
     }
 }

@@ -57,5 +57,21 @@
   "subtitles.entity.copper_golem.step": "Copper Golem steps",
   "subtitles.entity.copper_golem.hurt": "Copper Golem hurts",
   "subtitles.entity.copper_golem.death": "Copper Golem dies",
-  "subtitles.entity.copper_golem.spin": "Copper Golem spins"
+  "subtitles.entity.copper_golem.spin": "Copper Golem spins",
+  
+  "jade.copper_friend_backport.weather_state.unaffected": "Weather State: Unaffected",
+  "jade.copper_friend_backport.weather_state.exposed": "Weather State: Exposed",
+  "jade.copper_friend_backport.weather_state.weathered": "Weather State: Weathered",
+  "jade.copper_friend_backport.weather_state.oxidized": "Weather State: Oxidized",
+  "jade.copper_friend_backport.state.idle": "State: Idle",
+  "jade.copper_friend_backport.state.getting_item": "State: Getting Item",
+  "jade.copper_friend_backport.state.getting_no_item": "State: Trying to Get",
+  "jade.copper_friend_backport.state.dropping_item": "State: Dropping Item",
+  "jade.copper_friend_backport.state.dropping_no_item": "State: Trying to Drop",
+  "jade.copper_friend_backport.has_lantern": "Holding Lantern",
+  "jade.copper_friend_backport.has_poppy": "Holding Poppy",
+  
+  "jei.copper_friend_backport.copper_chest.info.1": "Copper Chest is a storage container",
+  "jei.copper_friend_backport.copper_chest.info.2": "Oxidizes and changes color over time",
+  "jei.copper_friend_backport.copper_chest.info.3": "Use honeycomb to prevent oxidation"
 }
