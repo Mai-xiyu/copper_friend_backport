@@ -12,6 +12,8 @@ import org.xiyu.yee.copper_friend_backport.CopperFriendBackport;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
 import org.xiyu.yee.copper_friend_backport.copper_chest.OxidizableCopperChestBlock;
 import org.xiyu.yee.copper_friend_backport.copper_chest.WaxedCopperChestBlock;
+import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock;
+import org.xiyu.yee.copper_friend_backport.world.WeatheringCopperGolemStatueBlock;
 // import org.xiyu.yee.copper_friend_backport.world.WeatheringCopperGolemStatueBlock;
 // import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock;
 
@@ -126,7 +128,6 @@ public class ModBlocks {
     );
     
     // Copper Golem Statues - Oxidizable variants (COMMENTED OUT FOR NOW)
-    /*
     public static final RegistryObject<Block> COPPER_GOLEM_STATUE = BLOCKS.register(
             "copper_golem_statue",
             () -> new WeatheringCopperGolemStatueBlock(
@@ -198,5 +199,4 @@ public class ModBlocks {
                     BlockBehaviour.Properties.copy(OXIDIZED_COPPER_GOLEM_STATUE.get())
             )
     );
-    */
 }

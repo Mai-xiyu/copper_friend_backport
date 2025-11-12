@@ -3,6 +3,7 @@ package org.xiyu.yee.copper_friend_backport;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
  * Configuration class for Copper Golem AI behavior.
@@ -202,8 +203,8 @@ public class CopperGolemConfig {
      * Register the configuration file.
      * Should be called during mod initialization.
      */
-    public static void register() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, COMMON_SPEC, "copper_friend_backport-common.toml");
+    public static void register(FMLJavaModLoadingContext context) {
+        context.registerConfig(ModConfig.Type.COMMON, COMMON_SPEC, "copper_friend_backport-common.toml");
     }
     
     // Convenience getters for use in code

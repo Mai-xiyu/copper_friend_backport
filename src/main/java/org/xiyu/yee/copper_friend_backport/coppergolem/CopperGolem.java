@@ -8,6 +8,13 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.level.GameRules;
+import org.jetbrains.annotations.NotNull;
 import org.xiyu.yee.copper_friend_backport.CopperGolemConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,7 +27,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,12 +42,10 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -55,68 +59,63 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
+import org.xiyu.yee.copper_friend_backport.registry.ModBlocks;
+import org.xiyu.yee.copper_friend_backport.registry.ModEntityDataSerializers;
 import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
+import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock;
 import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
-import org.xiyu.yee.copper_friend_backport.CopperGolemConfig;
 
 public class CopperGolem extends AbstractGolem implements Shearable {
-	private static final long IGNORE_WEATHERING_TICK = -2L;
-	private static final long UNSET_WEATHERING_TICK = -1L;
-	// Note: Actual values are loaded from config via getters
-	// private static final int WEATHERING_TICK_FROM = 504000;
-	// private static final int WEATHERING_TICK_TO = 552000;
-	// private static final int SPIN_ANIMATION_MIN_COOLDOWN = 200;
-	// private static final int SPIN_ANIMATION_MAX_COOLDOWN = 240;
-	private static final float SPIN_SOUND_TIME_INTERVAL_OFFSET = 10.0F;
-	// private static final float TURN_TO_STATUE_CHANCE = 0.0058F;
-	// private static final int SPAWN_COOLDOWN_MIN = 60;
-	// private static final int SPAWN_COOLDOWN_MAX = 100;
+    private static long IGNORE_WEATHERING_TICK = -2L;
+    private static long UNSET_WEATHERING_TICK = -1L;
+    private static int WEATHERING_TICK_FROM = 504000;
+    private static int WEATHERING_TICK_TO = 552000;
+    private static int SPIN_ANIMATION_MIN_COOLDOWN = 200;
+    private static int SPIN_ANIMATION_MAX_COOLDOWN = 240;
+    private static float SPIN_SOUND_TIME_INTERVAL_OFFSET = 10.0F;
+    private static float TURN_TO_STATUE_CHANCE = 0.0058F;
+    private static int SPAWN_COOLDOWN_MIN = 60;
+    private static int SPAWN_COOLDOWN_MAX = 100;
 	private static final EntityDataAccessor<WeatheringCopper.WeatherState> DATA_WEATHER_STATE = SynchedEntityData.defineId(
-		CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.WEATHERING_COPPER_STATE
+		CopperGolem.class, ModEntityDataSerializers.WEATHERING_COPPER_STATE
 	);
 	private static final EntityDataAccessor<CopperGolemState> COPPER_GOLEM_STATE = SynchedEntityData.defineId(
-		CopperGolem.class, org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers.COPPER_GOLEM_STATE
+		CopperGolem.class, ModEntityDataSerializers.COPPER_GOLEM_STATE
 	);
 	private static final EntityDataAccessor<Boolean> DATA_IS_LANTERN = SynchedEntityData.defineId(
-		CopperGolem.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN
+		CopperGolem.class, EntityDataSerializers.BOOLEAN
 	);
 	private static final EntityDataAccessor<Boolean> DATA_HAS_POPPY = SynchedEntityData.defineId(
-		CopperGolem.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN
+		CopperGolem.class, EntityDataSerializers.BOOLEAN
 	);
 	@Nullable
 	private BlockPos openedChestPos;
 	@Nullable
 	private UUID lastLightningBoltUUID;
 	private long nextWeatheringTick = -1L;
-	private int idleAnimationStartTick = 0; // 1.21.10: 动画开始的目标tick，0表示未设置
+	private int idleAnimationStartTick = 0;
 	private final AnimationState idleAnimationState = new AnimationState();
 	private final AnimationState headSpinAnimationState = new AnimationState();
 	private final AnimationState interactionGetItemAnimationState = new AnimationState();
 	private final AnimationState interactionGetNoItemAnimationState = new AnimationState();
 	private final AnimationState interactionDropItemAnimationState = new AnimationState();
 	private final AnimationState interactionDropNoItemAnimationState = new AnimationState();
-	// 1.20.1 doesn't have SADDLE or BODY slots, using CHEST as antenna slot
 	public static final EquipmentSlot EQUIPMENT_SLOT_ANTENNA = EquipmentSlot.CHEST;
 
 	public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
 		super(entityType, level);
-		// setRequiredPathLength doesn't exist in 1.20.1
-		// this.getNavigation().setRequiredPathLength(48.0F);
-		this.getNavigation().setCanFloat(true);
+        ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
 		this.setPersistenceRequired();
 		this.setState(CopperGolemState.IDLE);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
 		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
-		// 1.21.10: Initialize cooldown in constructor
-		// Note: Brain may not be ready yet, will set in finalizeSpawn
+        this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes()
-			.add(Attributes.MOVEMENT_SPEED, 0.2F)
-			.add(Attributes.MAX_HEALTH, 12.0);
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2F).add(Attributes.MAX_HEALTH, 12.0);
 	}
 
 	public CopperGolemState getState() {
@@ -222,13 +221,13 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	}
 
 	@Override
-	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
+	protected @NotNull Brain<?> makeBrain(Dynamic<?> dynamic) {
 		return CopperGolemAi.makeBrain(this.brainProvider().makeBrain(dynamic));
 	}
 
 	@Override
-	public Brain<CopperGolem> getBrain() {
-		return (Brain<CopperGolem>)super.getBrain();
+	public @NotNull Brain<CopperGolem> getBrain() {
+		return (Brain<CopperGolem>) super.getBrain();
 	}
 
 	@Override
@@ -303,8 +302,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		
-		// Handle empty hand - retrieve item from golem
 		if (itemStack.isEmpty()) {
 			ItemStack itemStack2 = this.getMainHandItem();
 			if (!itemStack2.isEmpty()) {
@@ -315,17 +312,13 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		}
 
 		Level level = this.level();
-		
-		// Handle shears - remove poppy first, then handle oxidation
 		if (itemStack.is(Items.SHEARS)) {
-			// First check if golem has a poppy to remove
 			if (this.hasPoppy()) {
 				if (level instanceof ServerLevel serverLevel) {
-					// Drop poppy
 					ItemStack poppyStack = new ItemStack(Items.POPPY);
 					this.spawnAtLocation(poppyStack);
 					this.setHasPoppy(false);
-					
+
 					// Play sound
 					level.playSound(null, this, SoundEvents.SHEEP_SHEAR, this.getSoundSource(), 1.0F, 1.0F);
 					this.gameEvent(GameEvent.SHEAR, player);
@@ -343,55 +336,53 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				return InteractionResult.SUCCESS;
 			}
 		}
-		
-		// Handle poppy - golem accepts it and wears on head
 		if (itemStack.is(Items.POPPY) && !this.hasPoppy()) {
 			this.setHasPoppy(true);
 			level.playSound(null, this, SoundEvents.ITEM_PICKUP, this.getSoundSource(), 1.0F, 1.0F);
-			
+
 			if (!player.getAbilities().instabuild) {
 				itemStack.shrink(1);
 			}
 			return InteractionResult.SUCCESS;
 		}
-		
+
 		if (level.isClientSide()) {
 			return InteractionResult.PASS;
 		}
-		
+
 		// Handle honeycomb - apply wax (requires sneaking)
 		if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L && player.isCrouching()) {
 			// Play wax on sound
 			level.playSound(null, this, SoundEvents.HONEYCOMB_WAX_ON, this.getSoundSource(), 1.0F, 1.0F);
 			level.levelEvent(player, 3003, this.blockPosition(), 0);
 			this.nextWeatheringTick = -2L;
-			
+
 			// Grant advancement
 			if (player instanceof ServerPlayer serverPlayer) {
 				CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
 			}
-			
+
 			if (!player.getAbilities().instabuild) {
 				itemStack.shrink(1);
 			}
 			return InteractionResult.SUCCESS;
 		}
-		
+
 		// Handle axe - dewax (requires sneaking)
 		if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L && player.isCrouching()) {
 			level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
 			level.levelEvent(player, 3004, this.blockPosition(), 0); // Wax off particles
 			this.nextWeatheringTick = -1L;
-			
+
 			// Grant advancement
 			if (player instanceof ServerPlayer serverPlayer) {
 				CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
 			}
-			
+
 			itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
 			return InteractionResult.SUCCESS;
 		}
-		
+
 		// Handle axe - scrape oxidation (requires sneaking)
 		if (itemStack.is(ItemTags.AXES) && player.isCrouching()) {
 			WeatheringCopper.WeatherState weatherState = this.getWeatherState();
@@ -400,12 +391,12 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				level.levelEvent(player, 3005, this.blockPosition(), 0); // Scrape particles
 				this.nextWeatheringTick = -1L;
 				this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
-				
+
 				// Grant advancement
 				if (player instanceof ServerPlayer serverPlayer) {
 					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
 				}
-				
+
 				itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
 				return InteractionResult.SUCCESS;
 			}
@@ -418,50 +409,35 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		if (this.nextWeatheringTick != -2L) {
 			if (this.nextWeatheringTick == -1L) {
 				this.nextWeatheringTick = l + randomSource.nextIntBetweenInclusive(
-					CopperGolemConfig.getWeatheringTickMin(), 
+					CopperGolemConfig.getWeatheringTickMin(),
 					CopperGolemConfig.getWeatheringTickMax()
 				);
 			} else {
-			WeatheringCopper.WeatherState weatherState = this.entityData.get(DATA_WEATHER_STATE);
-			boolean bl = weatherState.equals(WeatheringCopper.WeatherState.OXIDIZED);
-			if (l >= this.nextWeatheringTick && !bl) {
-				WeatheringCopper.WeatherState weatherState2 = weatherState.next();
-				boolean bl2 = weatherState2.equals(WeatheringCopper.WeatherState.OXIDIZED);
-				this.setWeatherState(weatherState2);
-				this.nextWeatheringTick = bl2 ? 0L : this.nextWeatheringTick + randomSource.nextIntBetweenInclusive(
-					CopperGolemConfig.getWeatheringTickMin(), 
-					CopperGolemConfig.getWeatheringTickMax()
-				);
-			}
+			    WeatheringCopper.WeatherState weatherState = this.entityData.get(DATA_WEATHER_STATE);
+			    boolean bl = weatherState.equals(WeatheringCopper.WeatherState.OXIDIZED);
+			    if (l >= this.nextWeatheringTick && !bl) {
+				    WeatheringCopper.WeatherState weatherState2 = weatherState.next();
+				    boolean bl2 = weatherState2.equals(WeatheringCopper.WeatherState.OXIDIZED);
+				    this.setWeatherState(weatherState2);
+				    this.nextWeatheringTick = bl2 ? 0L : this.nextWeatheringTick + randomSource.nextIntBetweenInclusive(CopperGolemConfig.getWeatheringTickMin(), CopperGolemConfig.getWeatheringTickMax());
+			    }
 
-			// TODO: 临时禁用 - 避免触发ModBlocks静态初始化导致注册表冻结错误
-			// 用户会在稍后自行注册方块,现在专注于测试动画系统
-			// if (bl && this.canTurnToStatue(serverLevel)) {
-			// 	this.turnToStatue(serverLevel);
-			// }
+                if (bl && this.canTurnToStatue(serverLevel)) {
+                    this.turnToStatue(serverLevel);
+                }
 			}
 		}
 	}
 
 	private boolean canTurnToStatue(Level level) {
-		return level.getBlockState(this.blockPosition()).is(Blocks.AIR) 
-			&& level.random.nextFloat() <= CopperGolemConfig.getTurnToStatueChance();
+		return level.getBlockState(this.blockPosition()).is(Blocks.AIR) && level.random.nextFloat() <= CopperGolemConfig.getTurnToStatueChance();
 	}
 
 	private void turnToStatue(ServerLevel serverLevel) {
-		// Drop poppy if golem has one
-		if (this.hasPoppy()) {
-			ItemStack poppyStack = new ItemStack(Items.POPPY);
-			this.spawnAtLocation(poppyStack);
-		}
-		
-		// TODO: 临时禁用 - 等待方块注册完成后启用
-		// 这样可以先测试动画系统
-		/*
 		BlockPos blockPos = this.blockPosition();
 		serverLevel.setBlock(
 			blockPos,
-			org.xiyu.yee.copper_friend_backport.registry.ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE
+			ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE.get()
 				.defaultBlockState()
 				.setValue(CopperGolemStatueBlock.POSE, CopperGolemStatueBlock.Pose.values()[this.random.nextInt(0, CopperGolemStatueBlock.Pose.values().length)])
 				.setValue(CopperGolemStatueBlock.FACING, Direction.fromYRot(this.getYRot())),
@@ -471,49 +447,37 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			copperGolemStatueBlockEntity.createStatue(this);
 			this.dropPreservedEquipment(serverLevel, (itemStack) -> true);
 			this.discard();
-			this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_BECOME_STATUE.get());
+			this.playSound(ModSoundEvents.COPPER_GOLEM_BECOME_STATUE.get());
 			if (this.isLeashed()) {
 				if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 					this.dropLeash(true, true);
 				} else {
-					this.dropLeash(false, false);
+					this.dropLeash(true, false);
 				}
 			}
 		}
-		*/
 	}
 
 	private void setupAnimationStates() {
-		// 1.21.10 logic: Delay animation start with random cooldown
 		switch (this.getState()) {
 			case IDLE:
 				this.interactionGetNoItemAnimationState.stop();
 				this.interactionGetItemAnimationState.stop();
 				this.interactionDropItemAnimationState.stop();
 				this.interactionDropNoItemAnimationState.stop();
-				
-				// Check if it's time to start the animation
 				if (this.idleAnimationStartTick == this.tickCount) {
-					// Start the animation now
 					this.idleAnimationState.start(this.tickCount);
-					this.headSpinAnimationState.start(this.tickCount);
 				} else if (this.idleAnimationStartTick == 0) {
-					// Schedule next animation start (random delay 200-240 ticks)
-					this.idleAnimationStartTick = this.tickCount + this.random.nextInt(
-						CopperGolemConfig.getSpinAnimationMinCooldown(),
-						CopperGolemConfig.getSpinAnimationMaxCooldown()
-					);
+					this.idleAnimationStartTick = this.tickCount + this.random.nextInt(CopperGolemConfig.getSpinAnimationMinCooldown(), CopperGolemConfig.getSpinAnimationMaxCooldown());
 				}
-				
-				// Play sound 10 ticks after animation starts
+
 				if (this.tickCount == this.idleAnimationStartTick + 10) {
 					this.playHeadSpinSound();
-					this.idleAnimationStartTick = 0; // Reset for next cycle
+					this.idleAnimationStartTick = 0;
 				}
 				break;
 			case GETTING_ITEM:
 				this.idleAnimationState.stop();
-				this.headSpinAnimationState.stop();
 				this.idleAnimationStartTick = 0;
 				this.interactionGetNoItemAnimationState.stop();
 				this.interactionDropItemAnimationState.stop();
@@ -522,7 +486,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				break;
 			case GETTING_NO_ITEM:
 				this.idleAnimationState.stop();
-				this.headSpinAnimationState.stop();
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionDropNoItemAnimationState.stop();
@@ -531,7 +494,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				break;
 			case DROPPING_ITEM:
 				this.idleAnimationState.stop();
-				this.headSpinAnimationState.stop();
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionGetNoItemAnimationState.stop();
@@ -540,7 +502,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				break;
 			case DROPPING_NO_ITEM:
 				this.idleAnimationState.stop();
-				this.headSpinAnimationState.stop();
 				this.idleAnimationStartTick = 0;
 				this.interactionGetItemAnimationState.stop();
 				this.interactionGetNoItemAnimationState.stop();
@@ -560,18 +521,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, net.minecraft.world.entity.MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag
 	) {
 		this.playSpawnSound();
-		// Initialize memory after brain is fully set up
-		this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), 
-			this.getRandom().nextInt(
-				CopperGolemConfig.getSpawnCooldownMin(), 
-				CopperGolemConfig.getSpawnCooldownMax()
-			)
-		);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public void playSpawnSound() {
-		this.playSound(org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SPAWN.get());
+		this.playSound(ModSoundEvents.COPPER_GOLEM_SPAWN.get());
 	}
 
 	private void playHeadSpinSound() {
@@ -604,7 +558,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		return new Vec3(0.0, 0.75F * this.getEyeHeight(), 0.0);
 	}
 
-	// ContainerUser interface method - not available in 1.20.1
 	public boolean hasContainerOpen(ContainerOpenersCounter containerOpenersCounter, BlockPos blockPos) {
 		if (this.openedChestPos == null) {
 			return false;
@@ -621,7 +574,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         return blockPos.relative(direction);
     }
 
-	// ContainerUser interface method - not available in 1.20.1
 	public double getContainerInteractionRange() {
 		return 3.0;
 	}
@@ -629,7 +581,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	@Override
 	public void shear(SoundSource soundSource) {
 		if (this.level() instanceof ServerLevel serverLevel) {
-			serverLevel.playSound(null, this, org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents.COPPER_GOLEM_SHEAR.get(), soundSource, 1.0F, 1.0F);
+			serverLevel.playSound(null, this, ModSoundEvents.COPPER_GOLEM_SHEAR.get(), soundSource, 1.0F, 1.0F);
 			ItemStack itemStack2 = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
 			this.setItemSlot(EQUIPMENT_SLOT_ANTENNA, ItemStack.EMPTY);
 			this.spawnAtLocation(itemStack2, 1.5F);
@@ -678,7 +630,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
 	@Override
 	protected void dropAllDeathLoot(DamageSource damageSource) {
-		// Drop poppy if golem has one
 		if (this.hasPoppy()) {
 			ItemStack poppyStack = new ItemStack(Items.POPPY);
 			this.spawnAtLocation(poppyStack);

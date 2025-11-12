@@ -5,7 +5,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
-import org.xiyu.yee.copper_friend_backport.registry.EntityDataSerializers;
+import org.xiyu.yee.copper_friend_backport.registry.ModEntityDataSerializers;
 import org.xiyu.yee.copper_friend_backport.registry.ModBlockEntity;
 import org.xiyu.yee.copper_friend_backport.registry.ModBlocks;
 import org.xiyu.yee.copper_friend_backport.registry.ModCreativeTabs;
@@ -23,9 +23,9 @@ public class CopperFriendBackport {
         IEventBus modEventBus = context.getModEventBus();
 
         // Register configuration
-        CopperGolemConfig.register();
+        CopperGolemConfig.register(context);
         
-        EntityDataSerializers.init();
+        ModEntityDataSerializers.init();
         
         // Register memory modules
         ModMemoryModules.MEMORY_MODULE_TYPES.register(modEventBus);

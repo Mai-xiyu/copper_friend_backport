@@ -20,7 +20,7 @@ public class CopperFriendJEIPlugin implements IModPlugin {
     
     @Override
     public ResourceLocation getPluginUid() {
-        return new ResourceLocation(CopperFriendBackport.MOD_ID, "jei_plugin");
+        return ResourceLocation.fromNamespaceAndPath(CopperFriendBackport.MOD_ID, "jei_plugin");
     }
     
     @Override

@@ -19,17 +19,17 @@ public class CopperChestBlockEntity extends ChestBlockEntity {
     // Custom openersCounter that plays copper chest sounds
     private final ContainerOpenersCounter customOpenersCounter = new ContainerOpenersCounter() {
         @Override
-        protected void onOpen(Level level, BlockPos pos, BlockState state) {
+        public void onOpen(Level level, BlockPos pos, BlockState state) {
             playCopperChestSound(level, pos, state, SoundEvents.CHEST_OPEN);
         }
 
         @Override
-        protected void onClose(Level level, BlockPos pos, BlockState state) {
+        public void onClose(Level level, BlockPos pos, BlockState state) {
             playCopperChestSound(level, pos, state, SoundEvents.CHEST_CLOSE);
         }
 
         @Override
-        protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int oldCount, int newCount) {
+        public void openerCountChanged(Level level, BlockPos pos, BlockState state, int oldCount, int newCount) {
             level.blockEvent(pos, state.getBlock(), 1, newCount);
         }
 
@@ -73,14 +73,9 @@ public class CopperChestBlockEntity extends ChestBlockEntity {
         }
     }
 
-    /**
-     * Play copper chest sound based on oxidation state
-     */
     private static void playCopperChestSound(Level level, BlockPos pos, BlockState state, SoundEvent defaultSound) {
         if (state.getBlock() instanceof BaseCopperChestBlock copperChest) {
             WeatheringCopper.WeatherState weatherState = copperChest.getWeatherState();
-            
-            // Select sound based on oxidation state and whether opening or closing
             SoundEvent soundToPlay;
             if (defaultSound == SoundEvents.CHEST_OPEN) {
                 soundToPlay = switch (weatherState) {
@@ -88,15 +83,14 @@ public class CopperChestBlockEntity extends ChestBlockEntity {
                     case WEATHERED -> ModSoundEvents.COPPER_CHEST_WEATHERED_OPEN.get();
                     case OXIDIZED -> ModSoundEvents.COPPER_CHEST_OXIDIZED_OPEN.get();
                 };
-            } else { // CHEST_CLOSE
+            } else {
                 soundToPlay = switch (weatherState) {
                     case UNAFFECTED, EXPOSED -> ModSoundEvents.COPPER_CHEST_CLOSE.get();
                     case WEATHERED -> ModSoundEvents.COPPER_CHEST_WEATHERED_CLOSE.get();
                     case OXIDIZED -> ModSoundEvents.COPPER_CHEST_OXIDIZED_CLOSE.get();
                 };
             }
-            
-            // Play the sound
+
             level.playSound(null, pos, soundToPlay, SoundSource.BLOCKS, 0.5F, 
                 level.random.nextFloat() * 0.1F + 0.9F);
         }
