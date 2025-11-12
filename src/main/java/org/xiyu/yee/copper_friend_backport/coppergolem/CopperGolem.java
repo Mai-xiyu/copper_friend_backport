@@ -9,11 +9,7 @@ import java.util.function.Predicate;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.world.entity.ai.behavior.BehaviorControl;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.level.GameRules;
 import org.jetbrains.annotations.NotNull;
 import org.xiyu.yee.copper_friend_backport.CopperGolemConfig;
 import net.minecraft.core.BlockPos;
@@ -52,6 +48,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -59,12 +56,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.xiyu.yee.copper_friend_backport.WeatheringCopper;
-import org.xiyu.yee.copper_friend_backport.registry.ModBlocks;
 import org.xiyu.yee.copper_friend_backport.registry.ModEntityDataSerializers;
 import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
 import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
-import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlock;
-import org.xiyu.yee.copper_friend_backport.world.CopperGolemStatueBlockEntity;
 
 public class CopperGolem extends AbstractGolem implements Shearable {
     private static long IGNORE_WEATHERING_TICK = -2L;
@@ -95,6 +89,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	private UUID lastLightningBoltUUID;
 	private long nextWeatheringTick = -1L;
 	private int idleAnimationStartTick = 0;
+	@Nullable
+	private BlockPos lastLightUpdatePos = null; // Track position for dynamic lighting updates
 	private final AnimationState idleAnimationState = new AnimationState();
 	private final AnimationState headSpinAnimationState = new AnimationState();
 	private final AnimationState interactionGetItemAnimationState = new AnimationState();
@@ -152,7 +148,30 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	 * Sets whether this golem is a lantern (emits light).
 	 */
 	public void setLantern(boolean isLantern) {
+		boolean wasLantern = this.isLantern();
 		this.entityData.set(DATA_IS_LANTERN, isLantern);
+		
+		// If lantern status changed and we're on server side, handle light source
+		if (!this.level().isClientSide() && wasLantern != isLantern) {
+			BlockPos pos = this.blockPosition();
+			if (!isLantern && this.lastLightUpdatePos != null) {
+				// Became non-lantern: remove light block
+				BlockState state = this.level().getBlockState(this.lastLightUpdatePos);
+				if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 7) {
+					this.level().removeBlock(this.lastLightUpdatePos, false);
+				}
+				this.lastLightUpdatePos = null;
+			} else if (isLantern) {
+				// Became lantern: place light block if position is air
+				BlockState currentState = this.level().getBlockState(pos);
+				if (currentState.isAir()) {
+					this.level().setBlock(pos, 
+						Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 7),
+						3);
+					this.lastLightUpdatePos = pos;
+				}
+			}
+		}
 	}
 
 	/**
@@ -178,12 +197,13 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
 	/**
 	 * Returns the light emission level for this golem.
+	 * Jack O'Lantern golems emit light level 7.
 	 */
 	public int getLightEmission() {
-		return this.isLantern() ? 14 : 0;
+		return this.isLantern() ? 7 : 0;
 	}
 
-	public void setOpenedChestPos(BlockPos blockPos) {
+    public void setOpenedChestPos(BlockPos blockPos) {
 		this.openedChestPos = blockPos;
 	}
 
@@ -191,11 +211,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		this.openedChestPos = null;
 	}
 
-	public AnimationState getIdleAnimationState() {
-		return this.idleAnimationState;
-	}
-
-	public AnimationState getHeadSpinAnimationState() {
+    public AnimationState getHeadSpinAnimationState() {
 		return this.headSpinAnimationState;
 	}
 
@@ -296,7 +312,48 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			}
 		} else {
 			this.updateWeathering((ServerLevel)this.level(), this.level().getRandom(), this.level().getGameTime());
+			
+			// Update dynamic lighting for lantern golems using invisible LIGHT blocks
+			if (this.isLantern()) {
+				BlockPos currentPos = this.blockPosition();
+				
+				// If golem has moved to a new block position, update lighting
+				if (this.lastLightUpdatePos == null || !this.lastLightUpdatePos.equals(currentPos)) {
+					// Remove light block at old position
+					if (this.lastLightUpdatePos != null) {
+						BlockState oldState = this.level().getBlockState(this.lastLightUpdatePos);
+						// Only remove if it's a light block we placed (light level 7)
+						if (oldState.is(Blocks.LIGHT) && oldState.getValue(BlockStateProperties.LEVEL) == 7) {
+							this.level().removeBlock(this.lastLightUpdatePos, false);
+						}
+					}
+					
+					// Place light block at new position if the space is air
+					BlockState currentState = this.level().getBlockState(currentPos);
+					if (currentState.isAir()) {
+						// Place invisible light block with light level 7
+						this.level().setBlock(currentPos, 
+							Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 7),
+							3); // Flag 3: update neighbors and clients
+					}
+					
+					this.lastLightUpdatePos = currentPos;
+				}
+			}
 		}
+	}
+	
+	@Override
+	public void remove(RemovalReason reason) {
+		// Clean up dynamic lighting when entity is removed
+		if (!this.level().isClientSide() && this.isLantern() && this.lastLightUpdatePos != null) {
+			BlockState state = this.level().getBlockState(this.lastLightUpdatePos);
+			// Only remove if it's a light block we placed (light level 7)
+			if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 7) {
+				this.level().removeBlock(this.lastLightUpdatePos, false);
+			}
+		}
+		super.remove(reason);
 	}
 
 	@Override
@@ -429,33 +486,22 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		}
 	}
 
+	// TODO: Placeholder method for future statue transformation feature
+	// Currently just stops the golem's navigation/pathfinding
 	private boolean canTurnToStatue(Level level) {
 		return level.getBlockState(this.blockPosition()).is(Blocks.AIR) && level.random.nextFloat() <= CopperGolemConfig.getTurnToStatueChance();
 	}
 
+	// TODO: Placeholder method for future statue transformation feature
+	// Currently just stops the golem's navigation instead of turning into a statue
+	// Future developers should implement statue block placement and entity conversion here
 	private void turnToStatue(ServerLevel serverLevel) {
-		BlockPos blockPos = this.blockPosition();
-		serverLevel.setBlock(
-			blockPos,
-			ModBlocks.OXIDIZED_COPPER_GOLEM_STATUE.get()
-				.defaultBlockState()
-				.setValue(CopperGolemStatueBlock.POSE, CopperGolemStatueBlock.Pose.values()[this.random.nextInt(0, CopperGolemStatueBlock.Pose.values().length)])
-				.setValue(CopperGolemStatueBlock.FACING, Direction.fromYRot(this.getYRot())),
-			3
-		);
-		if (serverLevel.getBlockEntity(blockPos) instanceof CopperGolemStatueBlockEntity copperGolemStatueBlockEntity) {
-			copperGolemStatueBlockEntity.createStatue(this);
-			this.dropPreservedEquipment(serverLevel, (itemStack) -> true);
-			this.discard();
-			this.playSound(ModSoundEvents.COPPER_GOLEM_BECOME_STATUE.get());
-			if (this.isLeashed()) {
-				if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-					this.dropLeash(true, true);
-				} else {
-					this.dropLeash(true, false);
-				}
-			}
-		}
+		// Stop all navigation and pathfinding
+		this.getNavigation().stop();
+		// Clear brain goals and memories to stop AI behaviors
+		this.getBrain().stopAll(serverLevel, this);
+		// Set to idle state
+		this.setState(CopperGolemState.IDLE);
 	}
 
 	private void setupAnimationStates() {
@@ -574,11 +620,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         return blockPos.relative(direction);
     }
 
-	public double getContainerInteractionRange() {
-		return 3.0;
-	}
-
-	@Override
+    @Override
 	public void shear(SoundSource soundSource) {
 		if (this.level() instanceof ServerLevel serverLevel) {
 			serverLevel.playSound(null, this, ModSoundEvents.COPPER_GOLEM_SHEAR.get(), soundSource, 1.0F, 1.0F);

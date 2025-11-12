@@ -139,14 +139,25 @@ public class CopperGolemAi {
     }
 
     public static void incrementOpeners(ContainerOpenersCounter counter, Entity entity, Level level, BlockPos pos, BlockState blockState) {
-        int i = counter.openCount++;
-        if (i == 0) {
+        int oldCount = counter.openCount++;
+        if (oldCount == 0) {
             counter.onOpen(level, pos, blockState);
             level.gameEvent(entity, GameEvent.CONTAINER_OPEN, pos);
-            ContainerOpenersCounter.scheduleRecheck(level, pos, blockState);
+            // Don't schedule recheck here - let the golem control when to close
+            // ContainerOpenersCounter.scheduleRecheck(level, pos, blockState);
         }
-
-        counter.openerCountChanged(level, pos, blockState, i, counter.openCount);
+        // Notify clients about the new open count (triggers animation)
+        counter.openerCountChanged(level, pos, blockState, oldCount, counter.openCount);
+    }
+    
+    public static void decrementOpeners(ContainerOpenersCounter counter, Entity entity, Level level, BlockPos pos, BlockState blockState) {
+        int oldCount = counter.openCount--;
+        if (counter.openCount == 0) {
+            counter.onClose(level, pos, blockState);
+            level.gameEvent(entity, GameEvent.CONTAINER_CLOSE, pos);
+        }
+        // Notify clients about the new open count (triggers animation)
+        counter.openerCountChanged(level, pos, blockState, oldCount, counter.openCount);
     }
 
     private static TransportItemsBetweenContainers.OnTargetReachedInteraction onReachedTargetInteraction(
@@ -156,14 +167,17 @@ public class CopperGolemAi {
             if (pathfinderMob instanceof CopperGolem copperGolem) {
                 Container container = transportItemTarget.container();
                 if (integer == CopperGolemConfig.getTickToStartInteraction()) {
-                    System.out.println("CopperGolemAi.onReachedTargetInteraction start 1");
                     if (container instanceof ChestBlockEntity chest) {
                         if (!chest.isRemoved()) {
-                            System.out.println("0");
-                            incrementOpeners(chest.openersCounter, copperGolem, chest.getLevel(), chest.getBlockPos(), chest.getBlockState());
+                            // Special handling for copper chests to play custom sounds and trigger animations
+                            if (chest instanceof org.xiyu.yee.copper_friend_backport.copper_chest.CopperChestBlockEntity copperChest) {
+                                copperChest.onEntityOpen(chest.getLevel(), chest.getBlockPos(), chest.getBlockState());
+                            } else {
+                                // For vanilla chests, use the standard opener system
+                                incrementOpeners(chest.openersCounter, copperGolem, chest.getLevel(), chest.getBlockPos(), chest.getBlockState());
+                            }
                         }
                     }
-                    System.out.println("0-1");
                     copperGolem.setOpenedChestPos(transportItemTarget.pos());
                     copperGolem.setState(copperGolemState);
                 }
@@ -179,12 +193,13 @@ public class CopperGolemAi {
                             if (!chest.isRemoved()) {
                                 Level level = chest.getLevel();
                                 BlockState state = chest.getBlockState();
-                                int i = openersCounter.openCount--;
-                                if (openersCounter.openCount == 0) {
-                                    openersCounter.onClose(level, pos, state);
-                                    level.gameEvent(copperGolem, GameEvent.CONTAINER_CLOSE, pos);
+                                // Special handling for copper chests to play custom sounds and trigger animations
+                                if (chest instanceof org.xiyu.yee.copper_friend_backport.copper_chest.CopperChestBlockEntity copperChest) {
+                                    copperChest.onEntityClose(level, pos, state);
+                                } else {
+                                    // For vanilla chests, use the standard opener system
+                                    decrementOpeners(openersCounter, copperGolem, level, pos, state);
                                 }
-                                openersCounter.openerCountChanged(level, pos, state, i, openersCounter.openCount);
                             }
                         }
                     }
@@ -197,7 +212,6 @@ public class CopperGolemAi {
     private static Consumer<PathfinderMob> onTravelling() {
         return pathfinderMob -> {
             if (pathfinderMob instanceof CopperGolem copperGolem) {
-                System.out.println("CopperGolemAi.onTravelling");
                 copperGolem.clearOpenedChestPos();
                 copperGolem.setState(CopperGolemState.IDLE);
             }
@@ -207,7 +221,6 @@ public class CopperGolemAi {
     private static Predicate<TransportItemsBetweenContainers.TransportItemTarget> shouldQueueForTarget() {
         return transportItemTarget -> {
             boolean b = transportItemTarget.blockEntity() instanceof ChestBlockEntity chestBlockEntity && !(ChestBlockEntity.getOpenCount(chestBlockEntity.getLevel(), chestBlockEntity.getBlockPos()) <= 0);
-            System.out.println("CopperGolemAi.shouldQueueForTarget = " + b);
             return b;
         };
     }

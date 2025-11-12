@@ -110,7 +110,6 @@ public class TransportItemsBetweenContainers extends Behavior<PathfinderMob> {
     @Override
     protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
         if (pathfinderMob.getNavigation() instanceof GroundPathNavigation groundPathNavigation) {
-            System.out.println("TransportItemsBetweenContainers.start");
             ((GroundPathNavigationMixinInterface)groundPathNavigation).copper_friend_backport$set(true);
         }
     }
@@ -118,7 +117,6 @@ public class TransportItemsBetweenContainers extends Behavior<PathfinderMob> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
         boolean b = !pathfinderMob.isLeashed();
-        System.out.println("TransportItemsBetweenContainers.checkExtraStartConditions = " + b);
         return b;
     }
 
@@ -153,17 +151,14 @@ public class TransportItemsBetweenContainers extends Behavior<PathfinderMob> {
             this.stop(serverLevel, pathfinderMob, l);
         } else if (!bl) {
             if (this.state.equals(TransportItemState.QUEUING)) {
-                System.out.println("TransportItemsBetweenContainers.tick QUEUING");
                 this.onQueuingForTarget(this.target, serverLevel, pathfinderMob);
             }
 
             if (this.state.equals(TransportItemState.TRAVELLING)) {
-                System.out.println("TransportItemsBetweenContainers.tick TRAVELLING");
                 this.onTravelToTarget(this.target, serverLevel, pathfinderMob);
             }
 
             if (this.state.equals(TransportItemState.INTERACTING)) {
-                System.out.println("TransportItemsBetweenContainers.tick INTERACTING");
                 this.onReachedTarget(this.target, serverLevel, pathfinderMob);
             }
         }
@@ -196,13 +191,10 @@ public class TransportItemsBetweenContainers extends Behavior<PathfinderMob> {
     protected void onTravelToTarget(TransportItemTarget transportItemTarget, Level level, PathfinderMob pathfinderMob) {
         if (this.isWithinTargetDistance(3.0, transportItemTarget, level, pathfinderMob, this.getCenterPos(pathfinderMob))
                 && this.isAnotherMobInteractingWithTarget(transportItemTarget, level)) {
-            System.out.println("TransportItemsBetweenContainers.onTravelToTarget1");
             this.startQueuing(pathfinderMob);
         } else if (this.isWithinTargetDistance(getInteractionRange(pathfinderMob), transportItemTarget, level, pathfinderMob, this.getCenterPos(pathfinderMob))) {
-            System.out.println("TransportItemsBetweenContainers.onTravelToTarget2");
             this.startOnReachedTargetInteraction(transportItemTarget, pathfinderMob);
         } else {
-            System.out.println("TransportItemsBetweenContainers.onTravelToTarget3");
             this.walkTowardsTarget(pathfinderMob);
         }
     }
