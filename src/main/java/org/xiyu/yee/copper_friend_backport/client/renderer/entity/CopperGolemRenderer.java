@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -11,7 +12,6 @@ import org.xiyu.yee.copper_friend_backport.client.ClientSetup;
 import org.xiyu.yee.copper_friend_backport.client.model.CopperGolemModel;
 import org.xiyu.yee.copper_friend_backport.client.renderer.entity.layers.CopperGolemAntennaBlockLayer;
 import org.xiyu.yee.copper_friend_backport.client.renderer.entity.layers.CopperGolemEyesLayer;
-import org.xiyu.yee.copper_friend_backport.client.renderer.entity.layers.CopperGolemItemInHandLayer;
 import org.xiyu.yee.copper_friend_backport.client.renderer.entity.layers.CopperGolemPoppyLayer;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemOxidationLevels;
@@ -22,7 +22,7 @@ public class CopperGolemRenderer extends MobRenderer<CopperGolem, CopperGolemMod
     public CopperGolemRenderer(EntityRendererProvider.Context context) {
         super(context, new CopperGolemModel<>(context.bakeLayer(ClientSetup.COPPER_GOLEM_LAYER)), 0.5F);
         this.addLayer(new CopperGolemEyesLayer(this));
-        this.addLayer(new CopperGolemItemInHandLayer(this, context.getItemInHandRenderer()));
+        this.addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
         this.addLayer(new CopperGolemAntennaBlockLayer(this, context.getBlockRenderDispatcher()));
         this.addLayer(new CopperGolemPoppyLayer(this)); // 虞美人渲染层
     }
