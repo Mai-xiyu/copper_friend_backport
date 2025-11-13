@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,12 +20,14 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
 import org.xiyu.yee.copper_friend_backport.CopperGolemConfig;
+import org.xiyu.yee.copper_friend_backport.copper_chest.CopperChestBlockEntity;
 import org.xiyu.yee.copper_friend_backport.coppergolem.behavior.TransportItemsBetweenContainers;
 import org.xiyu.yee.copper_friend_backport.registry.ModBlockTags;
 import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
@@ -167,14 +170,22 @@ public class CopperGolemAi {
             if (pathfinderMob instanceof CopperGolem copperGolem) {
                 Container container = transportItemTarget.container();
                 if (integer == CopperGolemConfig.getTickToStartInteraction()) {
-                    if (container instanceof ChestBlockEntity chest) {
+                    // Get the actual BlockEntity to open
+                    // For double chests, container is CompoundContainer, but we need the BlockEntity
+                    BlockEntity blockEntity = transportItemTarget.blockEntity();
+                    
+                    if (blockEntity instanceof ChestBlockEntity chest) {
                         if (!chest.isRemoved()) {
-                            // Special handling for copper chests to play custom sounds and trigger animations
-                            if (chest instanceof org.xiyu.yee.copper_friend_backport.copper_chest.CopperChestBlockEntity copperChest) {
-                                copperChest.onEntityOpen(chest.getLevel(), chest.getBlockPos(), chest.getBlockState());
+                            Level level = chest.getLevel();
+                            BlockPos pos = chest.getBlockPos();
+                            BlockState state = chest.getBlockState();
+                            
+                            // Special handling for copper chests - they handle double chests internally
+                            if (chest instanceof CopperChestBlockEntity copperChest) {
+                                copperChest.onEntityOpen(level, pos, state);
                             } else {
                                 // For vanilla chests, use the standard opener system
-                                incrementOpeners(chest.openersCounter, copperGolem, chest.getLevel(), chest.getBlockPos(), chest.getBlockState());
+                                incrementOpeners(chest.openersCounter, copperGolem, level, pos, state);
                             }
                         }
                     }
@@ -186,18 +197,24 @@ public class CopperGolemAi {
                     copperGolem.playSound(soundEvent);
                 }
                 if (integer == 60) {
-                    if (container instanceof ChestBlockEntity chest) {
-                        ContainerOpenersCounter openersCounter = chest.openersCounter;
+                    // Get the actual BlockEntity to close
+                    BlockEntity blockEntity = transportItemTarget.blockEntity();
+                    
+                    if (blockEntity instanceof ChestBlockEntity chest) {
                         BlockPos pos = chest.getBlockPos();
-                        if (copperGolem.hasContainerOpen(openersCounter, pos)) {
+                        Level level = chest.getLevel();
+                        BlockState state = chest.getBlockState();
+                        
+                        // Only close if this is the chest the golem actually opened
+                        // For double chests, only close the main chest (the one stored in openedChestPos)
+                        if (copperGolem.openedChestPos != null && copperGolem.openedChestPos.equals(pos)) {
                             if (!chest.isRemoved()) {
-                                Level level = chest.getLevel();
-                                BlockState state = chest.getBlockState();
-                                // Special handling for copper chests to play custom sounds and trigger animations
-                                if (chest instanceof org.xiyu.yee.copper_friend_backport.copper_chest.CopperChestBlockEntity copperChest) {
+                                // Special handling for copper chests - they handle double chests internally
+                                if (chest instanceof CopperChestBlockEntity copperChest) {
                                     copperChest.onEntityClose(level, pos, state);
                                 } else {
                                     // For vanilla chests, use the standard opener system
+                                    ContainerOpenersCounter openersCounter = chest.openersCounter;
                                     decrementOpeners(openersCounter, copperGolem, level, pos, state);
                                 }
                             }

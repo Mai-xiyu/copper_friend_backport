@@ -189,6 +189,14 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
         return this.antenna;
     }
 
+    public ModelPart getRightArm() {
+        return this.rightArm;
+    }
+
+    public ModelPart getLeftArm() {
+        return this.leftArm;
+    }
+
     public void applyBlockOnAntennaTransform(PoseStack poseStack) {
         this.root.translateAndRotate(poseStack);
         this.body.translateAndRotate(poseStack);

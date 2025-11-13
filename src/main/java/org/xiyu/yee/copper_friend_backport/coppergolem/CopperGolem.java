@@ -83,8 +83,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 	private static final EntityDataAccessor<Boolean> DATA_HAS_POPPY = SynchedEntityData.defineId(
 		CopperGolem.class, EntityDataSerializers.BOOLEAN
 	);
-	@Nullable
-	private BlockPos openedChestPos;
+	@Nullable BlockPos openedChestPos;
 	@Nullable
 	private UUID lastLightningBoltUUID;
 	private long nextWeatheringTick = -1L;
