@@ -58,6 +58,11 @@
   "subtitles.entity.copper_golem.hurt": "Copper Golem hurts",
   "subtitles.entity.copper_golem.death": "Copper Golem dies",
   "subtitles.entity.copper_golem.spin": "Copper Golem spins",
+  "subtitles.entity.copper_golem.spawn": "Copper Golem spawn",
+  "subtitles.entity.copper_golem.item_get": "Copper Golem item get",
+  "subtitles.entity.copper_golem.item_no_get": "Copper Golem item no get",
+  "subtitles.entity.copper_golem.item_drop": "Copper Golem item drop",
+  "subtitles.entity.copper_golem.item_no_drop": "Copper Golem item no drop",
   
   "jade.copper_friend_backport.weather_state.unaffected": "Weather State: Unaffected",
   "jade.copper_friend_backport.weather_state.exposed": "Weather State: Exposed",

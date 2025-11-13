@@ -7,7 +7,7 @@
   "block.copper_friend_backport.waxed_exposed_copper_chest": "涂蜡斑驳的铜箱子",
   "block.copper_friend_backport.waxed_weathered_copper_chest": "涂蜡锈蚀的铜箱子",
   "block.copper_friend_backport.waxed_oxidized_copper_chest": "涂蜡氧化的铜箱子",
-  
+
   "block.copper_friend_backport.copper_golem_statue": "铜傀儡雕像",
   "block.copper_friend_backport.exposed_copper_golem_statue": "斑驳的铜傀儡雕像",
   "block.copper_friend_backport.weathered_copper_golem_statue": "锈蚀的铜傀儡雕像",
@@ -29,6 +29,11 @@
   "subtitles.entity.copper_golem.hurt": "铜傀儡：受伤",
   "subtitles.entity.copper_golem.death": "铜傀儡：死亡",
   "subtitles.entity.copper_golem.spin": "铜傀儡：旋转",
+  "subtitles.entity.copper_golem.spawn": "铜傀儡：齿轮转动...",
+  "subtitles.entity.copper_golem.item_get": "铜傀儡：捡起物品",
+  "subtitles.entity.copper_golem.item_no_get": "铜傀儡：检索失败",
+  "subtitles.entity.copper_golem.item_drop": "铜傀儡：放入物品",
+  "subtitles.entity.copper_golem.item_no_drop": "铜傀儡：检索失败",
   
   "jade.copper_friend_backport.weather_state.unaffected": "氧化状态: 无氧化",
   "jade.copper_friend_backport.weather_state.exposed": "氧化状态: 斑驳",

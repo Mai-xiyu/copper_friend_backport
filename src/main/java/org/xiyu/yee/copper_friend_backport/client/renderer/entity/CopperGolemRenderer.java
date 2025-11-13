@@ -34,17 +34,17 @@ public class CopperGolemRenderer extends MobRenderer<CopperGolem, CopperGolemMod
 
     @Override
     public void render(CopperGolem entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
-        // If the golem is a lantern, use light level 7 for rendering brightness
+        // If the golem is a lantern, use light level 14 for rendering brightness
         if (entity.isLantern()) {
-            // Pack light level 7 as block light (7 << 4 = 112, plus sky light 15 << 20)
-            packedLight = (15 << 20) | (7 << 4); // Sky light 15, block light 7
+            // Pack light level 7 as block light (14 << 4 = 112, plus sky light 15 << 20)
+            packedLight = (15 << 20) | (14 << 4); // Sky light 15, block light 14
         }
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
 
     @Override
     protected int getBlockLightLevel(CopperGolem entity, net.minecraft.core.BlockPos pos) {
-        // If the golem is a lantern, it emits light level 7
-        return entity.isLantern() ? 7 : super.getBlockLightLevel(entity, pos);
+        // If the golem is a lantern, it emits light level 14
+        return entity.isLantern() ? 14 : super.getBlockLightLevel(entity, pos);
     }
 }

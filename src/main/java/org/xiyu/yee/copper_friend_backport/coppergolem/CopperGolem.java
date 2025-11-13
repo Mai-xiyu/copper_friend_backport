@@ -156,7 +156,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 			if (!isLantern && this.lastLightUpdatePos != null) {
 				// Became non-lantern: remove light block
 				BlockState state = this.level().getBlockState(this.lastLightUpdatePos);
-				if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 7) {
+				if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 14) {
 					this.level().removeBlock(this.lastLightUpdatePos, false);
 				}
 				this.lastLightUpdatePos = null;
@@ -165,7 +165,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 				BlockState currentState = this.level().getBlockState(pos);
 				if (currentState.isAir()) {
 					this.level().setBlock(pos, 
-						Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 7),
+						Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 14),
 						3);
 					this.lastLightUpdatePos = pos;
 				}
@@ -196,10 +196,10 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
 	/**
 	 * Returns the light emission level for this golem.
-	 * Jack O'Lantern golems emit light level 7.
+	 * Jack O'Lantern golems emit light level 14.
 	 */
 	public int getLightEmission() {
-		return this.isLantern() ? 7 : 0;
+		return this.isLantern() ? 14 : 0;
 	}
 
     public void setOpenedChestPos(BlockPos blockPos) {
@@ -321,8 +321,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 					// Remove light block at old position
 					if (this.lastLightUpdatePos != null) {
 						BlockState oldState = this.level().getBlockState(this.lastLightUpdatePos);
-						// Only remove if it's a light block we placed (light level 7)
-						if (oldState.is(Blocks.LIGHT) && oldState.getValue(BlockStateProperties.LEVEL) == 7) {
+						// Only remove if it's a light block we placed (light level 14)
+						if (oldState.is(Blocks.LIGHT) && oldState.getValue(BlockStateProperties.LEVEL) == 14) {
 							this.level().removeBlock(this.lastLightUpdatePos, false);
 						}
 					}
@@ -330,9 +330,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 					// Place light block at new position if the space is air
 					BlockState currentState = this.level().getBlockState(currentPos);
 					if (currentState.isAir()) {
-						// Place invisible light block with light level 7
+						// Place invisible light block with light level 14
 						this.level().setBlock(currentPos, 
-							Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 7),
+							Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 14),
 							3); // Flag 3: update neighbors and clients
 					}
 					
@@ -347,8 +347,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 		// Clean up dynamic lighting when entity is removed
 		if (!this.level().isClientSide() && this.isLantern() && this.lastLightUpdatePos != null) {
 			BlockState state = this.level().getBlockState(this.lastLightUpdatePos);
-			// Only remove if it's a light block we placed (light level 7)
-			if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 7) {
+			// Only remove if it's a light block we placed (light level 14)
+			if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 14) {
 				this.level().removeBlock(this.lastLightUpdatePos, false);
 			}
 		}
