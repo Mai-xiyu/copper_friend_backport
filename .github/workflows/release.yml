@@ -3,7 +3,7 @@ name: Build & Release Mod
 on:
   push:
     tags:
-      - "v*"   # 推送 v1.0.0 这样的标签触发
+      - "v*"
 
 permissions:
   contents: write
@@ -41,7 +41,6 @@ jobs:
       - name: Find JAR file
         id: find_jar
         run: |
-          # 查找 build/libs 下最大的 jar（一般就是 mod jar）
           FILE=$(ls -S build/libs/*.jar | head -n 1)
           echo "jar=$FILE" >> $GITHUB_OUTPUT
 
@@ -49,5 +48,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.find_jar.outputs.jar }}
+          body_path: CHANGELOG.md   # ← 添加这一行即可
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
