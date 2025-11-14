@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CCC",
+    "CXC",
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "X": {
+      "item": "minecraft:chest"
+    }
+  },
+  "result": {
+    "item": "copper_friend_backport:copper_chest"
+  }
+}

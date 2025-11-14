@@ -7,7 +7,6 @@ import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -35,6 +34,8 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
     private final KeyframeAnimation gettingNoItemAnimation;
     private final KeyframeAnimation droppingItemAnimation;
     private final KeyframeAnimation droppingNoItemAnimation;
+    private final KeyframeAnimation dance1Animation;
+    private final KeyframeAnimation dance2Animation;
 
     public CopperGolemModel(ModelPart root) {
         this.root = root;
@@ -48,8 +49,10 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
         
         // 烘焙动画 - 使用1.21.10的完整动画数据
         this.walkAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_WALK);
+        this.dance1Animation = KeyframeAnimation.bake(root, CopperGolemAnimation.SHRUG);
+        this.dance2Animation = KeyframeAnimation.bake(root, CopperGolemAnimation.SHAKE_HEAD);
         this.walkWithItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_WALK_ITEM);
-        this.spinHeadAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_IDLE);
+        this.spinHeadAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_SPIN_HEAD);
         this.gettingItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_CHEST_INTERACTION_NOITEM_GET);
         this.gettingNoItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_CHEST_INTERACTION_NOITEM_NOGET);
         this.droppingItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_CHEST_INTERACTION_ITEM_DROP);
@@ -155,12 +158,8 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
                                     copperGolem.getInteractionDropNoItemAnimationState().isStarted();
             
             if (!isInteracting) {
-                // IDLE状态下，头部转动由spinHeadAnimation控制，但仍需要轻微的视角跟随
-                // 限制视角影响，避免与动画冲突
-                float yawFactor = 0.25F;  // 减小水平转动影响
-                float pitchFactor = 0.5F; // 适度保留俯仰
-                this.head.xRot += headPitch * pitchFactor * ((float)Math.PI / 180F);
-                this.head.yRot += netHeadYaw * yawFactor * ((float)Math.PI / 180F);
+                this.dance1Animation.apply(copperGolem.shrugAnimationState(),ageInTicks);
+                this.dance2Animation.apply(copperGolem.dance2AnimationState,ageInTicks);
             }
         }
     }

@@ -48,17 +48,6 @@ import org.xiyu.yee.copper_friend_backport.GroundPathNavigationMixinInterface;
 import org.xiyu.yee.copper_friend_backport.registry.ModMemoryModules;
 
 public class TransportItemsBetweenContainers extends Behavior<PathfinderMob> {
-    public static final int TARGET_INTERACTION_TIME = 60;
-    private static final int VISITED_POSITIONS_MEMORY_TIME = 6000;
-    private static final int TRANSPORTED_ITEM_MAX_STACK_SIZE = 16;
-    private static final int MAX_VISITED_POSITIONS = 10;
-    private static final int MAX_UNREACHABLE_POSITIONS = 50;
-    private static final int PASSENGER_MOB_TARGET_SEARCH_DISTANCE = 1;
-    private static final int IDLE_COOLDOWN = 140;
-    private static final double CLOSE_ENOUGH_TO_START_QUEUING_DISTANCE = 3.0;
-    private static final double CLOSE_ENOUGH_TO_START_INTERACTING_WITH_TARGET_DISTANCE = 0.5;
-    private static final double CLOSE_ENOUGH_TO_START_INTERACTING_WITH_TARGET_PATH_END_DISTANCE = 1.0;
-    private static final double CLOSE_ENOUGH_TO_CONTINUE_INTERACTING_WITH_TARGET = 2.0;
     private final float speedModifier;
     private final int horizontalSearchDistance;
     private final int verticalSearchDistance;
@@ -105,6 +94,8 @@ public class TransportItemsBetweenContainers extends Behavior<PathfinderMob> {
         this.shouldQueueForTarget = shouldQueueForTarget;
         this.onTargetInteractionActions = onTargetInteractionActions;
         this.state = TransportItemState.TRAVELLING;
+        System.out.println("horizontalSearchDistance = " + horizontalSearchDistance);
+        System.out.println("verticalSearchDistance = " + verticalSearchDistance);
     }
 
     @Override
