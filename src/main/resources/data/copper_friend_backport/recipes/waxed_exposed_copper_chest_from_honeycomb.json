@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "copper_friend_backport:exposed_copper_chest"
+    },
+    {
+      "item": "minecraft:honeycomb"
+    }
+  ],
+  "result": {
+    "item": "copper_friend_backport:waxed_exposed_copper_chest",
+    "count": 1
+  }
+}
