@@ -62,11 +62,10 @@ public class CopperGolemAnimation {
 			)
 		)
 		.build();
-	public static final AnimationDefinition COPPER_GOLEM_IDLE = new AnimationDefinition.Builder().length(3.5F)
+	public static final AnimationDefinition COPPER_GOLEM_SPIN_HEAD = new AnimationDefinition.Builder().length(3.5F)
 		.addAnimation(
 			"body",
 			AnimationChannel.rotation(
-				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, -35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, -35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -80,7 +79,6 @@ public class CopperGolemAnimation {
 		.addAnimation(
 			"head",
 			AnimationChannel.rotation(
-				
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
@@ -1353,4 +1351,30 @@ public class CopperGolemAnimation {
 			)
 		)
 		.build();
+
+
+
+
+
+    // 耸肩
+    public static final AnimationDefinition SHRUG = new AnimationDefinition.Builder().length(0.6f)
+            .addAnimation("left_arm", AnimationChannel.position(
+                    new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                    new Keyframe(0.3F, KeyframeAnimations.posVec(0.0F, 2.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                    new Keyframe(0.6F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR)
+            ))
+            .addAnimation("right_arm", AnimationChannel.position(
+                    new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                    new Keyframe(0.3F, KeyframeAnimations.posVec(0.0F, 2.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                    new Keyframe(0.6F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR)
+            ))
+            .build();
+    // 晃头
+    public static final AnimationDefinition SHAKE_HEAD = new AnimationDefinition.Builder().length(0.4f)
+            .addAnimation("head", AnimationChannel.position(
+                    new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                    new Keyframe(0.2F, KeyframeAnimations.posVec(0.0F, 0.0F, 1.0F), Keyframe.Interpolation.LINEAR),
+                    new Keyframe(0.4F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR)
+            ))
+            .build();
 }
