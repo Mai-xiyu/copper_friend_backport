@@ -149,8 +149,7 @@ public class CopperGolemConfig {
         
         builder.pop();
         builder.pop();
-        
-        // Weathering/Oxidation Settings
+
         builder.comment("Weathering and oxidation settings||风化和氧化设置")
                .push("weathering");
         

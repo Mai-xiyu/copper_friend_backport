@@ -34,23 +34,18 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
     private final KeyframeAnimation gettingNoItemAnimation;
     private final KeyframeAnimation droppingItemAnimation;
     private final KeyframeAnimation droppingNoItemAnimation;
-    private final KeyframeAnimation dance1Animation;
-    private final KeyframeAnimation dance2Animation;
 
     public CopperGolemModel(ModelPart root) {
         this.root = root;
         this.body = root.getChild("body");
         this.head = this.body.getChild("head");
-        this.antenna = this.head.getChild("antenna"); // 获取天线部件
+        this.antenna = this.head.getChild("antenna");
         this.rightArm = this.body.getChild("right_arm");
         this.leftArm = this.body.getChild("left_arm");
         this.rightLeg = root.getChild("right_leg");
         this.leftLeg = root.getChild("left_leg");
-        
-        // 烘焙动画 - 使用1.21.10的完整动画数据
+
         this.walkAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_WALK);
-        this.dance1Animation = KeyframeAnimation.bake(root, CopperGolemAnimation.SHRUG);
-        this.dance2Animation = KeyframeAnimation.bake(root, CopperGolemAnimation.SHAKE_HEAD);
         this.walkWithItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_WALK_ITEM);
         this.spinHeadAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_SPIN_HEAD);
         this.gettingItemAnimation = KeyframeAnimation.bake(root, CopperGolemAnimation.COPPER_GOLEM_CHEST_INTERACTION_NOITEM_GET);
@@ -63,14 +58,12 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
 
-        // 身体 - 修正UV坐标从14改为15
         PartDefinition body = partdefinition.addOrReplaceChild("body",
                 CubeListBuilder.create()
                         .texOffs(0, 15)
                         .addBox(-4.0F, -6.0F, -3.0F, 8.0F, 6.0F, 6.0F, CubeDeformation.NONE),
                 PartPose.offset(0.0F, 18.0F, 0.0F));
 
-        // 头部（不包含天线）
         PartDefinition head = body.addOrReplaceChild("head",
                 CubeListBuilder.create()
                         .texOffs(0, 0)
@@ -79,7 +72,6 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
                         .addBox(-1.0F, -2.0F, -6.0F, 2.0F, 3.0F, 2.0F, CubeDeformation.NONE),
                 PartPose.offset(0.0F, -6.0F, 0.0F));
 
-        // 天线作为头部的子部件
         PartDefinition antenna = head.addOrReplaceChild("antenna",
                 CubeListBuilder.create()
                         .texOffs(37, 8)
@@ -88,28 +80,24 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
                         .addBox(-2.0F, -8.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(-0.015F)), // 天线头
                 PartPose.offset(0.0F, -5.0F, 0.0F)); // 天线位置在头部顶部（Y=-5）
 
-        // 右臂 - 修正UV坐标从14改为16
         body.addOrReplaceChild("right_arm",
                 CubeListBuilder.create()
                         .texOffs(36, 16)
                         .addBox(-3.0F, -1.0F, -2.0F, 3.0F, 10.0F, 4.0F, CubeDeformation.NONE),
                 PartPose.offset(-4.0F, -6.0F, 0.0F));
 
-        // 左臂 - 修正UV坐标从14改为16
         body.addOrReplaceChild("left_arm",
                 CubeListBuilder.create()
                         .texOffs(50, 16)
                         .addBox(0.0F, -1.0F, -2.0F, 3.0F, 10.0F, 4.0F, CubeDeformation.NONE),
                 PartPose.offset(4.0F, -6.0F, 0.0F));
 
-        // 右腿 - 修正UV坐标从26改为27
         partdefinition.addOrReplaceChild("right_leg",
                 CubeListBuilder.create()
                         .texOffs(0, 27)
                         .addBox(-4.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, CubeDeformation.NONE),
                 PartPose.offset(0.0F, 18.0F, 0.0F));
 
-        // 左腿 - 修正UV坐标从26改为27
         partdefinition.addOrReplaceChild("left_leg",
                 CubeListBuilder.create()
                         .texOffs(16, 27)
@@ -126,41 +114,31 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
 
     @Override
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        // 重置所有旋转
         this.root().getAllParts().forEach(ModelPart::resetPose);
-        
-        // 铜傀儡特有动画
+
         if (entity instanceof CopperGolem copperGolem) {
-            // 行走动画 - 根据是否持有物品使用不同动画
             boolean hasItem = !copperGolem.getMainHandItem().isEmpty() || !copperGolem.getOffhandItem().isEmpty();
             
             if (hasItem) {
-                // 持有物品时的行走动画
                 this.walkWithItemAnimation.applyWalk(limbSwing, limbSwingAmount, 2.0F, 2.5F);
                 this.poseHeldItemArmsIfStill();
             } else {
-                // 无物品时的行走动画
                 this.walkAnimation.applyWalk(limbSwing, limbSwingAmount, 2.0F, 2.5F);
             }
-            
-            // 应用各种动画状态 - 使用关键帧动画系统
+
             this.spinHeadAnimation.apply(copperGolem.getHeadSpinAnimationState(), ageInTicks);
             this.gettingItemAnimation.apply(copperGolem.getInteractionGetItemAnimationState(), ageInTicks);
             this.gettingNoItemAnimation.apply(copperGolem.getInteractionGetNoItemAnimationState(), ageInTicks);
             this.droppingItemAnimation.apply(copperGolem.getInteractionDropItemAnimationState(), ageInTicks);
             this.droppingNoItemAnimation.apply(copperGolem.getInteractionDropNoItemAnimationState(), ageInTicks);
-            
-            // 头部朝向 - 只在非交互动画时应用视角朝向
-            // 交互动画期间头部由动画控制，不需要额外的视角修正
-            boolean isInteracting = copperGolem.getInteractionGetItemAnimationState().isStarted() ||
+
+            /*boolean isInteracting = copperGolem.getInteractionGetItemAnimationState().isStarted() ||
                                     copperGolem.getInteractionGetNoItemAnimationState().isStarted() ||
                                     copperGolem.getInteractionDropItemAnimationState().isStarted() ||
                                     copperGolem.getInteractionDropNoItemAnimationState().isStarted();
             
             if (!isInteracting) {
-                this.dance1Animation.apply(copperGolem.shrugAnimationState(),ageInTicks);
-                this.dance2Animation.apply(copperGolem.dance2AnimationState,ageInTicks);
-            }
+            }*/
         }
     }
 
@@ -170,11 +148,7 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
         this.body.translateAndRotate(poseStack);
         ModelPart armPart = arm == HumanoidArm.RIGHT ? this.rightArm : this.leftArm;
         armPart.translateAndRotate(poseStack);
-        
-        // 根据铜傀儡状态调整物品渲染位置（对应 1.21 的 setArmAngle 逻辑）
-        // 在 IDLE 状态下，物品会以不同角度渲染
-        // 注意：这里无法直接获取 CopperGolem 实例，所以使用通用逻辑
-        // 如果需要状态感知，需要在渲染器中处理
+
         poseStack.scale(0.55F, 0.55F, 0.55F);
         poseStack.translate(-0.125F, 0.3125F, -0.1875F);
     }

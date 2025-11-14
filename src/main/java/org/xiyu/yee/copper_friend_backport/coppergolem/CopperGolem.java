@@ -73,8 +73,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     );
     private final AnimationState idleAnimationState = new AnimationState();
     private final AnimationState headSpinAnimationState = new AnimationState();
-    private final AnimationState dance1AnimationState = new AnimationState();
-    public final AnimationState dance2AnimationState = new AnimationState();
     private final AnimationState interactionGetItemAnimationState = new AnimationState();
     private final AnimationState interactionGetNoItemAnimationState = new AnimationState();
     private final AnimationState interactionDropItemAnimationState = new AnimationState();
@@ -85,7 +83,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     private long nextWeatheringTick = -1L;
     private int idleAnimationStartTick = 0;
     @Nullable
-    private BlockPos lastLightUpdatePos = null; // Track position for dynamic lighting updates
+    private BlockPos lastLightUpdatePos = null;
 
     public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
         super(entityType, level);
@@ -107,26 +105,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         return blockPos.relative(direction);
     }
 
-    public int jukeboxPlaying() {
-        return this.entityData.get(DATA_DANCE);
-    }
-
-    public boolean dancing() {
-        return this.entityData.get(DATA_DANCE) != 0;
-    }
-
-    public void setJukeboxPlaying() {
-        if (jukeboxPlaying() == 0) {
-            this.entityData.set(DATA_DANCE, this.random.nextIntBetweenInclusive(0, 4));
-        }
-    }
-
-    public void setJukeboxNotPlaying() {
-        if (jukeboxPlaying() != 0) {
-            this.entityData.set(DATA_DANCE, 0);
-        }
-    }
-
     public CopperGolemState getState() {
         return this.entityData.get(COPPER_GOLEM_STATE);
     }
@@ -143,30 +121,18 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.entityData.set(DATA_WEATHER_STATE, weatherState);
     }
 
-    /**
-     * Sets this golem as waxed (prevents oxidation).
-     */
     public void setWaxed() {
         this.nextWeatheringTick = -2L;
     }
 
-    /**
-     * Checks if this golem is waxed.
-     */
     public boolean isWaxed() {
         return this.nextWeatheringTick == -2L;
     }
 
-    /**
-     * Checks if this golem is a lantern (emits light).
-     */
     public boolean isLantern() {
         return this.entityData.get(DATA_IS_LANTERN);
     }
 
-    /**
-     * Sets whether this golem is a lantern (emits light).
-     */
     public void setLantern(boolean isLantern) {
         boolean wasLantern = this.isLantern();
         this.entityData.set(DATA_IS_LANTERN, isLantern);
@@ -288,11 +254,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         if (compoundTag.contains("has_poppy")) {
             this.setHasPoppy(compoundTag.getBoolean("has_poppy"));
         }
-        if (compoundTag.contains("weather_state", 99)) { // 99 = any numeric type
+        if (compoundTag.contains("weather_state", 99)) {
             int weatherStateId = compoundTag.getInt("weather_state");
             WeatheringCopper.WeatherState state = WeatheringCopper.WeatherState.BY_ID.apply(weatherStateId);
             this.setWeatherState(state);
-        } else if (compoundTag.contains("weather_state", 8)) { // 8 = string (兼容旧数据)
+        } else if (compoundTag.contains("weather_state", 8)) {
             String weatherStateName = compoundTag.getString("weather_state");
             for (WeatheringCopper.WeatherState state : WeatheringCopper.WeatherState.values()) {
                 if (state.getSerializedName().equals(weatherStateName)) {
@@ -327,11 +293,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         } else {
             this.updateWeathering((ServerLevel) this.level(), this.level().getRandom(), this.level().getGameTime());
 
-            // Update dynamic lighting for lantern golems using invisible LIGHT blocks
             if (this.isLantern()) {
                 BlockPos currentPos = this.blockPosition();
 
-                // If golem has moved to a new block position, update lighting
                 if (this.lastLightUpdatePos == null || !this.lastLightUpdatePos.equals(currentPos)) {
                     // Remove light block at old position
                     if (this.lastLightUpdatePos != null) {
@@ -342,13 +306,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                         }
                     }
 
-                    // Place light block at new position if the space is air
                     BlockState currentState = this.level().getBlockState(currentPos);
                     if (currentState.isAir()) {
-                        // Place invisible light block with light level 14
                         this.level().setBlock(currentPos,
                                 Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 14),
-                                3); // Flag 3: update neighbors and clients
+                                3);
                     }
 
                     this.lastLightUpdatePos = currentPos;
@@ -359,10 +321,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
     @Override
     public void remove(RemovalReason reason) {
-        // Clean up dynamic lighting when entity is removed
         if (!this.level().isClientSide() && this.isLantern() && this.lastLightUpdatePos != null) {
             BlockState state = this.level().getBlockState(this.lastLightUpdatePos);
-            // Only remove if it's a light block we placed (light level 14)
             if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 14) {
                 this.level().removeBlock(this.lastLightUpdatePos, false);
             }
@@ -390,14 +350,12 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                     this.spawnAtLocation(poppyStack);
                     this.setHasPoppy(false);
 
-                    // Play sound
                     serverLevel.playSound(null, this, SoundEvents.SHEEP_SHEAR, this.getSoundSource(), 1.0F, 1.0F);
                     this.gameEvent(GameEvent.SHEAR, player);
                     itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
                 }
                 return InteractionResult.SUCCESS;
             }
-            // If no poppy, check for oxidation shearing
             else if (this.readyForShearing()) {
                 if (level instanceof ServerLevel) {
                     this.shear(SoundSource.PLAYERS);
@@ -421,14 +379,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             return InteractionResult.PASS;
         }
 
-        // Handle honeycomb - apply wax (requires sneaking)
         if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L && player.isCrouching()) {
-            // Play wax on sound
             level.playSound(null, this, SoundEvents.HONEYCOMB_WAX_ON, this.getSoundSource(), 1.0F, 1.0F);
             level.levelEvent(player, 3003, this.blockPosition(), 0);
             this.nextWeatheringTick = -2L;
 
-            // Grant advancement
             if (player instanceof ServerPlayer serverPlayer) {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
             }
@@ -439,13 +394,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             return InteractionResult.SUCCESS;
         }
 
-        // Handle axe - dewax (requires sneaking)
         if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L && player.isCrouching()) {
             level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
             level.levelEvent(player, 3004, this.blockPosition(), 0); // Wax off particles
             this.nextWeatheringTick = -1L;
 
-            // Grant advancement
             if (player instanceof ServerPlayer serverPlayer) {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
             }
@@ -454,7 +407,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             return InteractionResult.SUCCESS;
         }
 
-        // Handle axe - scrape oxidation (requires sneaking)
         if (itemStack.is(ItemTags.AXES) && player.isCrouching()) {
             WeatheringCopper.WeatherState weatherState = this.getWeatherState();
             if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
@@ -463,7 +415,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.nextWeatheringTick = -1L;
                 this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
 
-                // Grant advancement
                 if (player instanceof ServerPlayer serverPlayer) {
                     CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
                 }
@@ -505,11 +456,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     }
 
     private void turnToStatue(ServerLevel serverLevel) {
-        // Stop all navigation and pathfinding
         this.getNavigation().stop();
-        // Clear brain goals and memories to stop AI behaviors
         this.getBrain().stopAll(serverLevel, this);
-        // Set to idle state
         this.setState(CopperGolemState.IDLE);
     }
 
@@ -520,29 +468,21 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.interactionGetItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
-                if (dancing()) {
-                    switch (jukeboxPlaying()) {
-                        case 1, 2 -> this.dance1AnimationState.startIfStopped(this.tickCount);
-                        default -> this.dance2AnimationState.startIfStopped(this.tickCount);
-                    }
-                } else {
-                    stopDance();
-                    if (this.idleAnimationStartTick == this.tickCount) {
-                        this.idleAnimationState.start(this.tickCount);
-                    } else if (this.idleAnimationStartTick == 0) {
-                        this.idleAnimationStartTick = this.tickCount + ThreadLocalRandom.current().nextInt(CopperGolemConfig.getSpinAnimationMinCooldown(), CopperGolemConfig.getSpinAnimationMaxCooldown());
-                    }
-                    if (this.tickCount == this.idleAnimationStartTick + 10) {
-                        this.playHeadSpinSound();
-                        this.getHeadSpinAnimationState().start(this.tickCount);
-                        this.idleAnimationStartTick = 0;
-                    }
+                if (this.idleAnimationStartTick == this.tickCount) {
+                    this.idleAnimationState.start(this.tickCount);
+                } else if (this.idleAnimationStartTick == 0) {
+                    this.idleAnimationStartTick = this.tickCount + ThreadLocalRandom.current().nextInt(CopperGolemConfig.getSpinAnimationMinCooldown(), CopperGolemConfig.getSpinAnimationMaxCooldown());
+                }
+                if (this.tickCount == this.idleAnimationStartTick + 10) {
+                    this.playHeadSpinSound();
+                    this.getHeadSpinAnimationState().start(this.tickCount);
+                    this.idleAnimationStartTick = 0;
                 }
                 break;
             case GETTING_ITEM:
                 this.idleAnimationState.stop();
                 this.idleAnimationStartTick = 0;
-                stopDance();
+
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
@@ -551,7 +491,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             case GETTING_NO_ITEM:
                 this.idleAnimationState.stop();
                 this.idleAnimationStartTick = 0;
-                stopDance();
+
                 this.interactionGetItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
@@ -560,7 +500,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             case DROPPING_ITEM:
                 this.idleAnimationState.stop();
                 this.idleAnimationStartTick = 0;
-                stopDance();
+
                 this.interactionGetItemAnimationState.stop();
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
@@ -569,17 +509,12 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             case DROPPING_NO_ITEM:
                 this.idleAnimationState.stop();
                 this.idleAnimationStartTick = 0;
-                stopDance();
+
                 this.interactionGetItemAnimationState.stop();
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.startIfStopped(this.tickCount);
         }
-    }
-
-    private void stopDance() {
-        this.dance1AnimationState.stop();
-        this.dance2AnimationState.stop();
     }
 
     public void spawn(WeatheringCopper.WeatherState weatherState) {
@@ -589,9 +524,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(
-            ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, net.minecraft.world.entity.MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag
-    ) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor,
+                                        DifficultyInstance difficultyInstance,
+                                        MobSpawnType mobSpawnType,
+                                        @Nullable SpawnGroupData spawnGroupData,
+                                        @Nullable CompoundTag compoundTag) {
         this.playSpawnSound();
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
@@ -674,7 +611,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 if (!predicate.test(itemStack)) {
                     set.add(equipmentSlot);
                 } else {
-                    // In 1.20.1, we check drop chance directly
                     if (this.getEquipmentDropChance(equipmentSlot) > 1.0F) {
                         this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
                         this.spawnAtLocation(itemStack);
@@ -713,9 +649,5 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
             }
         }
-    }
-
-    public AnimationState shrugAnimationState() {
-        return dance1AnimationState;
     }
 }
