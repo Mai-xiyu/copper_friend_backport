@@ -84,6 +84,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     private int idleAnimationStartTick = 0;
     @Nullable
     private BlockPos lastLightUpdatePos = null;
+    private int spinHeadTick;
 
     public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
         super(entityType, level);
@@ -94,6 +95,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
         this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
+        this.tickCount += getRandom().nextInt(72000);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -292,7 +294,13 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             }
         } else {
             this.updateWeathering((ServerLevel) this.level(), this.level().getRandom(), this.level().getGameTime());
-
+            if (this.spinHeadTick < this.tickCount) {
+                this.spinHeadTick += this.tickCount + ThreadLocalRandom.current().nextInt(
+                        CopperGolemConfig.getSpinAnimationMinCooldown(),
+                        CopperGolemConfig.getSpinAnimationMaxCooldown());
+            } else {
+                this.setState(CopperGolemState.SPIN_HEAD);
+            }
             if (this.isLantern()) {
                 BlockPos currentPos = this.blockPosition();
 
@@ -355,8 +363,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                     itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
                 }
                 return InteractionResult.SUCCESS;
-            }
-            else if (this.readyForShearing()) {
+            } else if (this.readyForShearing()) {
                 if (level instanceof ServerLevel) {
                     this.shear(SoundSource.PLAYERS);
                     this.gameEvent(GameEvent.SHEAR, player);
@@ -463,23 +470,25 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
     private void setupAnimationStates() {
         switch (this.getState()) {
-            case IDLE:
+            case SPIN_HEAD -> {
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionGetItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
-                if (this.idleAnimationStartTick == this.tickCount) {
-                    this.idleAnimationState.start(this.tickCount);
-                } else if (this.idleAnimationStartTick == 0) {
-                    this.idleAnimationStartTick = this.tickCount + ThreadLocalRandom.current().nextInt(CopperGolemConfig.getSpinAnimationMinCooldown(), CopperGolemConfig.getSpinAnimationMaxCooldown());
-                }
-                if (this.tickCount == this.idleAnimationStartTick + 10) {
-                    this.playHeadSpinSound();
-                    this.getHeadSpinAnimationState().start(this.tickCount);
-                    this.idleAnimationStartTick = 0;
-                }
-                break;
-            case GETTING_ITEM:
+                this.idleAnimationState.stop();
+                this.playHeadSpinSound();
+                this.headSpinAnimationState.startIfStopped(this.tickCount);
+            }
+            case IDLE -> {
+                this.interactionGetNoItemAnimationState.stop();
+                this.interactionGetItemAnimationState.stop();
+                this.interactionDropItemAnimationState.stop();
+                this.interactionDropNoItemAnimationState.stop();
+                this.headSpinAnimationState.stop();
+                this.idleAnimationState.start(this.tickCount);
+            }
+            case GETTING_ITEM -> {
+                this.headSpinAnimationState.stop();
                 this.idleAnimationState.stop();
                 this.idleAnimationStartTick = 0;
 
@@ -487,8 +496,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
                 this.interactionGetItemAnimationState.startIfStopped(this.tickCount);
-                break;
-            case GETTING_NO_ITEM:
+            }
+            case GETTING_NO_ITEM -> {
+                this.headSpinAnimationState.stop();
                 this.idleAnimationState.stop();
                 this.idleAnimationStartTick = 0;
 
@@ -496,8 +506,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.interactionDropNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionGetNoItemAnimationState.startIfStopped(this.tickCount);
-                break;
-            case DROPPING_ITEM:
+            }
+            case DROPPING_ITEM -> {
+                this.headSpinAnimationState.stop();
                 this.idleAnimationState.stop();
                 this.idleAnimationStartTick = 0;
 
@@ -505,8 +516,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.startIfStopped(this.tickCount);
-                break;
-            case DROPPING_NO_ITEM:
+            }
+            case DROPPING_NO_ITEM -> {
+                this.headSpinAnimationState.stop();
                 this.idleAnimationState.stop();
                 this.idleAnimationStartTick = 0;
 
@@ -514,6 +526,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.startIfStopped(this.tickCount);
+            }
         }
     }
 

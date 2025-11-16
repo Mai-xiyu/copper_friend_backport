@@ -2,8 +2,8 @@ package org.xiyu.yee.copper_friend_backport.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.ArmedModel;
-import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
@@ -14,13 +14,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.xiyu.yee.copper_friend_backport.client.animation.*;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem;
 
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.Random;
 
 @OnlyIn(Dist.CLIENT)
 public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<T> implements ArmedModel, HeadedModel {
+    public static boolean resetSpinHeadAnimation = false;
     private final ModelPart root;
     private final ModelPart body;
     private final ModelPart head;
@@ -29,17 +27,15 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
     private final ModelPart leftArm;
     private final ModelPart rightLeg;
     private final ModelPart leftLeg;
-    
     // 关键帧动画
     private final KeyframeAnimation walkAnimation;
     private final KeyframeAnimation walkWithItemAnimation;
-    private KeyframeAnimation spinHeadAnimation;
     private final KeyframeAnimation gettingItemAnimation;
     private final KeyframeAnimation gettingNoItemAnimation;
     private final KeyframeAnimation droppingItemAnimation;
     private final KeyframeAnimation droppingNoItemAnimation;
-
-    private int spinHeadGetTimes = 0;
+    private final Random RANDOM = new Random();
+    private KeyframeAnimation spinHeadAnimation;
 
     public CopperGolemModel(ModelPart root) {
         this.root = root;
@@ -124,7 +120,7 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
 
         if (entity instanceof CopperGolem copperGolem) {
             boolean hasItem = !copperGolem.getMainHandItem().isEmpty() || !copperGolem.getOffhandItem().isEmpty();
-            
+
             if (hasItem) {
                 this.walkWithItemAnimation.applyWalk(limbSwing, limbSwingAmount, 2.0F, 2.5F);
                 this.poseHeldItemArmsIfStill();
@@ -132,30 +128,25 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
                 this.walkAnimation.applyWalk(limbSwing, limbSwingAmount, 2.0F, 2.5F);
             }
 
-            if(++spinHeadGetTimes >= 200){
-                if(!copperGolem.getHeadSpinAnimationState().isStarted() || spinHeadGetTimes>= 1000){
-                    float headUp;
-                    float headRotate;
-                    headUp = ThreadLocalRandom.current().nextFloat(10,35);
-                    headRotate = ThreadLocalRandom.current().nextFloat(120,330);
-                    spinHeadAnimation = KeyframeAnimation.bake(root, new AnimationDefinition.Builder().length(3.5F)
-                            .addAnimation(
-                                    "head",
-                                    AnimationChannel.rotation(
-                                            new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-                                            new Keyframe(1.2083F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-                                            new Keyframe(1.5F, KeyframeAnimations.degreeVec(0.0F, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
-                                            new Keyframe(1.6667F, KeyframeAnimations.degreeVec(0.0F, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
-                                            new Keyframe(1.75F, KeyframeAnimations.degreeVec(-headUp, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
-                                            new Keyframe(2.7083F, KeyframeAnimations.degreeVec(-headUp, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
-                                            new Keyframe(3.0F, KeyframeAnimations.degreeVec(0.0F, 360.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-                                            new Keyframe(3.5F, KeyframeAnimations.degreeVec(0.0F, 360.0F, 0.0F), Keyframe.Interpolation.LINEAR)
-                                    )
-                            )
-                            .build()
-                    );
-                    spinHeadGetTimes = 0;
-                }
+            if(resetSpinHeadAnimation){
+                float headUp;
+                float headRotate;
+                headUp = RANDOM.nextFloat(10, 35);
+                headRotate = RANDOM.nextFloat(120, 330);
+                this.spinHeadAnimation = KeyframeAnimation.bake(root, new AnimationDefinition.Builder().length(3.5F)
+                        .addAnimation(
+                                "head",
+                                AnimationChannel.rotation(
+                                        new Keyframe(1.2083F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                                        new Keyframe(1.5F, KeyframeAnimations.degreeVec(0.0F, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
+                                        new Keyframe(1.6667F, KeyframeAnimations.degreeVec(0.0F, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
+                                        new Keyframe(2.7083F, KeyframeAnimations.degreeVec(-headUp, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
+                                        new Keyframe(3.5F, KeyframeAnimations.degreeVec(0.0F, 360.0F, 0.0F), Keyframe.Interpolation.LINEAR)
+                                )
+                        )
+                        .build()
+                );
+                resetSpinHeadAnimation = false;
             }
             spinHeadAnimation.apply(copperGolem.getHeadSpinAnimationState(), ageInTicks);
             this.gettingItemAnimation.apply(copperGolem.getInteractionGetItemAnimationState(), ageInTicks);
