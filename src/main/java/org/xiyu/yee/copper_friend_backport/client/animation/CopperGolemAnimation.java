@@ -64,25 +64,9 @@ public class CopperGolemAnimation {
 		.build();
 	public static final AnimationDefinition COPPER_GOLEM_SPIN_HEAD = new AnimationDefinition.Builder().length(3.5F)
 		.addAnimation(
-			"body",
-			AnimationChannel.rotation(
-				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, -35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, -35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(0.625F, KeyframeAnimations.degreeVec(0.0F, 35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(1.2083F, KeyframeAnimations.degreeVec(0.0F, 35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(2.7083F, KeyframeAnimations.degreeVec(0.0F, 35.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(3.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(3.5F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR)
-			)
-		)
-		.addAnimation(
 			"head",
 			AnimationChannel.rotation(
 				new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
-				new Keyframe(0.625F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(1.2083F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(1.5F, KeyframeAnimations.degreeVec(0.0F, 300.0F, 0.0F), Keyframe.Interpolation.LINEAR),
 				new Keyframe(1.6667F, KeyframeAnimations.degreeVec(0.0F, 300.0F, 0.0F), Keyframe.Interpolation.LINEAR),

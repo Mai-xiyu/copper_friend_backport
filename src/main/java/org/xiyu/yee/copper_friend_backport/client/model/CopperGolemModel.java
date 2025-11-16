@@ -11,9 +11,13 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.xiyu.yee.copper_friend_backport.client.animation.CopperGolemAnimation;
-import org.xiyu.yee.copper_friend_backport.client.animation.KeyframeAnimation;
+import org.xiyu.yee.copper_friend_backport.client.animation.*;
 import org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolem;
+
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
 public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<T> implements ArmedModel, HeadedModel {
@@ -29,11 +33,13 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
     // 关键帧动画
     private final KeyframeAnimation walkAnimation;
     private final KeyframeAnimation walkWithItemAnimation;
-    private final KeyframeAnimation spinHeadAnimation;
+    private KeyframeAnimation spinHeadAnimation;
     private final KeyframeAnimation gettingItemAnimation;
     private final KeyframeAnimation gettingNoItemAnimation;
     private final KeyframeAnimation droppingItemAnimation;
     private final KeyframeAnimation droppingNoItemAnimation;
+
+    private int spinHeadGetTimes = 0;
 
     public CopperGolemModel(ModelPart root) {
         this.root = root;
@@ -126,19 +132,36 @@ public class CopperGolemModel<T extends LivingEntity> extends HierarchicalModel<
                 this.walkAnimation.applyWalk(limbSwing, limbSwingAmount, 2.0F, 2.5F);
             }
 
-            this.spinHeadAnimation.apply(copperGolem.getHeadSpinAnimationState(), ageInTicks);
+            if(++spinHeadGetTimes >= 200){
+                if(!copperGolem.getHeadSpinAnimationState().isStarted() || spinHeadGetTimes>= 1000){
+                    float headUp;
+                    float headRotate;
+                    headUp = ThreadLocalRandom.current().nextFloat(10,35);
+                    headRotate = ThreadLocalRandom.current().nextFloat(120,330);
+                    spinHeadAnimation = KeyframeAnimation.bake(root, new AnimationDefinition.Builder().length(3.5F)
+                            .addAnimation(
+                                    "head",
+                                    AnimationChannel.rotation(
+                                            new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                                            new Keyframe(1.2083F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                                            new Keyframe(1.5F, KeyframeAnimations.degreeVec(0.0F, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
+                                            new Keyframe(1.6667F, KeyframeAnimations.degreeVec(0.0F, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
+                                            new Keyframe(1.75F, KeyframeAnimations.degreeVec(-headUp, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
+                                            new Keyframe(2.7083F, KeyframeAnimations.degreeVec(-headUp, headRotate, 0.0F), Keyframe.Interpolation.LINEAR),
+                                            new Keyframe(3.0F, KeyframeAnimations.degreeVec(0.0F, 360.0F, 0.0F), Keyframe.Interpolation.LINEAR),
+                                            new Keyframe(3.5F, KeyframeAnimations.degreeVec(0.0F, 360.0F, 0.0F), Keyframe.Interpolation.LINEAR)
+                                    )
+                            )
+                            .build()
+                    );
+                    spinHeadGetTimes = 0;
+                }
+            }
+            spinHeadAnimation.apply(copperGolem.getHeadSpinAnimationState(), ageInTicks);
             this.gettingItemAnimation.apply(copperGolem.getInteractionGetItemAnimationState(), ageInTicks);
             this.gettingNoItemAnimation.apply(copperGolem.getInteractionGetNoItemAnimationState(), ageInTicks);
             this.droppingItemAnimation.apply(copperGolem.getInteractionDropItemAnimationState(), ageInTicks);
             this.droppingNoItemAnimation.apply(copperGolem.getInteractionDropNoItemAnimationState(), ageInTicks);
-
-            /*boolean isInteracting = copperGolem.getInteractionGetItemAnimationState().isStarted() ||
-                                    copperGolem.getInteractionGetNoItemAnimationState().isStarted() ||
-                                    copperGolem.getInteractionDropItemAnimationState().isStarted() ||
-                                    copperGolem.getInteractionDropNoItemAnimationState().isStarted();
-            
-            if (!isInteracting) {
-            }*/
         }
     }
 
