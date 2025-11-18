@@ -160,67 +160,37 @@
   },
   "entity.copper_golem.become_statue": {
     "sounds": [
-      "minecraft:block/stone/break1",
-      "minecraft:block/stone/break2",
-      "minecraft:block/stone/break3",
-      "minecraft:block/stone/break4",
-      "minecraft:block/stone/break5",
-      "minecraft:block/stone/break6"
+      "minecraft:block.stone.break"
     ],
     "subtitle": "subtitles.entity.copper_golem.become_statue"
   },
   "block.copper_golem_statue.break": {
     "sounds": [
-      "minecraft:block/stone/break1",
-      "minecraft:block/stone/break2",
-      "minecraft:block/stone/break3",
-      "minecraft:block/stone/break4",
-      "minecraft:block/stone/break5",
-      "minecraft:block/stone/break6"
+      "minecraft:block.stone.break"
     ],
     "subtitle": "subtitles.block.generic.break"
   },
   "block.copper_golem_statue.place": {
     "sounds": [
-      "minecraft:block/stone/place1",
-      "minecraft:block/stone/place2",
-      "minecraft:block/stone/place3",
-      "minecraft:block/stone/place4",
-      "minecraft:block/stone/place5",
-      "minecraft:block/stone/place6"
+      "minecraft:block.stone.place"
     ],
     "subtitle": "subtitles.block.generic.place"
   },
   "block.copper_golem_statue.hit": {
     "sounds": [
-      "minecraft:block/stone/hit1",
-      "minecraft:block/stone/hit2",
-      "minecraft:block/stone/hit3",
-      "minecraft:block/stone/hit4",
-      "minecraft:block/stone/hit5",
-      "minecraft:block/stone/hit6"
+      "minecraft:block.stone.hit"
     ],
     "subtitle": "subtitles.block.generic.hit"
   },
   "block.copper_golem_statue.step": {
     "sounds": [
-      "minecraft:block/stone/step1",
-      "minecraft:block/stone/step2",
-      "minecraft:block/stone/step3",
-      "minecraft:block/stone/step4",
-      "minecraft:block/stone/step5",
-      "minecraft:block/stone/step6"
+      "minecraft:block.stone.step"
     ],
     "subtitle": "subtitles.block.generic.footsteps"
   },
   "block.copper_golem_statue.fall": {
     "sounds": [
-      "minecraft:block/stone/step1",
-      "minecraft:block/stone/step2",
-      "minecraft:block/stone/step3",
-      "minecraft:block/stone/step4",
-      "minecraft:block/stone/step5",
-      "minecraft:block/stone/step6"
+      "minecraft:block.stone.fall"
     ],
     "subtitle": "subtitles.block.generic.footsteps"
   },
@@ -274,62 +244,43 @@
   },
   "block.copper_door.close": {
     "sounds": [
-      "minecraft:block/iron_door/close"
+      "minecraft:block.iron_door.close"
     ],
     "subtitle": "subtitles.block.door.toggle"
   },
   "block.copper_door.open": {
     "sounds": [
-      "minecraft:block/iron_door/open"
+      "minecraft:block.iron_door.open"
     ],
     "subtitle": "subtitles.block.door.toggle"
   },
   "block.copper_grate.break": {
     "sounds": [
-      "minecraft:block/copper/break1",
-      "minecraft:block/copper/break2",
-      "minecraft:block/copper/break3",
-      "minecraft:block/copper/break4"
+      "minecraft:block.copper.break"
     ],
     "subtitle": "subtitles.block.generic.break"
   },
   "block.copper_grate.step": {
     "sounds": [
-      "minecraft:block/copper/step1",
-      "minecraft:block/copper/step2",
-      "minecraft:block/copper/step3",
-      "minecraft:block/copper/step4",
-      "minecraft:block/copper/step5",
-      "minecraft:block/copper/step6"
+      "minecraft:block.copper.step"
     ],
     "subtitle": "subtitles.block.generic.footsteps"
   },
   "block.copper_grate.place": {
     "sounds": [
-      "minecraft:block/copper/place1",
-      "minecraft:block/copper/place2",
-      "minecraft:block/copper/place3",
-      "minecraft:block/copper/place4",
-      "minecraft:block/copper/place5",
-      "minecraft:block/copper/place6"
+      "minecraft:block.copper.place"
     ],
     "subtitle": "subtitles.block.generic.place"
   },
   "block.copper_grate.hit": {
     "sounds": [
-      "minecraft:block/copper/hit1",
-      "minecraft:block/copper/hit2",
-      "minecraft:block/copper/hit3",
-      "minecraft:block/copper/hit4"
+      "minecraft:block.copper.hit"
     ],
     "subtitle": "subtitles.block.generic.hit"
   },
   "block.copper_grate.fall": {
     "sounds": [
-      "minecraft:block/copper/fall1",
-      "minecraft:block/copper/fall2",
-      "minecraft:block/copper/fall3",
-      "minecraft:block/copper/fall4"
+      "minecraft:block.copper.fall"
     ],
     "subtitle": "subtitles.block.generic.footsteps"
   }

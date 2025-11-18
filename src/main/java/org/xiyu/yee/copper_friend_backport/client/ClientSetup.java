@@ -1,9 +1,12 @@
 package org.xiyu.yee.copper_friend_backport.client;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.xiyu.yee.copper_friend_backport.CopperFriendBackport;
@@ -36,5 +39,25 @@ public class ClientSetup {
         // Register block entity renderers
         // event.registerBlockEntityRenderer(ModBlockEntity.COPPER_GOLEM_STATUE.get(), CopperGolemStatueRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntity.COPPER_CHEST.get(), CopperChestRenderer::new);
+    }
+    
+    @Mod.EventBusSubscriber(modid = CopperFriendBackport.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+    public static class ClientEventHandler {
+        @SubscribeEvent
+        public static void onClientTick(TickEvent.ClientTickEvent event) {
+            if (event.phase == TickEvent.Phase.END) {
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.level != null) {
+                    DynamicLightHandler.tick(mc.level);
+                }
+            }
+        }
+        
+        @SubscribeEvent
+        public static void onLevelUnload(LevelEvent.Unload event) {
+            if (event.getLevel().isClientSide()) {
+                DynamicLightHandler.clearAllLights();
+            }
+        }
     }
 }

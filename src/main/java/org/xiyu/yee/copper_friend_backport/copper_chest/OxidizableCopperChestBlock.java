@@ -22,7 +22,7 @@ public class OxidizableCopperChestBlock extends BaseCopperChestBlock implements 
     
     public static final MapCodec<OxidizableCopperChestBlock> CODEC = RecordCodecBuilder.mapCodec(
         instance -> instance.group(
-            WeatheringCopper.WeatherState.CODEC.fieldOf("weathering_state")
+            WeatherState.CODEC.fieldOf("weathering_state")
                 .forGetter(BaseCopperChestBlock::getWeatherState),
             BuiltInRegistries.SOUND_EVENT.byNameCodec().fieldOf("open_sound")
                 .forGetter(block -> block.openSound),
@@ -33,10 +33,10 @@ public class OxidizableCopperChestBlock extends BaseCopperChestBlock implements 
     );
 
     public OxidizableCopperChestBlock(
-        WeatheringCopper.WeatherState weatherState,
+        WeatherState weatherState,
         SoundEvent openSound,
         SoundEvent closeSound,
-        BlockBehaviour.Properties properties
+        Properties properties
     ) {
         super(weatherState, openSound, closeSound, properties);
     }
@@ -79,7 +79,7 @@ public class OxidizableCopperChestBlock extends BaseCopperChestBlock implements 
      * Required by WeatheringCopper interface.
      */
     @Override
-    public WeatheringCopper.WeatherState getAge() {
+    public WeatherState getAge() {
         return this.weatherState;
     }
 }

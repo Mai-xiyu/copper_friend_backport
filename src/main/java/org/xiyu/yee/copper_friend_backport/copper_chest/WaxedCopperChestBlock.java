@@ -31,7 +31,7 @@ public class WaxedCopperChestBlock extends BaseCopperChestBlock {
         WeatheringCopper.WeatherState weatherState,
         SoundEvent openSound,
         SoundEvent closeSound,
-        BlockBehaviour.Properties properties
+        Properties properties
     ) {
         super(weatherState, openSound, closeSound, properties);
     }

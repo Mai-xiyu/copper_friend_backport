@@ -265,7 +265,7 @@ public class TransportItemsBetweenContainers extends Behavior<PathfinderMob> {
         pathfinderMob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(transportItemTarget.pos));
         this.stopInPlace(pathfinderMob);
         if (this.interactionState != null) {
-            Optional.ofNullable((TransportItemsBetweenContainers.OnTargetReachedInteraction)this.onTargetInteractionActions.get(this.interactionState))
+            Optional.ofNullable((OnTargetReachedInteraction)this.onTargetInteractionActions.get(this.interactionState))
                     .ifPresent(onTargetReachedInteraction -> onTargetReachedInteraction.accept(pathfinderMob, transportItemTarget, this.ticksSinceReachingTarget));
         }
     }

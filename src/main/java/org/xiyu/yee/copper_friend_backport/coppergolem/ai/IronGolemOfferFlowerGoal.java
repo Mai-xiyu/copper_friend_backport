@@ -20,7 +20,7 @@ public class IronGolemOfferFlowerGoal extends Goal {
     
     public IronGolemOfferFlowerGoal(IronGolem ironGolem) {
         this.ironGolem = ironGolem;
-        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
     
     @Override

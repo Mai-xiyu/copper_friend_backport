@@ -73,6 +73,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     );
     private final AnimationState idleAnimationState = new AnimationState();
     private final AnimationState headSpinAnimationState = new AnimationState();
+    private final AnimationState dance1AnimationState = new AnimationState();
+    public final AnimationState dance2AnimationState = new AnimationState();
     private final AnimationState interactionGetItemAnimationState = new AnimationState();
     private final AnimationState interactionGetNoItemAnimationState = new AnimationState();
     private final AnimationState interactionDropItemAnimationState = new AnimationState();
@@ -82,9 +84,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     private UUID lastLightningBoltUUID;
     private long nextWeatheringTick = -1L;
     private int idleAnimationStartTick = 0;
-    @Nullable
-    private BlockPos lastLightUpdatePos = null;
-    private int spinHeadTick;
 
     public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
         super(entityType, level);
@@ -95,7 +94,6 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
         this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
-        this.tickCount += getRandom().nextInt(72000);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -105,6 +103,26 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     public static BlockPos getConnectedBlockPos(BlockPos blockPos, BlockState blockState) {
         Direction direction = ChestBlock.getConnectedDirection(blockState);
         return blockPos.relative(direction);
+    }
+
+    public int jukeboxPlaying() {
+        return this.entityData.get(DATA_DANCE);
+    }
+
+    public boolean dancing() {
+        return this.entityData.get(DATA_DANCE) != 0;
+    }
+
+    public void setJukeboxPlaying() {
+        if (jukeboxPlaying() == 0) {
+            this.entityData.set(DATA_DANCE, this.random.nextIntBetweenInclusive(0, 4));
+        }
+    }
+
+    public void setJukeboxNotPlaying() {
+        if (jukeboxPlaying() != 0) {
+            this.entityData.set(DATA_DANCE, 0);
+        }
     }
 
     public CopperGolemState getState() {
@@ -123,43 +141,32 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.entityData.set(DATA_WEATHER_STATE, weatherState);
     }
 
+    /**
+     * Sets this golem as waxed (prevents oxidation).
+     */
     public void setWaxed() {
         this.nextWeatheringTick = -2L;
     }
 
+    /**
+     * Checks if this golem is waxed.
+     */
     public boolean isWaxed() {
         return this.nextWeatheringTick == -2L;
     }
 
+    /**
+     * Checks if this golem is a lantern (emits light).
+     */
     public boolean isLantern() {
         return this.entityData.get(DATA_IS_LANTERN);
     }
 
+    /**
+     * Sets whether this golem is a lantern (emits light).
+     */
     public void setLantern(boolean isLantern) {
-        boolean wasLantern = this.isLantern();
         this.entityData.set(DATA_IS_LANTERN, isLantern);
-
-        // If lantern status changed and we're on server side, handle light source
-        if (!this.level().isClientSide() && wasLantern != isLantern) {
-            BlockPos pos = this.blockPosition();
-            if (!isLantern && this.lastLightUpdatePos != null) {
-                // Became non-lantern: remove light block
-                BlockState state = this.level().getBlockState(this.lastLightUpdatePos);
-                if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 14) {
-                    this.level().removeBlock(this.lastLightUpdatePos, false);
-                }
-                this.lastLightUpdatePos = null;
-            } else if (isLantern) {
-                // Became lantern: place light block if position is air
-                BlockState currentState = this.level().getBlockState(pos);
-                if (currentState.isAir()) {
-                    this.level().setBlock(pos,
-                            Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 14),
-                            3);
-                    this.lastLightUpdatePos = pos;
-                }
-            }
-        }
     }
 
     /**
@@ -256,11 +263,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         if (compoundTag.contains("has_poppy")) {
             this.setHasPoppy(compoundTag.getBoolean("has_poppy"));
         }
-        if (compoundTag.contains("weather_state", 99)) {
+        if (compoundTag.contains("weather_state", 99)) { // 99 = any numeric type
             int weatherStateId = compoundTag.getInt("weather_state");
             WeatheringCopper.WeatherState state = WeatheringCopper.WeatherState.BY_ID.apply(weatherStateId);
             this.setWeatherState(state);
-        } else if (compoundTag.contains("weather_state", 8)) {
+        } else if (compoundTag.contains("weather_state", 8)) { // 8 = string (兼容旧数据)
             String weatherStateName = compoundTag.getString("weather_state");
             for (WeatheringCopper.WeatherState state : WeatheringCopper.WeatherState.values()) {
                 if (state.getSerializedName().equals(weatherStateName)) {
@@ -294,47 +301,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             }
         } else {
             this.updateWeathering((ServerLevel) this.level(), this.level().getRandom(), this.level().getGameTime());
-            if (this.spinHeadTick < this.tickCount) {
-                this.spinHeadTick += this.tickCount + ThreadLocalRandom.current().nextInt(
-                        CopperGolemConfig.getSpinAnimationMinCooldown(),
-                        CopperGolemConfig.getSpinAnimationMaxCooldown());
-            } else {
-                this.setState(CopperGolemState.SPIN_HEAD);
-            }
-            if (this.isLantern()) {
-                BlockPos currentPos = this.blockPosition();
-
-                if (this.lastLightUpdatePos == null || !this.lastLightUpdatePos.equals(currentPos)) {
-                    // Remove light block at old position
-                    if (this.lastLightUpdatePos != null) {
-                        BlockState oldState = this.level().getBlockState(this.lastLightUpdatePos);
-                        // Only remove if it's a light block we placed (light level 14)
-                        if (oldState.is(Blocks.LIGHT) && oldState.getValue(BlockStateProperties.LEVEL) == 14) {
-                            this.level().removeBlock(this.lastLightUpdatePos, false);
-                        }
-                    }
-
-                    BlockState currentState = this.level().getBlockState(currentPos);
-                    if (currentState.isAir()) {
-                        this.level().setBlock(currentPos,
-                                Blocks.LIGHT.defaultBlockState().setValue(BlockStateProperties.LEVEL, 14),
-                                3);
-                    }
-
-                    this.lastLightUpdatePos = currentPos;
-                }
-            }
         }
     }
 
     @Override
     public void remove(RemovalReason reason) {
-        if (!this.level().isClientSide() && this.isLantern() && this.lastLightUpdatePos != null) {
-            BlockState state = this.level().getBlockState(this.lastLightUpdatePos);
-            if (state.is(Blocks.LIGHT) && state.getValue(BlockStateProperties.LEVEL) == 14) {
-                this.level().removeBlock(this.lastLightUpdatePos, false);
-            }
-        }
         super.remove(reason);
     }
 
@@ -358,12 +329,15 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                     this.spawnAtLocation(poppyStack);
                     this.setHasPoppy(false);
 
-                    serverLevel.playSound(null, this, SoundEvents.SHEEP_SHEAR, this.getSoundSource(), 1.0F, 1.0F);
+                    // Play sound
+                    serverLevel.playSound(null, this, SoundEvents.SHEEP_SHEAR, this.getSoundSource(), 3.0F, 1.0F);
                     this.gameEvent(GameEvent.SHEAR, player);
                     itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
                 }
                 return InteractionResult.SUCCESS;
-            } else if (this.readyForShearing()) {
+            }
+            // If no poppy, check for oxidation shearing
+            else if (this.readyForShearing()) {
                 if (level instanceof ServerLevel) {
                     this.shear(SoundSource.PLAYERS);
                     this.gameEvent(GameEvent.SHEAR, player);
@@ -374,7 +348,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         }
         if (itemStack.is(Items.POPPY) && !this.hasPoppy()) {
             this.setHasPoppy(true);
-            level.playSound(null, this, SoundEvents.ITEM_PICKUP, this.getSoundSource(), 1.0F, 1.0F);
+            level.playSound(null, this, SoundEvents.ITEM_PICKUP, this.getSoundSource(), 3.0F, 1.0F);
 
             if (!player.getAbilities().instabuild) {
                 itemStack.shrink(1);
@@ -386,11 +360,14 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             return InteractionResult.PASS;
         }
 
+        // Handle honeycomb - apply wax (requires sneaking)
         if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L && player.isCrouching()) {
-            level.playSound(null, this, SoundEvents.HONEYCOMB_WAX_ON, this.getSoundSource(), 1.0F, 1.0F);
+            // Play wax on sound
+            level.playSound(null, this, SoundEvents.HONEYCOMB_WAX_ON, this.getSoundSource(), 3.0F, 1.0F);
             level.levelEvent(player, 3003, this.blockPosition(), 0);
             this.nextWeatheringTick = -2L;
 
+            // Grant advancement
             if (player instanceof ServerPlayer serverPlayer) {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
             }
@@ -401,11 +378,13 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             return InteractionResult.SUCCESS;
         }
 
+        // Handle axe - dewax (requires sneaking)
         if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L && player.isCrouching()) {
-            level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
+            level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 3.0F, 1.0F);
             level.levelEvent(player, 3004, this.blockPosition(), 0); // Wax off particles
             this.nextWeatheringTick = -1L;
 
+            // Grant advancement
             if (player instanceof ServerPlayer serverPlayer) {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
             }
@@ -414,14 +393,16 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             return InteractionResult.SUCCESS;
         }
 
+        // Handle axe - scrape oxidation (requires sneaking)
         if (itemStack.is(ItemTags.AXES) && player.isCrouching()) {
             WeatheringCopper.WeatherState weatherState = this.getWeatherState();
             if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
-                level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
+                level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 3.0F, 1.0F);
                 level.levelEvent(player, 3005, this.blockPosition(), 0); // Scrape particles
                 this.nextWeatheringTick = -1L;
                 this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
 
+                // Grant advancement
                 if (player instanceof ServerPlayer serverPlayer) {
                     CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
                 }
@@ -463,71 +444,104 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     }
 
     private void turnToStatue(ServerLevel serverLevel) {
+        // Stop all navigation and pathfinding
         this.getNavigation().stop();
+        // Clear brain goals and memories to stop AI behaviors
         this.getBrain().stopAll(serverLevel, this);
+        // Set to idle state
         this.setState(CopperGolemState.IDLE);
     }
 
     private void setupAnimationStates() {
         switch (this.getState()) {
-            case SPIN_HEAD -> {
+            case IDLE:
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionGetItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
+                if (dancing()) {
+                    switch (jukeboxPlaying()) {
+                        case 1, 2 -> this.dance1AnimationState.startIfStopped(this.tickCount);
+                        default -> this.dance2AnimationState.startIfStopped(this.tickCount);
+                    }
+                } else {
+                    stopDance();
+                    if (this.idleAnimationStartTick == this.tickCount) {
+                        this.idleAnimationState.start(this.tickCount);
+                    } else if (this.idleAnimationStartTick == 0) {
+                        // 使用完整的冷却时间，让头部旋转不那么频繁
+                        int minCooldown = CopperGolemConfig.getSpinAnimationMinCooldown();
+                        int maxCooldown = CopperGolemConfig.getSpinAnimationMaxCooldown();
+                        this.idleAnimationStartTick = this.tickCount + ThreadLocalRandom.current().nextInt(minCooldown, maxCooldown);
+                    }
+                    if (this.tickCount == this.idleAnimationStartTick + 10) {
+                        this.playHeadSpinSound();
+                        this.getHeadSpinAnimationState().start(this.tickCount);
+                        this.idleAnimationStartTick = 0;
+                    }
+                }
+                break;
+            case GETTING_ITEM:
                 this.idleAnimationState.stop();
-                this.playHeadSpinSound();
-                this.headSpinAnimationState.startIfStopped(this.tickCount);
-            }
-            case IDLE -> {
-                this.interactionGetNoItemAnimationState.stop();
-                this.interactionGetItemAnimationState.stop();
-                this.interactionDropItemAnimationState.stop();
-                this.interactionDropNoItemAnimationState.stop();
-                this.headSpinAnimationState.stop();
-                this.idleAnimationState.start(this.tickCount);
-            }
-            case GETTING_ITEM -> {
-                this.headSpinAnimationState.stop();
-                this.idleAnimationState.stop();
-                this.idleAnimationStartTick = 0;
-
+                // 在获取物品后有较小机会触发头部旋转
+                if (this.idleAnimationStartTick == 0 && this.random.nextFloat() < 0.15F) {
+                    this.playHeadSpinSound();
+                    this.getHeadSpinAnimationState().start(this.tickCount);
+                    this.idleAnimationStartTick = -1; // 标记已触发
+                }
+                stopDance();
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
                 this.interactionGetItemAnimationState.startIfStopped(this.tickCount);
-            }
-            case GETTING_NO_ITEM -> {
-                this.headSpinAnimationState.stop();
+                break;
+            case GETTING_NO_ITEM:
                 this.idleAnimationState.stop();
-                this.idleAnimationStartTick = 0;
-
+                // 没有获取到物品时也可能转头
+                if (this.idleAnimationStartTick == 0 && this.random.nextFloat() < 0.2F) {
+                    this.playHeadSpinSound();
+                    this.getHeadSpinAnimationState().start(this.tickCount);
+                    this.idleAnimationStartTick = -1;
+                }
+                stopDance();
                 this.interactionGetItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionGetNoItemAnimationState.startIfStopped(this.tickCount);
-            }
-            case DROPPING_ITEM -> {
-                this.headSpinAnimationState.stop();
+                break;
+            case DROPPING_ITEM:
                 this.idleAnimationState.stop();
-                this.idleAnimationStartTick = 0;
-
+                // 放置物品后可能转头
+                if (this.idleAnimationStartTick == 0 && this.random.nextFloat() < 0.15F) {
+                    this.playHeadSpinSound();
+                    this.getHeadSpinAnimationState().start(this.tickCount);
+                    this.idleAnimationStartTick = -1;
+                }
+                stopDance();
                 this.interactionGetItemAnimationState.stop();
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.startIfStopped(this.tickCount);
-            }
-            case DROPPING_NO_ITEM -> {
-                this.headSpinAnimationState.stop();
+                break;
+            case DROPPING_NO_ITEM:
                 this.idleAnimationState.stop();
-                this.idleAnimationStartTick = 0;
-
+                // 没有放置物品时也可能转头
+                if (this.idleAnimationStartTick == 0 && this.random.nextFloat() < 0.2F) {
+                    this.playHeadSpinSound();
+                    this.getHeadSpinAnimationState().start(this.tickCount);
+                    this.idleAnimationStartTick = -1;
+                }
+                stopDance();
                 this.interactionGetItemAnimationState.stop();
                 this.interactionGetNoItemAnimationState.stop();
                 this.interactionDropItemAnimationState.stop();
                 this.interactionDropNoItemAnimationState.startIfStopped(this.tickCount);
-            }
         }
+    }
+
+    private void stopDance() {
+        this.dance1AnimationState.stop();
+        this.dance2AnimationState.stop();
     }
 
     public void spawn(WeatheringCopper.WeatherState weatherState) {
@@ -537,22 +551,20 @@ public class CopperGolem extends AbstractGolem implements Shearable {
 
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor,
-                                        DifficultyInstance difficultyInstance,
-                                        MobSpawnType mobSpawnType,
-                                        @Nullable SpawnGroupData spawnGroupData,
-                                        @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(
+            ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag
+    ) {
         this.playSpawnSound();
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     public void playSpawnSound() {
-        this.playSound(ModSoundEvents.COPPER_GOLEM_SPAWN.get());
+        this.playSound(ModSoundEvents.COPPER_GOLEM_SPAWN.get(), 3.0F, 1.0F);
     }
 
     private void playHeadSpinSound() {
         if (!this.isSilent()) {
-            this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSpinHeadSound(), this.getSoundSource(), 1.0F, 1.0F, false);
+            this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSpinHeadSound(), this.getSoundSource(), 3.0F, 1.0F, false);
         }
     }
 
@@ -595,7 +607,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     @Override
     public void shear(SoundSource soundSource) {
         if (this.level() instanceof ServerLevel serverLevel) {
-            serverLevel.playSound(null, this, ModSoundEvents.COPPER_GOLEM_SHEAR.get(), soundSource, 1.0F, 1.0F);
+            serverLevel.playSound(null, this, ModSoundEvents.COPPER_GOLEM_SHEAR.get(), soundSource, 3.0F, 1.0F);
             ItemStack itemStack2 = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
             this.setItemSlot(EQUIPMENT_SLOT_ANTENNA, ItemStack.EMPTY);
             this.spawnAtLocation(itemStack2, 1.5F);
@@ -624,6 +636,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 if (!predicate.test(itemStack)) {
                     set.add(equipmentSlot);
                 } else {
+                    // In 1.20.1, we check drop chance directly
                     if (this.getEquipmentDropChance(equipmentSlot) > 1.0F) {
                         this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
                         this.spawnAtLocation(itemStack);
@@ -662,5 +675,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
             }
         }
+    }
+
+    public AnimationState shrugAnimationState() {
+        return dance1AnimationState;
     }
 }

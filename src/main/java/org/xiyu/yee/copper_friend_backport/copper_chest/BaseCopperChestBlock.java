@@ -65,7 +65,7 @@ public abstract class BaseCopperChestBlock extends ChestBlock {
         WeatheringCopper.WeatherState weatherState,
         SoundEvent openSound,
         SoundEvent closeSound,
-        BlockBehaviour.Properties properties
+        Properties properties
     ) {
         super(properties, () -> ModBlockEntity.COPPER_CHEST.get());
         this.weatherState = weatherState;
@@ -104,7 +104,7 @@ public abstract class BaseCopperChestBlock extends ChestBlock {
         BlockPos pos,
         Player player,
         InteractionHand hand,
-        net.minecraft.world.phys.BlockHitResult hitResult
+        BlockHitResult hitResult
     ) {
         ItemStack stack = player.getItemInHand(hand);
         
