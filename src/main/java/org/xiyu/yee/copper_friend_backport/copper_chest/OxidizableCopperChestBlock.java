@@ -76,6 +76,38 @@ public class OxidizableCopperChestBlock extends BaseCopperChestBlock implements 
     }
 
     /**
+     * Override changeOverTime to preserve chest contents when oxidizing.
+     */
+    @Override
+    public void changeOverTime(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        float f = 0.05688889F;
+        if (random.nextFloat() < f) {
+            this.getNextState(state, level, pos, random).ifPresent(newState -> {
+                // Save BlockEntity data before changing block
+                net.minecraft.world.level.block.entity.BlockEntity blockEntity = level.getBlockEntity(pos);
+                net.minecraft.nbt.CompoundTag nbt = null;
+                if (blockEntity != null) {
+                    nbt = blockEntity.saveWithFullMetadata();
+                    // Remove BlockEntity without dropping items
+                    level.removeBlockEntity(pos);
+                }
+                
+                // Change block without triggering neighbor updates that cause drops
+                level.setBlock(pos, newState, net.minecraft.world.level.block.Block.UPDATE_CLIENTS | net.minecraft.world.level.block.Block.UPDATE_KNOWN_SHAPE);
+                
+                // Restore BlockEntity data
+                if (nbt != null) {
+                    net.minecraft.world.level.block.entity.BlockEntity newBlockEntity = level.getBlockEntity(pos);
+                    if (newBlockEntity != null) {
+                        newBlockEntity.load(nbt);
+                        newBlockEntity.setChanged();
+                    }
+                }
+            });
+        }
+    }
+
+    /**
      * Required by WeatheringCopper interface.
      */
     @Override

@@ -108,17 +108,33 @@ public abstract class BaseCopperChestBlock extends ChestBlock {
     ) {
         ItemStack stack = player.getItemInHand(hand);
         
-        // Handle honeycomb - apply wax (works even when not crouching for consistency with vanilla copper blocks)
+                // Handle honeycomb - apply wax (works even when not crouching for consistency with vanilla copper blocks)
         if (stack.is(Items.HONEYCOMB) && !this.isWaxed()) {
             Block waxedBlock = getWaxedBlock(state.getBlock());
             if (waxedBlock != null) {
                 if (level.isClientSide()) {
                     return InteractionResult.SUCCESS;
                 } else {
-                    // Change block
-                    level.setBlock(pos, waxedBlock.withPropertiesOf(state), 11);
+                    // Save BlockEntity data before changing block
+                    BlockEntity blockEntity = level.getBlockEntity(pos);
+                    net.minecraft.nbt.CompoundTag nbt = null;
+                    if (blockEntity != null) {
+                        nbt = blockEntity.saveWithFullMetadata();
+                        // Remove BlockEntity without dropping items
+                        level.removeBlockEntity(pos);
+                    }
                     
-                    // Play wax on sound
+                    // Change block without triggering neighbor updates that cause drops
+                    level.setBlock(pos, waxedBlock.withPropertiesOf(state), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+                    
+                    // Restore BlockEntity data
+                    if (nbt != null) {
+                        BlockEntity newBlockEntity = level.getBlockEntity(pos);
+                        if (newBlockEntity != null) {
+                            newBlockEntity.load(nbt);
+                            newBlockEntity.setChanged();
+                        }
+                    }                    // Play wax on sound
                     level.playSound(null, pos, SoundEvents.HONEYCOMB_WAX_ON, SoundSource.BLOCKS, 1.0F, 1.0F);
                     
                     // Wax on particle effect
@@ -165,8 +181,26 @@ public abstract class BaseCopperChestBlock extends ChestBlock {
                 if (level.isClientSide()) {
                     return InteractionResult.SUCCESS;
                 } else {
-                    // Change block
-                    level.setBlock(pos, scrapedBlock.withPropertiesOf(state), 11);
+                    // Save BlockEntity data before changing block
+                    BlockEntity blockEntity = level.getBlockEntity(pos);
+                    net.minecraft.nbt.CompoundTag nbt = null;
+                    if (blockEntity != null) {
+                        nbt = blockEntity.saveWithFullMetadata();
+                        // Remove BlockEntity without dropping items
+                        level.removeBlockEntity(pos);
+                    }
+                    
+                    // Change block without triggering neighbor updates that cause drops
+                    level.setBlock(pos, scrapedBlock.withPropertiesOf(state), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+                    
+                    // Restore BlockEntity data
+                    if (nbt != null) {
+                        BlockEntity newBlockEntity = level.getBlockEntity(pos);
+                        if (newBlockEntity != null) {
+                            newBlockEntity.load(nbt);
+                            newBlockEntity.setChanged();
+                        }
+                    }
                     
                     // Play scraping sound
                     level.playSound(null, pos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -255,7 +289,26 @@ public abstract class BaseCopperChestBlock extends ChestBlock {
             }
             
             if (firstBlock != null && firstBlock != state.getBlock()) {
-                level.setBlock(pos, firstBlock.withPropertiesOf(state), 3);
+                // Save BlockEntity data before changing block
+                BlockEntity blockEntity = level.getBlockEntity(pos);
+                net.minecraft.nbt.CompoundTag nbt = null;
+                if (blockEntity != null) {
+                    nbt = blockEntity.saveWithFullMetadata();
+                    // Remove BlockEntity without dropping items
+                    level.removeBlockEntity(pos);
+                }
+                
+                // Change block without triggering neighbor updates that cause drops
+                level.setBlock(pos, firstBlock.withPropertiesOf(state), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+                
+                // Restore BlockEntity data
+                if (nbt != null) {
+                    BlockEntity newBlockEntity = level.getBlockEntity(pos);
+                    if (newBlockEntity != null) {
+                        newBlockEntity.load(nbt);
+                        newBlockEntity.setChanged();
+                    }
+                }
             }
         }
     }
