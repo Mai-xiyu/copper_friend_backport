@@ -94,6 +94,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
         this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
+        this.tickCount += getRandom().nextInt(72000);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
