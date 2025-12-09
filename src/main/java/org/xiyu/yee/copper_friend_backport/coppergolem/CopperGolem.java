@@ -94,6 +94,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
         this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
+        this.tickCount += getRandom().nextInt(72000);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -444,10 +445,10 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     }
 
     private void turnToStatue(ServerLevel serverLevel) {
-        // Stop all navigation and pathfinding
+        // Set NoAI to true to disable all AI behaviors
+        this.setNoAi(true);
+        // Stop navigation
         this.getNavigation().stop();
-        // Clear brain goals and memories to stop AI behaviors
-        this.getBrain().stopAll(serverLevel, this);
         // Set to idle state
         this.setState(CopperGolemState.IDLE);
     }
