@@ -71,6 +71,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     private static final EntityDataAccessor<Integer> DATA_DANCE = SynchedEntityData.defineId(
             CopperGolem.class, EntityDataSerializers.INT
     );
+    private static final EntityDataAccessor<Boolean> DATA_IS_STATUE = SynchedEntityData.defineId(
+            CopperGolem.class, EntityDataSerializers.BOOLEAN
+    );
     private final AnimationState idleAnimationState = new AnimationState();
     private final AnimationState headSpinAnimationState = new AnimationState();
     private final AnimationState dance1AnimationState = new AnimationState();
@@ -243,6 +246,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.entityData.define(DATA_IS_LANTERN, false);
         this.entityData.define(DATA_HAS_POPPY, false);
         this.entityData.define(DATA_DANCE, 0);
+        this.entityData.define(DATA_IS_STATUE, false);
     }
 
     @Override
@@ -252,6 +256,7 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         compoundTag.putInt("weather_state", this.getWeatherState().ordinal());
         compoundTag.putBoolean("is_lantern", this.isLantern());
         compoundTag.putBoolean("has_poppy", this.hasPoppy());
+        compoundTag.putBoolean("is_statue", this.entityData.get(DATA_IS_STATUE));
     }
 
     @Override
@@ -263,6 +268,9 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         }
         if (compoundTag.contains("has_poppy")) {
             this.setHasPoppy(compoundTag.getBoolean("has_poppy"));
+        }
+        if (compoundTag.contains("is_statue")) {
+            this.entityData.set(DATA_IS_STATUE, compoundTag.getBoolean("is_statue"));
         }
         if (compoundTag.contains("weather_state", 99)) { // 99 = any numeric type
             int weatherStateId = compoundTag.getInt("weather_state");
@@ -402,6 +410,12 @@ public class CopperGolem extends AbstractGolem implements Shearable {
                 level.levelEvent(player, 3005, this.blockPosition(), 0); // Scrape particles
                 this.nextWeatheringTick = -1L;
                 this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
+                
+                // If was statue (oxidized by natural process), restore AI
+                if (this.entityData.get(DATA_IS_STATUE)) {
+                    this.entityData.set(DATA_IS_STATUE, false);
+                    this.setNoAi(false);
+                }
 
                 // Grant advancement
                 if (player instanceof ServerPlayer serverPlayer) {
@@ -445,6 +459,8 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     }
 
     private void turnToStatue(ServerLevel serverLevel) {
+        // Mark as statue (oxidized)
+        this.entityData.set(DATA_IS_STATUE, true);
         // Set NoAI to true to disable all AI behaviors
         this.setNoAi(true);
         // Stop navigation
@@ -454,6 +470,11 @@ public class CopperGolem extends AbstractGolem implements Shearable {
     }
 
     private void setupAnimationStates() {
+        // 如果实体处于 NoAI 状态(无论是氧化雕像还是玩家设置),停止所有动画
+        if (this.isNoAi()) {
+            return;
+        }
+        
         switch (this.getState()) {
             case IDLE:
                 this.interactionGetNoItemAnimationState.stop();
@@ -674,6 +695,12 @@ public class CopperGolem extends AbstractGolem implements Shearable {
             if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
                 this.nextWeatheringTick = -1L;
                 this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
+                
+                // If was statue (oxidized by natural process), restore AI
+                if (this.entityData.get(DATA_IS_STATUE)) {
+                    this.entityData.set(DATA_IS_STATUE, false);
+                    this.setNoAi(false);
+                }
             }
         }
     }
