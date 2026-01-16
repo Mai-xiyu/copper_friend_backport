@@ -35,7 +35,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -51,42 +50,52 @@ import org.xiyu.yee.copper_friend_backport.registry.ModSoundEvents;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 public class CopperGolem extends AbstractGolem implements Shearable {
-    public static final EquipmentSlot EQUIPMENT_SLOT_ANTENNA = EquipmentSlot.CHEST;
+    // --- Mojang 官方常量定义 ---
+    private static final long IGNORE_WEATHERING_TICK = -2L;
+    private static final long UNSET_WEATHERING_TICK = -1L;
+    private static final int WEATHERING_TICK_FROM = 504000;
+    private static final int WEATHERING_TICK_TO = 552000;
+    private static final int SPIN_ANIMATION_MIN_COOLDOWN = 200;
+    private static final int SPIN_ANIMATION_MAX_COOLDOWN = 240;
+    private static final float SPIN_SOUND_TIME_INTERVAL_OFFSET = 10.0F; // 动画先动，声音后响
+    private static final float TURN_TO_STATUE_CHANCE = 0.0058F;
+
+    // --- 数据同步键 ---
     private static final EntityDataAccessor<WeatheringCopper.WeatherState> DATA_WEATHER_STATE = SynchedEntityData.defineId(
             CopperGolem.class, ModEntityDataSerializers.WEATHERING_COPPER_STATE
     );
     private static final EntityDataAccessor<CopperGolemState> COPPER_GOLEM_STATE = SynchedEntityData.defineId(
             CopperGolem.class, ModEntityDataSerializers.COPPER_GOLEM_STATE
     );
-    private static final EntityDataAccessor<Boolean> DATA_IS_LANTERN = SynchedEntityData.defineId(
-            CopperGolem.class, EntityDataSerializers.BOOLEAN
-    );
-    private static final EntityDataAccessor<Boolean> DATA_HAS_POPPY = SynchedEntityData.defineId(
-            CopperGolem.class, EntityDataSerializers.BOOLEAN
-    );
-    private static final EntityDataAccessor<Integer> DATA_DANCE = SynchedEntityData.defineId(
-            CopperGolem.class, EntityDataSerializers.INT
-    );
-    private static final EntityDataAccessor<Boolean> DATA_IS_STATUE = SynchedEntityData.defineId(
-            CopperGolem.class, EntityDataSerializers.BOOLEAN
-    );
-    private final AnimationState idleAnimationState = new AnimationState();
+    // Mod 特有数据
+    private static final EntityDataAccessor<Boolean> DATA_IS_LANTERN = SynchedEntityData.defineId(CopperGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_HAS_POPPY = SynchedEntityData.defineId(CopperGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> DATA_DANCE = SynchedEntityData.defineId(CopperGolem.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> DATA_IS_STATUE = SynchedEntityData.defineId(CopperGolem.class, EntityDataSerializers.BOOLEAN);
+
+    public static final EquipmentSlot EQUIPMENT_SLOT_ANTENNA = EquipmentSlot.CHEST; // 对应官方 SADDLE 插槽
+
+    // --- 状态字段 ---
+    @Nullable
+    public BlockPos openedChestPos;
+    @Nullable
+    private UUID lastLightningBoltUUID;
+    private long nextWeatheringTick = UNSET_WEATHERING_TICK;
+    private int idleAnimationStartTick = 0;
+
+    // --- 动画状态 ---
+    // 官方 idleAnimationState 对应你的 headSpinAnimationState
     private final AnimationState headSpinAnimationState = new AnimationState();
-    private final AnimationState dance1AnimationState = new AnimationState();
-    public final AnimationState dance2AnimationState = new AnimationState();
     private final AnimationState interactionGetItemAnimationState = new AnimationState();
     private final AnimationState interactionGetNoItemAnimationState = new AnimationState();
     private final AnimationState interactionDropItemAnimationState = new AnimationState();
     private final AnimationState interactionDropNoItemAnimationState = new AnimationState();
-    @Nullable BlockPos openedChestPos;
-    @Nullable
-    private UUID lastLightningBoltUUID;
-    private long nextWeatheringTick = -1L;
-    private int idleAnimationStartTick = 0;
+    // Mod 特有动画
+    public final AnimationState dance1AnimationState = new AnimationState();
+    public final AnimationState dance2AnimationState = new AnimationState();
 
     public CopperGolem(EntityType<? extends AbstractGolem> entityType, Level level) {
         super(entityType, level);
@@ -97,198 +106,244 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
         this.getBrain().setMemory(ModMemoryModules.TRANSPORT_ITEMS_COOLDOWN_TICKS.get(), this.getRandom().nextInt(60, 100));
-        this.tickCount += getRandom().nextInt(72000);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.2F).add(Attributes.MAX_HEALTH, 12.0);
     }
 
-    public static BlockPos getConnectedBlockPos(BlockPos blockPos, BlockState blockState) {
-        Direction direction = ChestBlock.getConnectedDirection(blockState);
-        return blockPos.relative(direction);
-    }
+    // --- 核心逻辑: 动画状态机 (Strictly Mojang) ---
 
-    public int jukeboxPlaying() {
-        return this.entityData.get(DATA_DANCE);
-    }
+    private void setupAnimationStates() {
+        // 如果是雕像模式(NoAI)，不运行动画逻辑
+        if (this.isNoAi()) return;
 
-    public boolean dancing() {
-        return this.entityData.get(DATA_DANCE) != 0;
-    }
+        switch (this.getState()) {
+            case IDLE:
+                // 停止所有交互动画
+                this.interactionGetNoItemAnimationState.stop();
+                this.interactionGetItemAnimationState.stop();
+                this.interactionDropItemAnimationState.stop();
+                this.interactionDropNoItemAnimationState.stop();
 
-    public void setJukeboxPlaying() {
-        if (jukeboxPlaying() == 0) {
-            this.entityData.set(DATA_DANCE, this.random.nextIntBetweenInclusive(0, 4));
+                // 跳舞逻辑 (Mod 特有) - 如果在跳舞，覆盖掉原本的 IDLE 逻辑
+                if (dancing()) {
+                    switch (jukeboxPlaying()) {
+                        case 1, 2 -> this.dance1AnimationState.startIfStopped(this.tickCount);
+                        default -> this.dance2AnimationState.startIfStopped(this.tickCount);
+                    }
+                } else {
+                    stopDance(); // 停止跳舞
+
+                    // --- Mojang 转头逻辑 ---
+                    if (this.idleAnimationStartTick == this.tickCount) {
+                        // 1. 计时器触发：立即开始动画 (Tick 0)
+                        this.headSpinAnimationState.start(this.tickCount);
+                    } else if (this.idleAnimationStartTick == 0) {
+                        // 2. 计时器为0：设定下一次触发时间 (随机 200-240 ticks)
+                        // 这里保留了 Config 接口，如果想完全还原官方数值，请确保 Config 返回 200/240
+                        int min = CopperGolemConfig.getSpinAnimationMinCooldown();
+                        int max = CopperGolemConfig.getSpinAnimationMaxCooldown();
+                        this.idleAnimationStartTick = this.tickCount + this.random.nextInt(min, max);
+                    }
+
+                    // 3. 动画开始 10 ticks 后：播放声音并重置计时器
+                    if ((float)this.tickCount == (float)this.idleAnimationStartTick + SPIN_SOUND_TIME_INTERVAL_OFFSET) {
+                        this.playHeadSpinSound();
+                        this.idleAnimationStartTick = 0;
+                    }
+                }
+                break;
+
+            case GETTING_ITEM:
+                handleInteractionState(this.interactionGetItemAnimationState);
+                break;
+            case GETTING_NO_ITEM:
+                handleInteractionState(this.interactionGetNoItemAnimationState);
+                break;
+            case DROPPING_ITEM:
+                handleInteractionState(this.interactionDropItemAnimationState);
+                break;
+            case DROPPING_NO_ITEM:
+                handleInteractionState(this.interactionDropNoItemAnimationState);
+                break;
         }
     }
 
-    public void setJukeboxNotPlaying() {
-        if (jukeboxPlaying() != 0) {
-            this.entityData.set(DATA_DANCE, 0);
+    // 辅助方法：处理交互状态的动画清理 (Mojang 不在交互时转头)
+    private void handleInteractionState(AnimationState currentState) {
+        this.headSpinAnimationState.stop(); // 停止转头
+        this.idleAnimationStartTick = 0;    // 重置转头计时
+        stopDance();                        // 停止跳舞
+
+        // 停止其他交互动画
+        if (currentState != this.interactionGetItemAnimationState) this.interactionGetItemAnimationState.stop();
+        if (currentState != this.interactionGetNoItemAnimationState) this.interactionGetNoItemAnimationState.stop();
+        if (currentState != this.interactionDropItemAnimationState) this.interactionDropItemAnimationState.stop();
+        if (currentState != this.interactionDropNoItemAnimationState) this.interactionDropNoItemAnimationState.stop();
+
+        currentState.startIfStopped(this.tickCount);
+    }
+
+    private void stopDance() {
+        this.dance1AnimationState.stop();
+        this.dance2AnimationState.stop();
+    }
+
+    // --- 核心逻辑: 交互 (Strictly Mojang Order) ---
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+
+        // 1. [Mojang] 实体手中有物品 -> 扔出
+        if (itemStack.isEmpty()) {
+            ItemStack handItem = this.getMainHandItem();
+            if (!handItem.isEmpty()) {
+                BehaviorUtils.throwItem(this, handItem, player.position());
+                this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        Level level = this.level();
+
+        // 2. [Mojang/Mod] 剪切逻辑 (Shearing)
+        // Mod 优先: 剪虞美人
+        if (itemStack.is(Items.SHEARS)) {
+            if (this.hasPoppy()) {
+                if (level instanceof ServerLevel serverLevel) {
+                    this.spawnAtLocation(new ItemStack(Items.POPPY));
+                    this.setHasPoppy(false);
+                    serverLevel.playSound(null, this, SoundEvents.SHEEP_SHEAR, this.getSoundSource(), 1.0F, 1.0F);
+                    this.gameEvent(GameEvent.SHEAR, player);
+                    itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+                }
+                return InteractionResult.SUCCESS;
+            }
+            // Mojang: 剪天线 (readyForShearing 检查)
+            else if (this.readyForShearing()) {
+                if (level instanceof ServerLevel) {
+                    this.shear(SoundSource.PLAYERS);
+                    this.gameEvent(GameEvent.SHEAR, player);
+                    itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+                }
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        // 3. [Mojang] 客户端检查
+        if (level.isClientSide()) return InteractionResult.PASS;
+
+        // 4. [Mod] 给予虞美人 (插队在涂蜡之前)
+        if (itemStack.is(Items.POPPY) && !this.hasPoppy()) {
+            this.setHasPoppy(true);
+            level.playSound(null, this, SoundEvents.ITEM_PICKUP, this.getSoundSource(), 1.0F, 1.0F);
+            if (!player.getAbilities().instabuild) itemStack.shrink(1);
+            return InteractionResult.SUCCESS;
+        }
+
+        // 5. [Mojang] 涂蜡 (Waxing)
+        if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != IGNORE_WEATHERING_TICK) {
+            level.levelEvent(player, 3003, this.blockPosition(), 0);
+            this.nextWeatheringTick = IGNORE_WEATHERING_TICK;
+            this.usePlayerItem(player, interactionHand, itemStack); // 辅助方法处理消耗和统计
+            return InteractionResult.SUCCESS;
+        }
+
+        // 6. [Mojang] 刮蜡 (Dewaxing)
+        if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == IGNORE_WEATHERING_TICK) {
+            level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
+            level.levelEvent(player, 3004, this.blockPosition(), 0);
+            this.nextWeatheringTick = UNSET_WEATHERING_TICK;
+            itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+            return InteractionResult.SUCCESS;
+        }
+
+        // 7. [Mojang] 刮氧化 (Scraping Oxidation)
+        if (itemStack.is(ItemTags.AXES)) {
+            WeatheringCopper.WeatherState weatherState = this.getWeatherState();
+            if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
+                level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 1.0F, 1.0F);
+                level.levelEvent(player, 3005, this.blockPosition(), 0);
+                this.nextWeatheringTick = UNSET_WEATHERING_TICK;
+                this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
+
+                // Mod 特殊处理: 如果是雕像状态恢复为实体
+                if (this.entityData.get(DATA_IS_STATUE)) {
+                    this.entityData.set(DATA_IS_STATUE, false);
+                    this.setNoAi(false); // 恢复 AI
+                    this.setState(CopperGolemState.IDLE); // 恢复 IDLE 状态
+                }
+
+                itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        return super.mobInteract(player, interactionHand);
+    }
+
+    // 辅助方法: 简化物品消耗逻辑
+    private void usePlayerItem(Player player, InteractionHand hand, ItemStack stack) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), stack);
+        }
+        if (!player.getAbilities().instabuild) {
+            stack.shrink(1);
         }
     }
 
-    public CopperGolemState getState() {
-        return this.entityData.get(COPPER_GOLEM_STATE);
-    }
+    // --- 核心逻辑: 氧化 (Mojang Update Loop) ---
 
-    public void setState(CopperGolemState copperGolemState) {
-        this.entityData.set(COPPER_GOLEM_STATE, copperGolemState);
-    }
+    private void updateWeathering(ServerLevel serverLevel, RandomSource random, long gameTime) {
+        if (this.nextWeatheringTick != IGNORE_WEATHERING_TICK) {
+            // 初始化 ticks
+            if (this.nextWeatheringTick == UNSET_WEATHERING_TICK) {
+                this.nextWeatheringTick = gameTime + random.nextIntBetweenInclusive(WEATHERING_TICK_FROM, WEATHERING_TICK_TO);
+            } else {
+                WeatheringCopper.WeatherState currentState = this.getWeatherState();
+                boolean isOxidized = currentState.equals(WeatheringCopper.WeatherState.OXIDIZED);
 
-    public WeatheringCopper.WeatherState getWeatherState() {
-        return this.entityData.get(DATA_WEATHER_STATE);
-    }
+                // 检查是否到了氧化时间
+                if (gameTime >= this.nextWeatheringTick && !isOxidized) {
+                    WeatheringCopper.WeatherState nextState = currentState.next();
+                    this.setWeatherState(nextState);
+                    // 如果变成了完全氧化，Tick 设为 0 (准备变雕像检查)，否则继续随机下一个区间
+                    boolean isNowOxidized = nextState.equals(WeatheringCopper.WeatherState.OXIDIZED);
+                    this.nextWeatheringTick = isNowOxidized ? 0L : this.nextWeatheringTick + random.nextIntBetweenInclusive(WEATHERING_TICK_FROM, WEATHERING_TICK_TO);
+                }
 
-    public void setWeatherState(WeatheringCopper.WeatherState weatherState) {
-        this.entityData.set(DATA_WEATHER_STATE, weatherState);
-    }
-
-    /**
-     * Sets this golem as waxed (prevents oxidation).
-     */
-    public void setWaxed() {
-        this.nextWeatheringTick = -2L;
-    }
-
-    /**
-     * Checks if this golem is waxed.
-     */
-    public boolean isWaxed() {
-        return this.nextWeatheringTick == -2L;
-    }
-
-    /**
-     * Checks if this golem is a lantern (emits light).
-     */
-    public boolean isLantern() {
-        return this.entityData.get(DATA_IS_LANTERN);
-    }
-
-    /**
-     * Sets whether this golem is a lantern (emits light).
-     */
-    public void setLantern(boolean isLantern) {
-        this.entityData.set(DATA_IS_LANTERN, isLantern);
-    }
-
-    /**
-     * Sets whether this golem has a poppy on its head.
-     */
-    public void setHasPoppy(boolean hasPoppy) {
-        this.entityData.set(DATA_HAS_POPPY, hasPoppy);
-    }
-
-    /**
-     * Checks if this golem has a poppy on its head.
-     */
-    public boolean hasPoppy() {
-        return this.entityData.get(DATA_HAS_POPPY);
-    }
-
-    /**
-     * Returns the light emission level for this golem.
-     * Jack O'Lantern golems emit light level 14.
-     */
-    public int getLightEmission() {
-        return this.isLantern() ? 14 : 0;
-    }
-
-    public void setOpenedChestPos(BlockPos blockPos) {
-        this.openedChestPos = blockPos;
-    }
-
-    public void clearOpenedChestPos() {
-        this.openedChestPos = null;
-    }
-
-    public AnimationState getHeadSpinAnimationState() {
-        return this.headSpinAnimationState;
-    }
-
-    public AnimationState getInteractionGetItemAnimationState() {
-        return this.interactionGetItemAnimationState;
-    }
-
-    public AnimationState getInteractionGetNoItemAnimationState() {
-        return this.interactionGetNoItemAnimationState;
-    }
-
-    public AnimationState getInteractionDropItemAnimationState() {
-        return this.interactionDropItemAnimationState;
-    }
-
-    public AnimationState getInteractionDropNoItemAnimationState() {
-        return this.interactionDropNoItemAnimationState;
-    }
-
-    @Override
-    protected Brain.Provider<CopperGolem> brainProvider() {
-        return CopperGolemAi.brainProvider();
-    }
-
-    @Override
-    protected @NotNull Brain<?> makeBrain(Dynamic<?> dynamic) {
-        return CopperGolemAi.makeBrain(this.brainProvider().makeBrain(dynamic));
-    }
-
-    @Override
-    public @NotNull Brain<CopperGolem> getBrain() {
-        return (Brain<CopperGolem>) super.getBrain();
-    }
-
-    @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_WEATHER_STATE, WeatheringCopper.WeatherState.UNAFFECTED);
-        this.entityData.define(COPPER_GOLEM_STATE, CopperGolemState.IDLE);
-        this.entityData.define(DATA_IS_LANTERN, false);
-        this.entityData.define(DATA_HAS_POPPY, false);
-        this.entityData.define(DATA_DANCE, 0);
-        this.entityData.define(DATA_IS_STATUE, false);
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag compoundTag) {
-        super.addAdditionalSaveData(compoundTag);
-        compoundTag.putLong("next_weather_age", this.nextWeatheringTick);
-        compoundTag.putInt("weather_state", this.getWeatherState().ordinal());
-        compoundTag.putBoolean("is_lantern", this.isLantern());
-        compoundTag.putBoolean("has_poppy", this.hasPoppy());
-        compoundTag.putBoolean("is_statue", this.entityData.get(DATA_IS_STATUE));
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag compoundTag) {
-        super.readAdditionalSaveData(compoundTag);
-        this.nextWeatheringTick = compoundTag.getLong("next_weather_age");
-        if (compoundTag.contains("is_lantern")) {
-            this.setLantern(compoundTag.getBoolean("is_lantern"));
-        }
-        if (compoundTag.contains("has_poppy")) {
-            this.setHasPoppy(compoundTag.getBoolean("has_poppy"));
-        }
-        if (compoundTag.contains("is_statue")) {
-            this.entityData.set(DATA_IS_STATUE, compoundTag.getBoolean("is_statue"));
-        }
-        if (compoundTag.contains("weather_state", 99)) { // 99 = any numeric type
-            int weatherStateId = compoundTag.getInt("weather_state");
-            WeatheringCopper.WeatherState state = WeatheringCopper.WeatherState.BY_ID.apply(weatherStateId);
-            this.setWeatherState(state);
-        } else if (compoundTag.contains("weather_state", 8)) { // 8 = string (兼容旧数据)
-            String weatherStateName = compoundTag.getString("weather_state");
-            for (WeatheringCopper.WeatherState state : WeatheringCopper.WeatherState.values()) {
-                if (state.getSerializedName().equals(weatherStateName)) {
-                    this.setWeatherState(state);
-                    return;
+                // 检查是否变雕像
+                if (isOxidized && this.canTurnToStatue(serverLevel)) {
+                    this.turnToStatue(serverLevel);
                 }
             }
-            this.setWeatherState(WeatheringCopper.WeatherState.UNAFFECTED);
-        } else {
-            this.setWeatherState(WeatheringCopper.WeatherState.UNAFFECTED);
         }
     }
+
+    private boolean canTurnToStatue(Level level) {
+        // Mojang 逻辑：空气方块 + 极小概率
+        return level.getBlockState(this.blockPosition()).is(Blocks.AIR) && level.random.nextFloat() <= TURN_TO_STATUE_CHANCE;
+    }
+
+    private void turnToStatue(ServerLevel serverLevel) {
+        // Mod 实现：保持为 Entity，但禁用 AI
+        this.entityData.set(DATA_IS_STATUE, true);
+        this.setNoAi(true);
+        this.getNavigation().stop();
+        this.setState(CopperGolemState.IDLE);
+
+        // 播放声音 (Mojang 1.21.9 有 COPPER_GOLEM_BECOME_STATUE)
+        this.playSound(ModSoundEvents.COPPER_GOLEM_BECOME_STATUE.get(), 1.0F, 1.0F);
+
+        // 处理拴绳 (Mojang 会掉落拴绳)
+        if (this.isLeashed()) {
+            this.dropLeash(true, true);
+        }
+    }
+
+    // --- 杂项与Getter/Setter ---
 
     @Override
     protected void customServerAiStep() {
@@ -313,332 +368,144 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         }
     }
 
+    // ... 省略了部分简单的 Getter/Setter (如 getBrain, defineSynchedData 等)，保持原样即可 ...
+    // 下面是关键的动画 Getter 和 Mod 特有方法
+
+    public AnimationState getHeadSpinAnimationState() { return headSpinAnimationState; }
+    public AnimationState getInteractionGetItemAnimationState() { return interactionGetItemAnimationState; }
+    public AnimationState getInteractionGetNoItemAnimationState() { return interactionGetNoItemAnimationState; }
+    public AnimationState getInteractionDropItemAnimationState() { return interactionDropItemAnimationState; }
+    public AnimationState getInteractionDropNoItemAnimationState() { return interactionDropNoItemAnimationState; }
+    public AnimationState shrugAnimationState() { return dance1AnimationState; }
+
+    public CopperGolemState getState() { return this.entityData.get(COPPER_GOLEM_STATE); }
+    public void setState(CopperGolemState state) { this.entityData.set(COPPER_GOLEM_STATE, state); }
+    public WeatheringCopper.WeatherState getWeatherState() { return this.entityData.get(DATA_WEATHER_STATE); }
+    public void setWeatherState(WeatheringCopper.WeatherState state) { this.entityData.set(DATA_WEATHER_STATE, state); }
+
+    // Mod 特有 Getter/Setter
+    public boolean dancing() { return this.entityData.get(DATA_DANCE) != 0; }
+    public int jukeboxPlaying() { return this.entityData.get(DATA_DANCE); }
+    public void setJukeboxPlaying() { if (jukeboxPlaying() == 0) this.entityData.set(DATA_DANCE, this.random.nextIntBetweenInclusive(0, 4)); }
+    public void setJukeboxNotPlaying() { if (jukeboxPlaying() != 0) this.entityData.set(DATA_DANCE, 0); }
+    public boolean hasPoppy() { return this.entityData.get(DATA_HAS_POPPY); }
+    public void setHasPoppy(boolean val) { this.entityData.set(DATA_HAS_POPPY, val); }
+    public boolean isLantern() { return this.entityData.get(DATA_IS_LANTERN); }
+    public void setLantern(boolean val) { this.entityData.set(DATA_IS_LANTERN, val); }
+    public int getLightEmission() { return this.isLantern() ? 14 : 0; }
+
+    // 数据保存
     @Override
-    public void remove(RemovalReason reason) {
-        super.remove(reason);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_WEATHER_STATE, WeatheringCopper.WeatherState.UNAFFECTED);
+        this.entityData.define(COPPER_GOLEM_STATE, CopperGolemState.IDLE);
+        this.entityData.define(DATA_IS_LANTERN, false);
+        this.entityData.define(DATA_HAS_POPPY, false);
+        this.entityData.define(DATA_DANCE, 0);
+        this.entityData.define(DATA_IS_STATUE, false);
     }
 
     @Override
-    public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-        ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (itemStack.isEmpty()) {
-            ItemStack itemStack2 = this.getMainHandItem();
-            if (!itemStack2.isEmpty()) {
-                BehaviorUtils.throwItem(this, itemStack2, player.position());
-                this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-                return InteractionResult.SUCCESS;
-            }
-        }
-
-        Level level = this.level();
-        if (itemStack.is(Items.SHEARS)) {
-            if (this.hasPoppy()) {
-                if (level instanceof ServerLevel serverLevel) {
-                    ItemStack poppyStack = new ItemStack(Items.POPPY);
-                    this.spawnAtLocation(poppyStack);
-                    this.setHasPoppy(false);
-
-                    // Play sound
-                    serverLevel.playSound(null, this, SoundEvents.SHEEP_SHEAR, this.getSoundSource(), 3.0F, 1.0F);
-                    this.gameEvent(GameEvent.SHEAR, player);
-                    itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
-                }
-                return InteractionResult.SUCCESS;
-            }
-            // If no poppy, check for oxidation shearing
-            else if (this.readyForShearing()) {
-                if (level instanceof ServerLevel) {
-                    this.shear(SoundSource.PLAYERS);
-                    this.gameEvent(GameEvent.SHEAR, player);
-                    itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
-                }
-                return InteractionResult.SUCCESS;
-            }
-        }
-        if (itemStack.is(Items.POPPY) && !this.hasPoppy()) {
-            this.setHasPoppy(true);
-            level.playSound(null, this, SoundEvents.ITEM_PICKUP, this.getSoundSource(), 3.0F, 1.0F);
-
-            if (!player.getAbilities().instabuild) {
-                itemStack.shrink(1);
-            }
-            return InteractionResult.SUCCESS;
-        }
-
-        if (level.isClientSide()) {
-            return InteractionResult.PASS;
-        }
-
-        // Handle honeycomb - apply wax (requires sneaking)
-        if (itemStack.is(Items.HONEYCOMB) && this.nextWeatheringTick != -2L && player.isCrouching()) {
-            // Play wax on sound
-            level.playSound(null, this, SoundEvents.HONEYCOMB_WAX_ON, this.getSoundSource(), 3.0F, 1.0F);
-            level.levelEvent(player, 3003, this.blockPosition(), 0);
-            this.nextWeatheringTick = -2L;
-
-            // Grant advancement
-            if (player instanceof ServerPlayer serverPlayer) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
-            }
-
-            if (!player.getAbilities().instabuild) {
-                itemStack.shrink(1);
-            }
-            return InteractionResult.SUCCESS;
-        }
-
-        // Handle axe - dewax (requires sneaking)
-        if (itemStack.is(ItemTags.AXES) && this.nextWeatheringTick == -2L && player.isCrouching()) {
-            level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 3.0F, 1.0F);
-            level.levelEvent(player, 3004, this.blockPosition(), 0); // Wax off particles
-            this.nextWeatheringTick = -1L;
-
-            // Grant advancement
-            if (player instanceof ServerPlayer serverPlayer) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
-            }
-
-            itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
-            return InteractionResult.SUCCESS;
-        }
-
-        // Handle axe - scrape oxidation (requires sneaking)
-        if (itemStack.is(ItemTags.AXES) && player.isCrouching()) {
-            WeatheringCopper.WeatherState weatherState = this.getWeatherState();
-            if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
-                level.playSound(null, this, SoundEvents.AXE_SCRAPE, this.getSoundSource(), 3.0F, 1.0F);
-                level.levelEvent(player, 3005, this.blockPosition(), 0); // Scrape particles
-                this.nextWeatheringTick = -1L;
-                this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
-                
-                // If was statue (oxidized by natural process), restore AI
-                if (this.entityData.get(DATA_IS_STATUE)) {
-                    this.entityData.set(DATA_IS_STATUE, false);
-                    this.setNoAi(false);
-                }
-
-                // Grant advancement
-                if (player instanceof ServerPlayer serverPlayer) {
-                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, this.blockPosition(), itemStack);
-                }
-
-                itemStack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(interactionHand));
-                return InteractionResult.SUCCESS;
-            }
-        }
-
-        return super.mobInteract(player, interactionHand);
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putLong("next_weather_age", this.nextWeatheringTick);
+        tag.putInt("weather_state", this.getWeatherState().ordinal());
+        tag.putBoolean("is_lantern", this.isLantern());
+        tag.putBoolean("has_poppy", this.hasPoppy());
+        tag.putBoolean("is_statue", this.entityData.get(DATA_IS_STATUE));
     }
 
-    private void updateWeathering(ServerLevel serverLevel, RandomSource randomSource, long l) {
-        if (this.nextWeatheringTick != -2L) {
-            if (this.nextWeatheringTick == -1L) {
-                this.nextWeatheringTick = l + randomSource.nextIntBetweenInclusive(
-                        CopperGolemConfig.getWeatheringTickMin(),
-                        CopperGolemConfig.getWeatheringTickMax()
-                );
-            } else {
-                WeatheringCopper.WeatherState weatherState = this.entityData.get(DATA_WEATHER_STATE);
-                boolean bl = weatherState.equals(WeatheringCopper.WeatherState.OXIDIZED);
-                if (l >= this.nextWeatheringTick && !bl) {
-                    WeatheringCopper.WeatherState weatherState2 = weatherState.next();
-                    boolean bl2 = weatherState2.equals(WeatheringCopper.WeatherState.OXIDIZED);
-                    this.setWeatherState(weatherState2);
-                    this.nextWeatheringTick = bl2 ? 0L : this.nextWeatheringTick + randomSource.nextIntBetweenInclusive(CopperGolemConfig.getWeatheringTickMin(), CopperGolemConfig.getWeatheringTickMax());
-                }
-
-                if (bl && this.canTurnToStatue(serverLevel)) {
-                    this.turnToStatue(serverLevel);
-                }
-            }
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.nextWeatheringTick = tag.getLong("next_weather_age");
+        if (tag.contains("is_lantern")) this.setLantern(tag.getBoolean("is_lantern"));
+        if (tag.contains("has_poppy")) this.setHasPoppy(tag.getBoolean("has_poppy"));
+        if (tag.contains("is_statue")) {
+            boolean isStatue = tag.getBoolean("is_statue");
+            this.entityData.set(DATA_IS_STATUE, isStatue);
+            if (isStatue) this.setNoAi(true);
+        }
+        // 兼容旧数据
+        if (tag.contains("weather_state", 99)) {
+            this.setWeatherState(WeatheringCopper.WeatherState.BY_ID.apply(tag.getInt("weather_state")));
+        } else {
+            this.setWeatherState(WeatheringCopper.WeatherState.UNAFFECTED);
         }
     }
 
-    private boolean canTurnToStatue(Level level) {
-        return level.getBlockState(this.blockPosition()).is(Blocks.AIR) && level.random.nextFloat() <= CopperGolemConfig.getTurnToStatueChance();
-    }
-
-    private void turnToStatue(ServerLevel serverLevel) {
-        // Mark as statue (oxidized)
-        this.entityData.set(DATA_IS_STATUE, true);
-        // Set NoAI to true to disable all AI behaviors
-        this.setNoAi(true);
-        // Stop navigation
-        this.getNavigation().stop();
-        // Set to idle state
-        this.setState(CopperGolemState.IDLE);
-    }
-
-    private void setupAnimationStates() {
-        // 如果实体处于 NoAI 状态(无论是氧化雕像还是玩家设置),停止所有动画
-        if (this.isNoAi()) {
-            return;
-        }
-        
-        switch (this.getState()) {
-            case IDLE:
-                this.interactionGetNoItemAnimationState.stop();
-                this.interactionGetItemAnimationState.stop();
-                this.interactionDropItemAnimationState.stop();
-                this.interactionDropNoItemAnimationState.stop();
-                if (dancing()) {
-                    switch (jukeboxPlaying()) {
-                        case 1, 2 -> this.dance1AnimationState.startIfStopped(this.tickCount);
-                        default -> this.dance2AnimationState.startIfStopped(this.tickCount);
-                    }
-                } else {
-                    stopDance();
-                    if (this.idleAnimationStartTick == this.tickCount) {
-                        this.idleAnimationState.start(this.tickCount);
-                    } else if (this.idleAnimationStartTick == 0) {
-                        // 使用完整的冷却时间，让头部旋转不那么频繁
-                        int minCooldown = CopperGolemConfig.getSpinAnimationMinCooldown();
-                        int maxCooldown = CopperGolemConfig.getSpinAnimationMaxCooldown();
-                        this.idleAnimationStartTick = this.tickCount + ThreadLocalRandom.current().nextInt(minCooldown, maxCooldown);
-                    }
-                    if (this.tickCount == this.idleAnimationStartTick + 10) {
-                        this.playHeadSpinSound();
-                        this.getHeadSpinAnimationState().start(this.tickCount);
-                        this.idleAnimationStartTick = 0;
-                    }
-                }
-                break;
-            case GETTING_ITEM:
-                this.idleAnimationState.stop();
-                // 在获取物品后有较小机会触发头部旋转
-                if (this.idleAnimationStartTick == 0 && this.random.nextFloat() < 0.15F) {
-                    this.playHeadSpinSound();
-                    this.getHeadSpinAnimationState().start(this.tickCount);
-                    this.idleAnimationStartTick = -1; // 标记已触发
-                }
-                stopDance();
-                this.interactionGetNoItemAnimationState.stop();
-                this.interactionDropItemAnimationState.stop();
-                this.interactionDropNoItemAnimationState.stop();
-                this.interactionGetItemAnimationState.startIfStopped(this.tickCount);
-                break;
-            case GETTING_NO_ITEM:
-                this.idleAnimationState.stop();
-                // 没有获取到物品时也可能转头
-                if (this.idleAnimationStartTick == 0 && this.random.nextFloat() < 0.2F) {
-                    this.playHeadSpinSound();
-                    this.getHeadSpinAnimationState().start(this.tickCount);
-                    this.idleAnimationStartTick = -1;
-                }
-                stopDance();
-                this.interactionGetItemAnimationState.stop();
-                this.interactionDropNoItemAnimationState.stop();
-                this.interactionDropItemAnimationState.stop();
-                this.interactionGetNoItemAnimationState.startIfStopped(this.tickCount);
-                break;
-            case DROPPING_ITEM:
-                this.idleAnimationState.stop();
-                // 放置物品后可能转头
-                if (this.idleAnimationStartTick == 0 && this.random.nextFloat() < 0.15F) {
-                    this.playHeadSpinSound();
-                    this.getHeadSpinAnimationState().start(this.tickCount);
-                    this.idleAnimationStartTick = -1;
-                }
-                stopDance();
-                this.interactionGetItemAnimationState.stop();
-                this.interactionGetNoItemAnimationState.stop();
-                this.interactionDropNoItemAnimationState.stop();
-                this.interactionDropItemAnimationState.startIfStopped(this.tickCount);
-                break;
-            case DROPPING_NO_ITEM:
-                this.idleAnimationState.stop();
-                // 没有放置物品时也可能转头
-                if (this.idleAnimationStartTick == 0 && this.random.nextFloat() < 0.2F) {
-                    this.playHeadSpinSound();
-                    this.getHeadSpinAnimationState().start(this.tickCount);
-                    this.idleAnimationStartTick = -1;
-                }
-                stopDance();
-                this.interactionGetItemAnimationState.stop();
-                this.interactionGetNoItemAnimationState.stop();
-                this.interactionDropItemAnimationState.stop();
-                this.interactionDropNoItemAnimationState.startIfStopped(this.tickCount);
-        }
-    }
-
-    private void stopDance() {
-        this.dance1AnimationState.stop();
-        this.dance2AnimationState.stop();
-    }
-
-    public void spawn(WeatheringCopper.WeatherState weatherState) {
-        this.setWeatherState(weatherState);
+    // 音效与辅助
+    public void spawn(WeatheringCopper.WeatherState state) {
+        this.setWeatherState(state);
         this.playSpawnSound();
     }
 
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(
-            ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag
-    ) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType type, @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
         this.playSpawnSound();
-        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(level, difficulty, type, data, tag);
     }
 
     public void playSpawnSound() {
-        this.playSound(ModSoundEvents.COPPER_GOLEM_SPAWN.get(), 3.0F, 1.0F);
+        this.playSound(ModSoundEvents.COPPER_GOLEM_SPAWN.get(), 1.0F, 1.0F);
     }
 
     private void playHeadSpinSound() {
         if (!this.isSilent()) {
-            this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSpinHeadSound(), this.getSoundSource(), 3.0F, 1.0F, false);
+            this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSpinHeadSound(), this.getSoundSource(), 1.0F, 1.0F, false);
         }
     }
 
-    @Override
-    protected SoundEvent getHurtSound(DamageSource damageSource) {
-        return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).hurtSound();
-    }
-
-    @Override
-    protected SoundEvent getDeathSound() {
-        return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).deathSound();
-    }
-
-    @Override
-    protected void playStepSound(BlockPos blockPos, BlockState blockState) {
-        this.playSound(CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).stepSound(), 1.0F, 1.0F);
-    }
-
-    private SoundEvent getSpinHeadSound() {
-        return CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).spinHeadSound();
-    }
+    // 声音映射
+    @Override protected SoundEvent getHurtSound(DamageSource src) { return org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).hurtSound(); }
+    @Override protected SoundEvent getDeathSound() { return org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).deathSound(); }
+    @Override protected void playStepSound(BlockPos pos, BlockState state) { this.playSound(org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).stepSound(), 1.0F, 1.0F); }
+    private SoundEvent getSpinHeadSound() { return org.xiyu.yee.copper_friend_backport.coppergolem.CopperGolemOxidationLevels.getOxidationLevel(this.getWeatherState()).spinHeadSound(); }
 
     @Override
     public Vec3 getLeashOffset() {
         return new Vec3(0.0, 0.75F * this.getEyeHeight(), 0.0);
     }
 
-    public boolean hasContainerOpen(ContainerOpenersCounter containerOpenersCounter, BlockPos blockPos) {
-        if (this.openedChestPos == null) {
-            return false;
-        } else {
-            BlockState blockState = this.level().getBlockState(this.openedChestPos);
-            return this.openedChestPos.equals(blockPos)
-                    || blockState.getBlock() instanceof ChestBlock
-                    && blockState.getValue(ChestBlock.TYPE) != ChestType.SINGLE
-                    && getConnectedBlockPos(this.openedChestPos, blockState).equals(blockPos);
-        }
+    // 容器检查
+    public boolean hasContainerOpen(ContainerOpenersCounter counter, BlockPos pos) {
+        if (this.openedChestPos == null) return false;
+        BlockState state = this.level().getBlockState(this.openedChestPos);
+        return this.openedChestPos.equals(pos) || (state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE) != ChestType.SINGLE && getConnectedBlockPos(this.openedChestPos, state).equals(pos));
     }
 
+    public static BlockPos getConnectedBlockPos(BlockPos pos, BlockState state) {
+        return pos.relative(ChestBlock.getConnectedDirection(state));
+    }
+
+    public void setOpenedChestPos(BlockPos pos) { this.openedChestPos = pos; }
+    public void clearOpenedChestPos() { this.openedChestPos = null; }
+
     @Override
-    public void shear(SoundSource soundSource) {
+    protected Brain.Provider<CopperGolem> brainProvider() { return CopperGolemAi.brainProvider(); }
+
+    @Override
+    protected @NotNull Brain<?> makeBrain(Dynamic<?> dynamic) { return CopperGolemAi.makeBrain(this.brainProvider().makeBrain(dynamic)); }
+
+    @Override
+    public @NotNull Brain<CopperGolem> getBrain() { return (Brain<CopperGolem>) super.getBrain(); }
+
+    // 剪切接口实现
+    @Override
+    public void shear(SoundSource source) {
         if (this.level() instanceof ServerLevel serverLevel) {
-            serverLevel.playSound(null, this, ModSoundEvents.COPPER_GOLEM_SHEAR.get(), soundSource, 3.0F, 1.0F);
-            ItemStack itemStack2 = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
+            serverLevel.playSound(null, this, ModSoundEvents.COPPER_GOLEM_SHEAR.get(), source, 1.0F, 1.0F);
+            ItemStack itemStack = this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA);
             this.setItemSlot(EQUIPMENT_SLOT_ANTENNA, ItemStack.EMPTY);
-            this.spawnAtLocation(itemStack2, 1.5F);
+            this.spawnAtLocation(itemStack, 1.5F);
         }
     }
 
     @Override
     public boolean readyForShearing() {
-        return this.isAlive() && this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA).is(Items.POPPY);
+        return this.isAlive() && !this.getItemBySlot(EQUIPMENT_SLOT_ANTENNA).isEmpty() && !this.hasPoppy();
     }
 
     @Override
@@ -649,63 +516,51 @@ public class CopperGolem extends AbstractGolem implements Shearable {
         }
     }
 
-    public Set<EquipmentSlot> dropPreservedEquipment(ServerLevel serverLevel, Predicate<ItemStack> predicate) {
-        Set<EquipmentSlot> set = new HashSet<>();
-
-        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-            if (!itemStack.isEmpty()) {
-                if (!predicate.test(itemStack)) {
-                    set.add(equipmentSlot);
-                } else {
-                    // In 1.20.1, we check drop chance directly
-                    if (this.getEquipmentDropChance(equipmentSlot) > 1.0F) {
-                        this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
-                        this.spawnAtLocation(itemStack);
-                    }
+    public Set<EquipmentSlot> dropPreservedEquipment(ServerLevel level, Predicate<ItemStack> match) {
+        Set<EquipmentSlot> slots = new HashSet<>();
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack stack = this.getItemBySlot(slot);
+            if (!stack.isEmpty()) {
+                if (!match.test(stack)) {
+                    slots.add(slot);
+                } else if (this.getEquipmentDropChance(slot) > 1.0F) {
+                    this.setItemSlot(slot, ItemStack.EMPTY);
+                    this.spawnAtLocation(stack);
                 }
             }
         }
-
-        return set;
+        return slots;
     }
 
     @Override
-    protected void actuallyHurt(DamageSource damageSource, float f) {
-        super.actuallyHurt(damageSource, f);
-        this.setState(CopperGolemState.IDLE);
-    }
-
-    @Override
-    protected void dropAllDeathLoot(DamageSource damageSource) {
-        if (this.hasPoppy()) {
-            ItemStack poppyStack = new ItemStack(Items.POPPY);
-            this.spawnAtLocation(poppyStack);
+    protected void actuallyHurt(DamageSource source, float amount) {
+        super.actuallyHurt(source, amount);
+        if (!this.isNoAi()) { // 只有非雕像状态才重置为 IDLE
+            this.setState(CopperGolemState.IDLE);
         }
-        super.dropAllDeathLoot(damageSource);
     }
 
     @Override
-    public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
-        super.thunderHit(serverLevel, lightningBolt);
-        UUID uUID = lightningBolt.getUUID();
-        if (!uUID.equals(this.lastLightningBoltUUID)) {
-            this.lastLightningBoltUUID = uUID;
-            WeatheringCopper.WeatherState weatherState = this.getWeatherState();
-            if (weatherState != WeatheringCopper.WeatherState.UNAFFECTED) {
-                this.nextWeatheringTick = -1L;
-                this.entityData.set(DATA_WEATHER_STATE, weatherState.previous());
-                
-                // If was statue (oxidized by natural process), restore AI
+    protected void dropAllDeathLoot(DamageSource source) {
+        if (this.hasPoppy()) this.spawnAtLocation(new ItemStack(Items.POPPY));
+        super.dropAllDeathLoot(source);
+    }
+
+    @Override
+    public void thunderHit(ServerLevel level, LightningBolt bolt) {
+        super.thunderHit(level, bolt);
+        UUID uuid = bolt.getUUID();
+        if (!uuid.equals(this.lastLightningBoltUUID)) {
+            this.lastLightningBoltUUID = uuid;
+            WeatheringCopper.WeatherState state = this.getWeatherState();
+            if (state != WeatheringCopper.WeatherState.UNAFFECTED) {
+                this.nextWeatheringTick = UNSET_WEATHERING_TICK;
+                this.entityData.set(DATA_WEATHER_STATE, state.previous());
                 if (this.entityData.get(DATA_IS_STATUE)) {
                     this.entityData.set(DATA_IS_STATUE, false);
                     this.setNoAi(false);
                 }
             }
         }
-    }
-
-    public AnimationState shrugAnimationState() {
-        return dance1AnimationState;
     }
 }
